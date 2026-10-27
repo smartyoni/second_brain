@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Calendar as CalendarIcon,
   Plus,
-  ChevronDown,
-  ChevronUp,
+  X,
   Check,
   Clock,
   FileText,
+  AlignLeft,
 } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
 import { useWorkspace } from '../../context/WorkspaceContext';
@@ -17,6 +17,7 @@ interface GoogleCalendarMonthDayAgendaProps {
   items: CalendarScheduleItem[];
   onSelectItem: (item: CalendarScheduleItem) => void;
   onAddEvent: (dateStr: string) => void;
+  onClose?: () => void;
 }
 
 export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgendaProps> = ({
@@ -24,20 +25,20 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
   items,
   onSelectItem,
   onAddEvent,
+  onClose,
 }) => {
-  const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const { toggleCheckItemCompleted, toggleCalendarEventCompleted, subItems } = useWorkspace();
 
   const dateObj = new Date(selectedDate);
   const isValid = !isNaN(dateObj.getTime());
   const formattedDate = isValid
     ? dateObj.toLocaleDateString('ko-KR', {
-        year: 'numeric',
         month: 'long',
         day: 'numeric',
         weekday: 'short',
       })
     : selectedDate;
+  const yearText = isValid ? `${dateObj.getFullYear()}년` : '';
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const isToday = selectedDate === todayStr;
@@ -52,139 +53,138 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
   };
 
   return (
-    <div className="shrink-0 bg-white border-t border-[#dadce0] flex flex-col select-none transition-all duration-200">
-      {/* 1. 아젠다 상단 헤더 바 */}
-      <div className="h-11 px-4 flex items-center justify-between border-b border-[#dadce0]/70 bg-[#fafafa]">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <CalendarIcon className="w-4 h-4 text-[#1a73e8] shrink-0" />
-          <span className="text-sm font-semibold text-[#202124] truncate">
-            {formattedDate}
-          </span>
-          {isToday && (
-            <span className="px-2 py-0.5 bg-[#1a73e8] text-white text-[11px] font-bold rounded-full shrink-0">
-              오늘
-            </span>
+    <aside className="w-80 shrink-0 bg-white border-l border-[#dadce0] flex flex-col h-full select-none shadow-sm z-10">
+      {/* 1. 상단 헤더 */}
+      <div className="p-4 border-b border-[#dadce0] bg-[#fafafa]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs text-[#5f6368] font-medium">
+            <CalendarIcon className="w-3.5 h-3.5 text-[#1a73e8]" />
+            <span>{yearText}</span>
+            {isToday && (
+              <span className="px-1.5 py-0.5 bg-[#1a73e8] text-white text-[10px] font-bold rounded-full">
+                오늘
+              </span>
+            )}
+          </div>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1 text-[#5f6368] hover:text-[#202124] hover:bg-[#e8eaed] rounded-full transition-colors cursor-pointer"
+              title="패널 닫기"
+            >
+              <X className="w-4 h-4" />
+            </button>
           )}
-          <span className="text-xs text-[#5f6368] font-medium shrink-0 ml-1">
-            등록된 일정 <strong className="text-[#1a73e8]">{items.length}</strong>건
+        </div>
+
+        <div className="mt-1.5 flex items-baseline justify-between">
+          <h2 className="text-lg font-bold text-[#202124]">{formattedDate}</h2>
+          <span className="text-xs text-[#5f6368]">
+            일정 <strong className="text-[#1a73e8]">{items.length}</strong>건
           </span>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => onAddEvent(selectedDate)}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-[#1a73e8] hover:bg-[#e8f0fe] border border-[#dadce0] rounded transition-colors cursor-pointer"
-            title="선택한 날짜에 새 일정 만들기"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>일정 추가</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 hover:bg-[#e8eaed] text-[#5f6368] rounded transition-colors cursor-pointer"
-            title={isExpanded ? '일정 목록 접기' : '일정 목록 펼치기'}
-          >
-            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => onAddEvent(selectedDate)}
+          className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-[#1a73e8] hover:bg-[#1557b0] text-white text-xs font-semibold rounded-md shadow-xs transition-colors cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>새 일정 추가</span>
+        </button>
       </div>
 
-      {/* 2. 하단 일정 목록 (펼침 상태일 때) */}
-      {isExpanded && (
-        <div className="h-48 overflow-y-auto p-2 bg-white space-y-1">
-          {items.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-4 text-[#70757a]">
-              <p className="text-xs font-medium">선택한 날짜에 등록된 일정이 없습니다.</p>
-              <button
-                type="button"
-                onClick={() => onAddEvent(selectedDate)}
-                className="mt-2 text-xs text-[#1a73e8] hover:underline cursor-pointer font-medium"
+      {/* 2. 일정 카드 리스트 */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2.5 bg-[#f8f9fa]">
+        {items.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 text-[#70757a]">
+            <CalendarIcon className="w-8 h-8 text-[#dadce0] mb-2" />
+            <p className="text-xs font-medium text-[#3c4043]">등록된 일정이 없습니다</p>
+            <p className="text-[11px] text-[#70757a] mt-1">
+              상단의 버튼이나 날짜를 더블 클릭하여 새 일정을 추가해보세요.
+            </p>
+          </div>
+        ) : (
+          items.map((schedule) => {
+            const color = getGoogleCategoryColor(schedule.categoryId);
+            const subItem = subItems.find((s) => s.id === schedule.subItemId);
+            const isAllDay = !schedule.dueTime;
+
+            return (
+              <div
+                key={schedule.id}
+                onClick={() => onSelectItem(schedule)}
+                className="bg-white rounded-lg border border-[#dadce0]/80 p-3 hover:shadow-md hover:border-[#1a73e8]/50 cursor-pointer transition-all duration-150 flex flex-col gap-2 group"
               >
-                + 이 날짜에 새 일정 만들기
-              </button>
-            </div>
-          ) : (
-            items.map((schedule) => {
-              const color = getGoogleCategoryColor(schedule.categoryId);
-              const subItem = subItems.find((s) => s.id === schedule.subItemId);
-              const isAllDay = !schedule.dueTime;
-
-              return (
-                <div
-                  key={schedule.id}
-                  onClick={() => onSelectItem(schedule)}
-                  className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#f1f3f4] cursor-pointer group transition-colors border border-transparent hover:border-[#dadce0]/60"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1 mr-3">
-                    {/* 카테고리 색상 바 */}
-                    <div className={`w-1 h-7 rounded-full shrink-0 ${color.bg}`} />
-
-                    {/* 완료 체크박스 (체크리스트 or 캘린더 일정) */}
-                    <button
-                      type="button"
-                      onClick={(e) => handleToggleComplete(schedule, e)}
-                      className={`w-4 h-4 rounded-xs border flex items-center justify-center transition-colors shrink-0 cursor-pointer ${
-                        schedule.isCompleted
-                          ? 'bg-[#1a73e8] border-[#1a73e8] text-white'
-                          : 'border-[#5f6368] hover:border-[#1a73e8] bg-white'
-                      }`}
-                      title={schedule.isCompleted ? '완료 취소' : '완료 체크'}
-                    >
-                      {schedule.isCompleted && <Check className="w-3 h-3 stroke-[3]" />}
-                    </button>
-
-                    {/* 시간 표기 */}
-                    <div className="w-24 shrink-0 flex items-center gap-1 text-xs text-[#5f6368]">
-                      <Clock className="w-3 h-3 shrink-0" />
-                      <span className="truncate">
-                        {isAllDay ? '종일' : schedule.dueTime}
-                      </span>
-                    </div>
-
-                    {/* 출처 뱃지 */}
+                {/* 상단: 색상 띠, 출처 뱃지, 완료 체크박스 */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${color.bg}`} />
                     {schedule.sourceType === 'calendar' ? (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded font-medium shrink-0">
+                      <span className="text-[10px] px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded font-medium">
                         캘린더
                       </span>
                     ) : schedule.sourceType === 'checklist' ? (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-medium shrink-0">
+                      <span className="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-medium">
                         지식 할일
                       </span>
                     ) : (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-medium shrink-0">
+                      <span className="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-medium">
                         지식 메모
                       </span>
                     )}
-
-                    {/* 일정 제목 및 문서 경로 */}
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <span
-                        className={`text-xs font-medium text-[#202124] truncate ${
-                          schedule.isCompleted ? 'line-through text-[#70757a]' : ''
-                        }`}
-                      >
-                        {schedule.title}
-                      </span>
-                      {subItem && (
-                        <span className="text-[11px] text-[#70757a] truncate flex items-center gap-1 shrink-0">
-                          <FileText className="w-3 h-3" />
-                          {subItem.title}
-                        </span>
-                      )}
-                    </div>
                   </div>
 
-                  <span className="text-xs text-[#1a73e8] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 font-medium">
-                    상세보기 &gt;
-                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => handleToggleComplete(schedule, e)}
+                    className={`w-4 h-4 rounded-xs border flex items-center justify-center transition-colors shrink-0 cursor-pointer ${
+                      schedule.isCompleted
+                        ? 'bg-[#1a73e8] border-[#1a73e8] text-white'
+                        : 'border-[#5f6368] hover:border-[#1a73e8] bg-white'
+                    }`}
+                    title={schedule.isCompleted ? '완료 취소' : '완료 체크'}
+                  >
+                    {schedule.isCompleted && <Check className="w-3 h-3 stroke-[3]" />}
+                  </button>
                 </div>
-              );
-            })
-          )}
-        </div>
-      )}
-    </div>
+
+                {/* 제목 */}
+                <h3
+                  className={`text-sm font-semibold text-[#202124] group-hover:text-[#1a73e8] transition-colors leading-tight line-clamp-2 ${
+                    schedule.isCompleted ? 'line-through text-[#70757a]' : ''
+                  }`}
+                >
+                  {schedule.title}
+                </h3>
+
+                {/* 하단 메타 정보 (시간, 장소, 출처 지식문서) */}
+                <div className="space-y-1 pt-1.5 border-t border-gray-100 text-[11px] text-[#5f6368]">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
+                    <span>{isAllDay ? '종일' : schedule.dueTime}</span>
+                  </div>
+
+                  {schedule.description && (
+                    <div className="flex items-center gap-1.5">
+                      <AlignLeft className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
+                      <span className="truncate">{schedule.description}</span>
+                    </div>
+                  )}
+
+                  {subItem && (
+                    <div className="flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
+                      <span className="truncate">{subItem.title}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </aside>
   );
 };
