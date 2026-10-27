@@ -1,6 +1,7 @@
 import React from 'react';
 import { CalendarScheduleItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
+import { GoogleCalendarMonthDayAgenda } from './GoogleCalendarMonthDayAgenda';
 
 interface GoogleCalendarMonthViewProps {
   currentDateObj: Date;
@@ -72,6 +73,9 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
   const todayStr = new Date().toISOString().slice(0, 10);
   const totalWeeks = Math.ceil(days.length / 7);
 
+  // 현재 선택된 날짜에 등록된 일정 목록
+  const selectedDateItems = itemsByDate.get(selectedDate) || [];
+
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
       {/* 1. 요일 헤더 */}
@@ -89,7 +93,7 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
       <div
         className="flex-1 grid grid-cols-7 border-l border-[#dadce0] overflow-y-auto"
         style={{
-          gridTemplateRows: `repeat(${totalWeeks}, minmax(115px, 1fr))`,
+          gridTemplateRows: `repeat(${totalWeeks}, minmax(95px, 1fr))`,
         }}
       >
         {days.map((item, idx) => {
@@ -101,21 +105,19 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
           return (
             <div
               key={idx}
-              onClick={() => {
-                onSelectDate(item.dateStr);
-                onCellClick(item.dateStr);
-              }}
+              onClick={() => onSelectDate(item.dateStr)}
+              onDoubleClick={() => onCellClick(item.dateStr)}
               onDragOver={onDragOver}
               onDrop={(e) => {
                 e.preventDefault();
                 onDropOnDate(item.dateStr);
               }}
-              className={`flex flex-col border-r border-b border-[#dadce0] p-1 transition-colors cursor-pointer min-h-[115px] overflow-hidden ${
-                isSelected ? 'bg-[#e8f0fe]/40' : 'hover:bg-[#f8f9fa]'
+              className={`flex flex-col border-r border-b border-[#dadce0] p-1 transition-colors cursor-pointer min-h-[95px] overflow-hidden ${
+                isSelected ? 'bg-[#e8f0fe]/60 ring-2 ring-inset ring-[#1a73e8]' : 'hover:bg-[#f8f9fa]'
               }`}
             >
               {/* 날짜 헤더 */}
-              <div className="flex items-center justify-center mb-1 shrink-0 h-6">
+              <div className="flex items-center justify-between px-1 mb-1 shrink-0 h-6">
                 <span
                   className={`inline-flex items-center justify-center rounded-full text-xs transition-colors ${
                     isToday
@@ -129,6 +131,12 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
                 >
                   {isFirstDayOfMonth ? `${item.monthNum}월 1일` : item.dayNum}
                 </span>
+
+                {dayItems.length > 0 && (
+                  <span className="text-[10px] text-[#70757a] font-medium bg-[#f1f3f4] px-1.5 py-0.2 rounded-full">
+                    {dayItems.length}
+                  </span>
+                )}
               </div>
 
               {/* 일정 목록 (드래그 가능) */}
@@ -180,6 +188,14 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
           );
         })}
       </div>
+
+      {/* 3. 하단 선택 일자 아젠다 패널 */}
+      <GoogleCalendarMonthDayAgenda
+        selectedDate={selectedDate}
+        items={selectedDateItems}
+        onSelectItem={onSelectItem}
+        onAddEvent={onCellClick}
+      />
     </div>
   );
 };
