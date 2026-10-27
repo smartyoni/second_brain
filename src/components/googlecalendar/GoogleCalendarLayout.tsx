@@ -35,9 +35,9 @@ export const GoogleCalendarLayout: React.FC = () => {
     selectedCalendarDate,
     allItems,
     filteredItems,
-    selectedCategoryIds,
-    toggleCategoryFilter,
-    selectAllCategories,
+    selectedFilterKeys,
+    toggleFilterKey,
+    selectAll,
     showCompleted,
     setShowCompleted,
     searchQuery,
@@ -51,6 +51,7 @@ export const GoogleCalendarLayout: React.FC = () => {
     toggleCheckItemCompleted,
     handleJumpToSource,
     categoryItems,
+    topCategories,
     setAppMode,
   } = useFullCalendar();
 
@@ -147,10 +148,10 @@ export const GoogleCalendarLayout: React.FC = () => {
           selectedDate={selectedCalendarDate}
           onSelectDate={setDateByString}
           allItems={allItems}
-          categoryItems={categoryItems}
-          selectedCategoryIds={selectedCategoryIds}
-          onToggleCategoryFilter={toggleCategoryFilter}
-          onSelectAllCategories={selectAllCategories}
+          topCategories={topCategories}
+          selectedFilterKeys={selectedFilterKeys}
+          onToggleFilterKey={toggleFilterKey}
+          onSelectAll={selectAll}
           showCompleted={showCompleted}
           onToggleShowCompleted={() => setShowCompleted(!showCompleted)}
           onOpenCreateModal={() =>

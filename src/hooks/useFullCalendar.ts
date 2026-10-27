@@ -18,7 +18,7 @@ export const useFullCalendar = () => {
   } = useWorkspace();
 
   const [viewType, setViewType] = useState<FullCalendarViewType>('month');
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedFilterKeys, setSelectedFilterKeys] = useState<string[]>([]);
   const [showCompleted, setShowCompleted] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedScheduleItem, setSelectedScheduleItem] = useState<CalendarScheduleItem | null>(null);
@@ -41,9 +41,13 @@ export const useFullCalendar = () => {
   // 필터링된 일정 목록
   const filteredItems = useMemo(() => {
     return allItems.filter((item) => {
-      // 1. 카테고리 필터
-      if (selectedCategoryIds.length > 0 && !selectedCategoryIds.includes(item.categoryId)) {
-        return false;
+      // 1. 대분류 및 일정 출처 필터 (선택된 키 목록)
+      if (selectedFilterKeys.length > 0) {
+        if (item.sourceType === 'calendar') {
+          if (!selectedFilterKeys.includes('calendar')) return false;
+        } else {
+          if (!selectedFilterKeys.includes(item.topCategoryId)) return false;
+        }
       }
       // 2. 완료 여부 필터
       if (!showCompleted && item.isCompleted) {
@@ -57,17 +61,17 @@ export const useFullCalendar = () => {
       }
       return true;
     });
-  }, [allItems, selectedCategoryIds, showCompleted, searchQuery]);
+  }, [allItems, selectedFilterKeys, showCompleted, searchQuery]);
 
-  // 카테고리 필터 토글
-  const toggleCategoryFilter = (catId: string) => {
-    setSelectedCategoryIds((prev) =>
-      prev.includes(catId) ? prev.filter((id) => id !== catId) : [...prev, catId]
+  // 필터 키 토글 (클릭 시 선택, 재클릭 시 해제, 중복 선택 지원)
+  const toggleFilterKey = (key: string) => {
+    setSelectedFilterKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
   };
 
-  const selectAllCategories = () => {
-    setSelectedCategoryIds([]);
+  const selectAll = () => {
+    setSelectedFilterKeys([]);
   };
 
   // 날짜 이동
@@ -124,9 +128,13 @@ export const useFullCalendar = () => {
     selectedCalendarDate,
     allItems,
     filteredItems,
-    selectedCategoryIds,
-    toggleCategoryFilter,
-    selectAllCategories,
+    selectedFilterKeys,
+    toggleFilterKey,
+    selectAll,
+    // 하위 호환 별칭
+    selectedCategoryIds: selectedFilterKeys,
+    toggleCategoryFilter: toggleFilterKey,
+    selectAllCategories: selectAll,
     showCompleted,
     setShowCompleted,
     searchQuery,
