@@ -1,0 +1,35 @@
+import React from 'react';
+import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
+import { FourPanelLayout } from './components/layout/FourPanelLayout';
+import { CategoryPanel } from './components/panels/CategoryPanel';
+import { SubItemPanel } from './components/panels/SubItemPanel';
+import { DetailPanel } from './components/panels/DetailPanel';
+import { CalendarPanel } from './components/panels/CalendarPanel';
+import { GoogleCalendarLayout } from './components/googlecalendar/GoogleCalendarLayout';
+
+const AppContent: React.FC = () => {
+  const { appMode } = useWorkspace();
+
+  if (appMode === 'calendar') {
+    return <GoogleCalendarLayout />;
+  }
+
+  return (
+    <FourPanelLayout
+      panel1={<CategoryPanel />}
+      panel2={<SubItemPanel />}
+      panel3={<DetailPanel panelId="panel-3" />}
+      panel4={<CalendarPanel />}
+    />
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <WorkspaceProvider>
+      <AppContent />
+    </WorkspaceProvider>
+  );
+};
+
+export default App;

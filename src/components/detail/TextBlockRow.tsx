@@ -1,0 +1,130 @@
+import React, { useState } from 'react';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { TextBlock } from '../../types';
+import { SmartText } from '../shared/SmartText';
+import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { InlineEditableTextarea } from '../shared/InlineEditableTextarea';
+import { useWorkspace } from '../../context/WorkspaceContext';
+
+interface TextBlockRowProps {
+  block: TextBlock;
+  groupId: string;
+  onUpdateText: (groupId: string, blockId: string, text: string) => void;
+  onDeleteBlock: (groupId: string, blockId: string) => void;
+  onOpenSchedule: (blockId: string) => void;
+}
+
+export const TextBlockRow: React.FC<TextBlockRowProps> = ({
+  block,
+  groupId,
+  onUpdateText,
+  onDeleteBlock,
+  onOpenSchedule,
+}) => {
+  const { setSelectedCalendarDate } = useWorkspace();
+  const [isEditing, setIsEditing] = useState(false);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const handleSave = (newText: string) => {
+    onUpdateText(groupId, block.id, newText);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
+
+  return (
+    <div
+      onClick={() => {
+        if (!isEditing && block.dueDate) {
+          setSelectedCalendarDate(block.dueDate);
+        }
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        if (!isEditing) {
+          setIsEditing(true);
+        }
+      }}
+      className={`p-3 hover:bg-slate-50 transition-colors group select-text text-xs border-b border-slate-100 last:border-b-0 ${
+        block.dueDate ? 'cursor-pointer hover:bg-emerald-50/30' : ''
+      }`}
+      title={
+        !isEditing
+          ? block.dueDate
+            ? `더블클릭: 인라인 편집 | 클릭: 등록된 일정(${block.dueDate})으로 이동`
+            : '더블클릭하여 내용 수정'
+          : undefined
+      }
+    >
+      {isEditing ? (
+        <InlineEditableTextarea
+          value={block.text}
+          isEditing={isEditing}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          rows={3}
+          saveOnEnter={false}
+          placeholder="(내용을 입력하세요)"
+        />
+      ) : (
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2 flex-1 min-w-0">
+            <span className="text-slate-800 text-sm leading-none mt-1 select-none font-bold">
+              •
+            </span>
+            <div className="flex-1 whitespace-pre-wrap leading-relaxed text-slate-800">
+              {block.text ? (
+                <SmartText text={block.text} />
+              ) : (
+                <span className="text-slate-400 italic">(빈 블록 - 더블클릭하여 작성)</span>
+              )}
+            </div>
+
+            {/* 날짜 뱃지: 클릭 시 4번 패널 캘린더의 해당 일정 날짜로 즉시 이동 */}
+            {block.dueDate && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedCalendarDate(block.dueDate!);
+                }}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-emerald-50 hover:bg-emerald-200 active:bg-emerald-300 text-emerald-800 border border-emerald-300 shrink-0 font-semibold cursor-pointer transition-colors shadow-2xs"
+                title={`클릭 시 캘린더의 등록된 일정(${block.dueDate})으로 이동`}
+              >
+                <CalendarIcon className="w-3 h-3 text-emerald-600" />
+                <span>{block.dueDate.slice(5)}</span>
+                {block.dueTime && <span>{block.dueTime}</span>}
+              </button>
+            )}
+          </div>
+
+          <ThreeDotMenu
+            onEdit={() => setIsEditing(true)}
+            onCopy={() => copyToClipboard(block.text)}
+            onDelete={() => onDeleteBlock(groupId, block.id)}
+            deleteTitle="이 텍스트 블록을 삭제하시겠습니까?"
+            customItems={[
+              ...(block.dueDate
+                ? [
+                    {
+                      label: '📅 캘린더 일정으로 이동',
+                      onClick: () => setSelectedCalendarDate(block.dueDate!),
+                    },
+                  ]
+                : []),
+              {
+                label: block.dueDate ? '📅 일정 수정/해제' : '📅 일정 등록',
+                onClick: () => onOpenSchedule(block.id),
+              },
+            ]}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
