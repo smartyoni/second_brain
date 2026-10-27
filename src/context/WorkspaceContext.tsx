@@ -21,16 +21,16 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [activePanel, setActivePanel] = useState<ActivePanel>('panel-3');
 
   const [panel3State, setPanel3State] = useState<PanelDetailState>({
-    topCategoryId: 'top-3',
-    categoryId: 'cat-4',
-    subItemId: 'sub-1',
+    topCategoryId: 'top-1',
+    categoryId: null,
+    subItemId: null,
     activeTab: 'text',
   });
 
   const [panel4State, setPanel4State] = useState<PanelDetailState>({
-    topCategoryId: 'top-3',
-    categoryId: 'cat-2',
-    subItemId: 'sub-5',
+    topCategoryId: 'top-1',
+    categoryId: null,
+    subItemId: null,
     activeTab: 'text',
   });
 

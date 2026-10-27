@@ -23,27 +23,7 @@ export const useCalendarSchedule = (
   );
 
   // 캘린더 자체 독립 일정들
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([
-    {
-      id: 'cal-event-1',
-      title: '구글 캘린더 연동 회의',
-      dueDate: new Date().toISOString().slice(0, 10),
-      dueTime: '10:00',
-      isCompleted: false,
-      categoryId: categoryItems[0]?.id || 'cat-1',
-      description: '캘린더 자체 일정 등록 및 드래그 시간 이동 검증',
-      eventType: 'event',
-    },
-    {
-      id: 'cal-event-2',
-      title: '주간 업무 정리 (종일)',
-      dueDate: new Date().toISOString().slice(0, 10),
-      isCompleted: false,
-      categoryId: categoryItems[1]?.id || 'cat-2',
-      description: '세컨드브레인 지식 정리 및 주간 회고',
-      eventType: 'task',
-    },
-  ]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
   const addCalendarEvent = (eventData: Omit<CalendarEvent, 'id'>): CalendarEvent => {
     const newEvent: CalendarEvent = {

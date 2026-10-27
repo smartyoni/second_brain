@@ -187,6 +187,13 @@ export const CategoryPanel: React.FC = () => {
                 onCategoryDragEnd={onCategoryDragEnd}
               />
             )}
+
+            {currentGroups.length === 0 && unclassifiedItems.length === 0 && (
+              <div className="p-8 text-center text-xs text-slate-400 leading-relaxed">
+                등록된 그룹이나 카테고리가 없습니다.<br />
+                상단 툴바의 <strong>[+ 그룹 추가]</strong> 또는 <strong>[+ 카테고리 추가]</strong>를 눌러보세요.
+              </div>
+            )}
           </div>
         </>
       )}
