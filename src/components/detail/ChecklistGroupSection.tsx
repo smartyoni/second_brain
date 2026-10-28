@@ -114,13 +114,14 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
           isOpen={!!schedulingItemId}
           initialDate={selectedSchedulingItem.dueDate}
           initialTime={selectedSchedulingItem.dueTime}
-          onSave={(date, time) => {
-            updateCheckItemDueDate(group.id, selectedSchedulingItem.id, date, time);
+          initialEndDate={selectedSchedulingItem.endDate}
+          onSave={(date, time, endDate) => {
+            updateCheckItemDueDate(group.id, selectedSchedulingItem.id, date, time, endDate);
             setSelectedCalendarDate(date); // 등록 즉시 캘린더도 해당 날짜로 이동
             setSchedulingItemId(null);
           }}
           onRemove={() => {
-            updateCheckItemDueDate(group.id, selectedSchedulingItem.id, undefined, undefined);
+            updateCheckItemDueDate(group.id, selectedSchedulingItem.id, undefined, undefined, undefined);
             setSchedulingItemId(null);
           }}
           onClose={() => setSchedulingItemId(null)}

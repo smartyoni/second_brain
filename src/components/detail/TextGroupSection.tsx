@@ -106,13 +106,14 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
           isOpen={!!schedulingBlockId}
           initialDate={selectedSchedulingBlock.dueDate}
           initialTime={selectedSchedulingBlock.dueTime}
-          onSave={(date, time) => {
-            updateTextBlockDueDate(group.id, selectedSchedulingBlock.id, date, time);
+          initialEndDate={selectedSchedulingBlock.endDate}
+          onSave={(date, time, endDate) => {
+            updateTextBlockDueDate(group.id, selectedSchedulingBlock.id, date, time, endDate);
             setSelectedCalendarDate(date); // 등록 즉시 캘린더도 해당 날짜로 이동
             setSchedulingBlockId(null);
           }}
           onRemove={() => {
-            updateTextBlockDueDate(group.id, selectedSchedulingBlock.id, undefined, undefined);
+            updateTextBlockDueDate(group.id, selectedSchedulingBlock.id, undefined, undefined, undefined);
             setSchedulingBlockId(null);
           }}
           onClose={() => setSchedulingBlockId(null)}

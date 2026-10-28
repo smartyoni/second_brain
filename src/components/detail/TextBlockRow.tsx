@@ -21,8 +21,9 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
   onDeleteBlock,
   onOpenSchedule,
 }) => {
-  const { setSelectedCalendarDate } = useWorkspace();
+  const { setSelectedCalendarDate, selectedDetailItem, setSelectedDetailItem } = useWorkspace();
   const [isEditing, setIsEditing] = useState(false);
+  const isSelected = selectedDetailItem?.itemId === block.id;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -40,8 +41,11 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
   return (
     <div
       onClick={() => {
-        if (!isEditing && block.dueDate) {
-          setSelectedCalendarDate(block.dueDate);
+        if (!isEditing) {
+          setSelectedDetailItem({ type: 'text', groupId, itemId: block.id });
+          if (block.dueDate) {
+            setSelectedCalendarDate(block.dueDate);
+          }
         }
       }}
       onDoubleClick={(e) => {
@@ -50,8 +54,8 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
           setIsEditing(true);
         }
       }}
-      className={`p-3 hover:bg-slate-50 transition-colors group select-text text-xs border-b border-slate-100 last:border-b-0 ${
-        block.dueDate ? 'cursor-pointer hover:bg-emerald-50/30' : ''
+      className={`p-3 hover:bg-slate-50 transition-colors group select-text text-xs border-b border-slate-100 last:border-b-0 cursor-pointer ${
+        isSelected ? 'bg-emerald-50/70 ring-1 ring-emerald-300 rounded' : block.dueDate ? 'hover:bg-emerald-50/30' : ''
       }`}
       title={
         !isEditing
@@ -85,7 +89,7 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
               )}
             </div>
 
-            {/* 날짜 뱃지: 클릭 시 4번 패널 캘린더의 해당 일정 날짜로 즉시 이동 */}
+            {/* 날짜 뱃지: 클릭 시 해당 일정 날짜로 즉시 이동 */}
             {block.dueDate && (
               <button
                 type="button"
@@ -94,10 +98,13 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
                   setSelectedCalendarDate(block.dueDate!);
                 }}
                 className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-emerald-50 hover:bg-emerald-200 active:bg-emerald-300 text-emerald-800 border border-emerald-300 shrink-0 font-semibold cursor-pointer transition-colors shadow-2xs"
-                title={`클릭 시 캘린더의 등록된 일정(${block.dueDate})으로 이동`}
+                title={`클릭 시 등록된 일정(${block.dueDate}${block.endDate ? ` ~ ${block.endDate}` : ''})으로 이동`}
               >
                 <CalendarIcon className="w-3 h-3 text-emerald-600" />
-                <span>{block.dueDate.slice(5)}</span>
+                <span>
+                  {block.dueDate.slice(5)}
+                  {block.endDate && ` ~ ${block.endDate.slice(5)}`}
+                </span>
                 {block.dueTime && <span>{block.dueTime}</span>}
               </button>
             )}

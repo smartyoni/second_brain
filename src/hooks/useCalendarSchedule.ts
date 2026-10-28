@@ -7,6 +7,7 @@ import {
   CategoryItem,
   PanelDetailState,
   CalendarEvent,
+  SelectedDetailItemInfo,
 } from '../types';
 
 export const useCalendarSchedule = (
@@ -21,6 +22,9 @@ export const useCalendarSchedule = (
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string>(
     new Date().toISOString().slice(0, 10)
   );
+
+  // 4번 패널 하단 메모 연동용 선택 아이템
+  const [selectedDetailItem, setSelectedDetailItem] = useState<SelectedDetailItemInfo | null>(null);
 
   // 캘린더 자체 독립 일정들
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
@@ -54,14 +58,15 @@ export const useCalendarSchedule = (
     groupId: string,
     itemId: string,
     dueDate?: string,
-    dueTime?: string
+    dueTime?: string,
+    endDate?: string
   ) => {
     setChecklistGroups((prev) =>
       prev.map((g) =>
         g.id === groupId
           ? {
               ...g,
-              items: g.items.map((i) => (i.id === itemId ? { ...i, dueDate, dueTime } : i)),
+              items: g.items.map((i) => (i.id === itemId ? { ...i, dueDate, dueTime, endDate } : i)),
             }
           : g
       )
@@ -72,14 +77,41 @@ export const useCalendarSchedule = (
     groupId: string,
     blockId: string,
     dueDate?: string,
-    dueTime?: string
+    dueTime?: string,
+    endDate?: string
   ) => {
     setTextGroups((prev) =>
       prev.map((g) =>
         g.id === groupId
           ? {
               ...g,
-              blocks: g.blocks.map((b) => (b.id === blockId ? { ...b, dueDate, dueTime } : b)),
+              blocks: g.blocks.map((b) => (b.id === blockId ? { ...b, dueDate, dueTime, endDate } : b)),
+            }
+          : g
+      )
+    );
+  };
+
+  const updateCheckItemMemo = (groupId: string, itemId: string, memo: string) => {
+    setChecklistGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId
+          ? {
+              ...g,
+              items: g.items.map((i) => (i.id === itemId ? { ...i, memo } : i)),
+            }
+          : g
+      )
+    );
+  };
+
+  const updateTextBlockMemo = (groupId: string, blockId: string, memo: string) => {
+    setTextGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId
+          ? {
+              ...g,
+              blocks: g.blocks.map((b) => (b.id === blockId ? { ...b, memo } : b)),
             }
           : g
       )
@@ -115,6 +147,8 @@ export const useCalendarSchedule = (
             title: item.text,
             dueDate: item.dueDate,
             dueTime: item.dueTime,
+            endDate: item.endDate,
+            memo: item.memo,
             isCompleted: item.isCompleted,
             sourceType: 'checklist',
             subItemId: group.subItemId,
@@ -138,6 +172,8 @@ export const useCalendarSchedule = (
             title: firstLine || group.name,
             dueDate: block.dueDate,
             dueTime: block.dueTime,
+            endDate: block.endDate,
+            memo: block.memo,
             sourceType: 'text',
             subItemId: group.subItemId,
             groupId: group.id,
@@ -184,6 +220,10 @@ export const useCalendarSchedule = (
   };
 
   return {
+    selectedDetailItem,
+    setSelectedDetailItem,
+    updateCheckItemMemo,
+    updateTextBlockMemo,
     selectedCalendarDate,
     setSelectedCalendarDate,
     calendarEvents,

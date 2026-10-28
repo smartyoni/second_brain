@@ -40,6 +40,8 @@ export interface TextBlock {
   order: number;
   dueDate?: string; // YYYY-MM-DD
   dueTime?: string; // HH:mm
+  endDate?: string; // YYYY-MM-DD (마감일)
+  memo?: string; // 4번 패널 하단 전속 추가 메모
 }
 
 // 3번 패널: 텍스트 그룹
@@ -60,6 +62,8 @@ export interface CheckItem {
   order: number;
   dueDate?: string; // YYYY-MM-DD
   dueTime?: string; // HH:mm
+  endDate?: string; // YYYY-MM-DD (마감일)
+  memo?: string; // 4번 패널 하단 전속 추가 메모
 }
 
 // 캘린더 자체 독립 일정 모델
@@ -68,6 +72,8 @@ export interface CalendarEvent {
   title: string;
   dueDate: string; // YYYY-MM-DD
   dueTime?: string; // HH:mm
+  endDate?: string; // YYYY-MM-DD (마감일)
+  memo?: string; // 4번 패널 하단 전속 추가 메모
   endTime?: string;
   isCompleted?: boolean;
   categoryId?: string; // 소속 카테고리 (색상/분류)
@@ -81,6 +87,8 @@ export interface CalendarScheduleItem {
   title: string;
   dueDate: string; // YYYY-MM-DD
   dueTime?: string;
+  endDate?: string; // YYYY-MM-DD (마감일)
+  memo?: string;
   endTime?: string;
   isCompleted?: boolean;
   sourceType: 'checklist' | 'text' | 'calendar';
@@ -89,6 +97,13 @@ export interface CalendarScheduleItem {
   categoryId: string;
   topCategoryId: string;
   description?: string;
+}
+
+// 4번 패널 하단 메모 연동용 선택 아이템 정보
+export interface SelectedDetailItemInfo {
+  type: 'checklist' | 'text';
+  groupId: string;
+  itemId: string;
 }
 
 // 3번 패널: 체크리스트 그룹
@@ -168,13 +183,17 @@ export interface WorkspaceContextType {
   setCalendarEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>>;
 
   // 캘린더 및 일정 상태
+  selectedDetailItem: SelectedDetailItemInfo | null;
+  setSelectedDetailItem: (item: SelectedDetailItemInfo | null) => void;
   jumpedFromCalendar: boolean;
   setJumpedFromCalendar: (val: boolean) => void;
   returnToCalendar: () => void;
   selectedCalendarDate: string;
   setSelectedCalendarDate: (date: string) => void;
-  updateCheckItemDueDate: (groupId: string, itemId: string, dueDate?: string, dueTime?: string) => void;
-  updateTextBlockDueDate: (groupId: string, blockId: string, dueDate?: string, dueTime?: string) => void;
+  updateCheckItemDueDate: (groupId: string, itemId: string, dueDate?: string, dueTime?: string, endDate?: string) => void;
+  updateTextBlockDueDate: (groupId: string, blockId: string, dueDate?: string, dueTime?: string, endDate?: string) => void;
+  updateCheckItemMemo: (groupId: string, itemId: string, memo: string) => void;
+  updateTextBlockMemo: (groupId: string, blockId: string, memo: string) => void;
   toggleCheckItemCompleted: (groupId: string, itemId: string) => void;
   addCalendarEvent: (event: Omit<CalendarEvent, 'id'>) => CalendarEvent;
   updateCalendarEvent: (id: string, updates: Partial<CalendarEvent>) => void;
@@ -193,4 +212,3 @@ export interface WorkspaceContextType {
   addTextGroup: (subItemId: string) => void;
   addChecklistGroup: (subItemId: string) => void;
 }
-

@@ -23,8 +23,9 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
   onDeleteItem,
   onOpenSchedule,
 }) => {
-  const { setSelectedCalendarDate } = useWorkspace();
+  const { setSelectedCalendarDate, selectedDetailItem, setSelectedDetailItem } = useWorkspace();
   const [isEditing, setIsEditing] = useState(false);
+  const isSelected = selectedDetailItem?.itemId === item.id;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -42,8 +43,11 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
   return (
     <div
       onClick={() => {
-        if (!isEditing && item.dueDate) {
-          setSelectedCalendarDate(item.dueDate);
+        if (!isEditing) {
+          setSelectedDetailItem({ type: 'checklist', groupId, itemId: item.id });
+          if (item.dueDate) {
+            setSelectedCalendarDate(item.dueDate);
+          }
         }
       }}
       onDoubleClick={(e) => {
@@ -52,8 +56,8 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
           setIsEditing(true);
         }
       }}
-      className={`p-2.5 hover:bg-slate-50 transition-colors group select-text text-xs border-b border-slate-100 last:border-b-0 ${
-        item.dueDate ? 'cursor-pointer hover:bg-blue-50/30' : ''
+      className={`p-2.5 hover:bg-slate-50 transition-colors group select-text text-xs border-b border-slate-100 last:border-b-0 cursor-pointer ${
+        isSelected ? 'bg-blue-50/70 ring-1 ring-blue-300 rounded' : item.dueDate ? 'hover:bg-blue-50/30' : ''
       }`}
       title={
         !isEditing
@@ -100,7 +104,7 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
               <SmartText text={item.text} />
             </div>
 
-            {/* 날짜 뱃지: 클릭 시 4번 패널 캘린더의 해당 일정 날짜로 즉시 이동 */}
+            {/* 날짜 뱃지: 클릭 시 해당 일정 날짜로 즉시 이동 */}
             {item.dueDate && (
               <button
                 type="button"
@@ -109,10 +113,13 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
                   setSelectedCalendarDate(item.dueDate!);
                 }}
                 className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-blue-50 hover:bg-blue-200 active:bg-blue-300 text-blue-700 border border-blue-300 shrink-0 font-semibold cursor-pointer transition-colors shadow-2xs"
-                title={`클릭 시 캘린더의 등록된 일정(${item.dueDate})으로 이동`}
+                title={`클릭 시 등록된 일정(${item.dueDate}${item.endDate ? ` ~ ${item.endDate}` : ''})으로 이동`}
               >
                 <CalendarIcon className="w-3 h-3 text-blue-600" />
-                <span>{item.dueDate.slice(5)}</span>
+                <span>
+                  {item.dueDate.slice(5)}
+                  {item.endDate && ` ~ ${item.endDate.slice(5)}`}
+                </span>
                 {item.dueTime && <span>{item.dueTime}</span>}
               </button>
             )}

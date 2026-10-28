@@ -4,7 +4,7 @@ import { FourPanelLayout } from './components/layout/FourPanelLayout';
 import { CategoryPanel } from './components/panels/CategoryPanel';
 import { SubItemPanel } from './components/panels/SubItemPanel';
 import { DetailPanel } from './components/panels/DetailPanel';
-import { CalendarPanel } from './components/panels/CalendarPanel';
+import { GanttMemoPanel } from './components/panels/GanttMemoPanel';
 import { GoogleCalendarLayout } from './components/googlecalendar/GoogleCalendarLayout';
 
 const AppContent: React.FC = () => {
@@ -19,7 +19,7 @@ const AppContent: React.FC = () => {
       panel1={<CategoryPanel />}
       panel2={<SubItemPanel />}
       panel3={<DetailPanel panelId="panel-3" />}
-      panel4={<CalendarPanel />}
+      panel4={<GanttMemoPanel />}
     />
   );
 };

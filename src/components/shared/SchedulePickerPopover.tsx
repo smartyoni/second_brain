@@ -5,7 +5,8 @@ interface SchedulePickerPopoverProps {
   isOpen: boolean;
   initialDate?: string;
   initialTime?: string;
-  onSave: (date: string, time?: string) => void;
+  initialEndDate?: string;
+  onSave: (date: string, time?: string, endDate?: string) => void;
   onRemove: () => void;
   onClose: () => void;
 }
@@ -14,6 +15,7 @@ export const SchedulePickerPopover: React.FC<SchedulePickerPopoverProps> = ({
   isOpen,
   initialDate,
   initialTime,
+  initialEndDate,
   onSave,
   onRemove,
   onClose,
@@ -21,6 +23,7 @@ export const SchedulePickerPopover: React.FC<SchedulePickerPopoverProps> = ({
   const todayStr = new Date().toISOString().slice(0, 10);
   const [date, setDate] = useState<string>(initialDate || todayStr);
   const [time, setTime] = useState<string>(initialTime || '');
+  const [endDate, setEndDate] = useState<string>(initialEndDate || '');
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -37,7 +40,7 @@ export const SchedulePickerPopover: React.FC<SchedulePickerPopoverProps> = ({
 
   const handleSave = () => {
     if (!date) return;
-    onSave(date, time || undefined);
+    onSave(date, time || undefined, endDate || undefined);
     onClose();
   };
 
@@ -68,14 +71,49 @@ export const SchedulePickerPopover: React.FC<SchedulePickerPopoverProps> = ({
         <div className="space-y-1">
           <label className="text-[11px] font-semibold text-slate-600 flex items-center gap-1">
             <CalendarIcon className="w-3 h-3 text-slate-400" />
-            날짜 선택
+            시작일 / 일정일
           </label>
           <input
             type="date"
+            autoFocus
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => {
+              setDate(e.target.value);
+              if (endDate && e.target.value > endDate) {
+                setEndDate(e.target.value);
+              }
+            }}
             className="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500 font-sans"
           />
+        </div>
+
+        {/* 마감일 선택 (선택 사항) */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-semibold text-slate-600 flex items-center gap-1">
+              <CalendarIcon className="w-3 h-3 text-indigo-400" />
+              마감일 (선택)
+            </label>
+            {endDate && (
+              <button
+                type="button"
+                onClick={() => setEndDate('')}
+                className="text-[10px] text-slate-400 hover:text-red-500 underline cursor-pointer"
+              >
+                마감일 해제
+              </button>
+            )}
+          </div>
+          <input
+            type="date"
+            value={endDate}
+            min={date}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500 font-sans"
+          />
+          <p className="text-[10px] text-slate-400">
+            {endDate ? '기간 일정으로 간트차트에 표시됩니다.' : '미지정 시 해당일 단일 일정으로 표시됩니다.'}
+          </p>
         </div>
 
         {/* 시간 선택 (선택 사항) */}
