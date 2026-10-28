@@ -5,8 +5,8 @@ import {
   TIMELINE_HOURS,
   TIMELINE_HOUR_HEIGHT,
   formatGoogleHourLabel,
+  computeOverlappingLayout,
 } from '../../utils/googleCalendarUtils';
-import { parseTimeToMinutes } from '../../utils/calendarUtils';
 
 interface GoogleCalendarDayViewProps {
   selectedDate: string;
@@ -19,6 +19,7 @@ interface GoogleCalendarDayViewProps {
   onDropOnTime: (targetDate: string, targetTime: string) => void;
   onDropAllDay: (targetDate: string) => void;
   onDragEnd: () => void;
+  onContextMenu?: (item: CalendarScheduleItem, e: React.MouseEvent) => void;
 }
 
 export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
@@ -32,6 +33,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
   onDropOnTime,
   onDropAllDay,
   onDragEnd,
+  onContextMenu,
 }) => {
   const dayItems = items.filter((i) => i.dueDate === selectedDate);
   const allDayItems = dayItems.filter((i) => !i.dueTime);
@@ -53,7 +55,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
       {/* 1. 상단 일자 헤더 */}
-      <div className="flex border-b border-[#dadce0] bg-white shrink-0 pr-4">
+      <div className="flex border-b border-[#dadce0] bg-white shrink-0">
         <div className="w-20 shrink-0 flex items-end justify-center pb-2 text-[10px] text-[#70757a] border-r border-[#dadce0]">
           GMT+9
         </div>
@@ -73,7 +75,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
       </div>
 
       {/* 2. 상단 종일 일정 슬롯 */}
-      <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[38px] pr-4">
+      <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[38px]">
         <div className="w-20 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
           종일
         </div>
@@ -99,6 +101,11 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelectItem(schedule);
+                }}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onContextMenu?.(schedule, e);
                 }}
                 className={`px-2 py-0.5 rounded-xs text-[11px] font-medium text-white shadow-2xs cursor-grab active:cursor-grabbing ${
                   color.bg
@@ -160,43 +167,52 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
             </div>
           )}
 
-          {/* 일정 블록들 */}
-          {timedItems.map((schedule) => {
-            const color = getGoogleCategoryColor(schedule.categoryId);
-            const min = parseTimeToMinutes(schedule.dueTime) ?? 9 * 60;
-            const top = (min / 60) * TIMELINE_HOUR_HEIGHT;
-            const height = 44;
-            const isBeingDragged = draggedItem?.id === schedule.id;
+          {/* 일정 블록들 (구글 캘린더 스타일 시간 겹침 오버랩 레이아웃) */}
+          {computeOverlappingLayout(timedItems, TIMELINE_HOUR_HEIGHT, 60).map(
+            ({ item: schedule, top, height, leftPercent, widthPercent }) => {
+              const color = getGoogleCategoryColor(schedule.categoryId);
+              const isBeingDragged = draggedItem?.id === schedule.id;
 
-            return (
-              <div
-                key={schedule.id}
-                draggable
-                onDragStart={(e) => onDragStart(schedule, e)}
-                onDragEnd={onDragEnd}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSelectItem(schedule);
-                }}
-                style={{ top: `${top}px`, height: `${height}px` }}
-                className={`absolute left-2 right-6 rounded-md px-3 py-1.5 text-xs cursor-grab active:cursor-grabbing shadow-xs transition-opacity z-10 ${
-                  color.bg
-                } ${color.text} ${
-                  schedule.isCompleted ? 'opacity-50 line-through' : 'hover:opacity-90'
-                } ${
-                  isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
-                }`}
-                title={`${schedule.title} (${schedule.dueTime}) - 드래그하여 시간 이동`}
-              >
-                <div className="text-[10px] font-medium opacity-90 truncate">
-                  {schedule.dueTime}
+              return (
+                <div
+                  key={schedule.id}
+                  draggable
+                  onDragStart={(e) => onDragStart(schedule, e)}
+                  onDragEnd={onDragEnd}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectItem(schedule);
+                  }}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onContextMenu?.(schedule, e);
+                  }}
+                  style={{
+                    top: `${top}px`,
+                    height: `${height}px`,
+                    left: `calc(${leftPercent}% + 2px)`,
+                    width: `calc(${widthPercent}% - 4px)`,
+                  }}
+                  className={`absolute rounded-md px-2.5 py-1 text-xs cursor-grab active:cursor-grabbing shadow-xs transition-opacity z-10 overflow-hidden ${
+                    color.bg
+                  } ${color.text} ${
+                    schedule.isCompleted ? 'opacity-50 line-through' : 'hover:opacity-90'
+                  } ${
+                    isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
+                  }`}
+                  title={`${schedule.title} (${schedule.dueTime}) - 드래그하여 시간 이동`}
+                >
+                  <div className="text-[10px] font-medium opacity-90 truncate leading-none mb-0.5">
+                    {schedule.dueTime}
+                  </div>
+                  <div className="font-semibold truncate text-xs leading-tight">
+                    {schedule.title}
+                  </div>
                 </div>
-                <div className="font-semibold truncate text-sm">
-                  {schedule.title}
-                </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
         </div>
       </div>
     </div>

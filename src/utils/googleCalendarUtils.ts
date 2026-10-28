@@ -1,3 +1,6 @@
+import { CalendarScheduleItem } from '../types';
+import { parseTimeToMinutes } from './calendarUtils';
+
 // 구글 캘린더 공식 머티리얼 컬러 팔레트
 export interface GoogleColorTheme {
   id: string;
@@ -26,6 +29,9 @@ export const GOOGLE_COLORS: GoogleColorTheme[] = [
 
 export const getGoogleCategoryColor = (categoryId?: string): GoogleColorTheme => {
   if (!categoryId) return GOOGLE_COLORS[0];
+  const directMatch = GOOGLE_COLORS.find((c) => c.id === categoryId);
+  if (directMatch) return directMatch;
+
   let hash = 0;
   for (let i = 0; i < categoryId.length; i++) {
     hash = (hash << 5) - hash + categoryId.charCodeAt(i);
@@ -45,3 +51,98 @@ export const formatGoogleHourLabel = (hour: number): string => {
   if (hour === 12) return '오후 12시';
   return `오후 ${hour - 12}시`;
 };
+
+// 타임라인 오버랩(시간 겹침) 구글 캘린더 스타일 분할 레이아웃 계산
+export interface TimedEventLayout {
+  item: CalendarScheduleItem;
+  top: number;
+  height: number;
+  leftPercent: number;
+  widthPercent: number;
+}
+
+export function computeOverlappingLayout(
+  items: CalendarScheduleItem[],
+  hourHeight: number = TIMELINE_HOUR_HEIGHT,
+  defaultDurationMinutes: number = 60
+): TimedEventLayout[] {
+  if (items.length === 0) return [];
+
+  // 1. 분 단위 시작/종료 계산
+  const parsed = items.map((item) => {
+    const start = parseTimeToMinutes(item.dueTime) ?? 9 * 60;
+    const end = item.endTime
+      ? parseTimeToMinutes(item.endTime) ?? (start + defaultDurationMinutes)
+      : start + defaultDurationMinutes;
+    // 최소 지속시간 30분
+    const duration = Math.max(30, end - start);
+    return {
+      item,
+      start,
+      end: start + duration,
+      duration,
+    };
+  });
+
+  // 2. 시작 시간순 정렬 (같으면 긴 지속시간 우선)
+  parsed.sort((a, b) => a.start - b.start || b.end - a.end);
+
+  const result: TimedEventLayout[] = [];
+  let cluster: typeof parsed = [];
+  let clusterEnd = -1;
+
+  const processCluster = (eventsInCluster: typeof parsed) => {
+    if (eventsInCluster.length === 0) return;
+
+    // 각 이벤트에 최적 컬럼 할당 (Greedy Column Allocation)
+    const columns: number[] = [];
+    const eventAssignments: { event: (typeof parsed)[0]; colIndex: number }[] = [];
+
+    eventsInCluster.forEach((ev) => {
+      let placedCol = -1;
+      for (let c = 0; c < columns.length; c++) {
+        if (columns[c] <= ev.start) {
+          placedCol = c;
+          columns[c] = ev.end;
+          break;
+        }
+      }
+      if (placedCol === -1) {
+        placedCol = columns.length;
+        columns.push(ev.end);
+      }
+      eventAssignments.push({ event: ev, colIndex: placedCol });
+    });
+
+    const totalCols = columns.length;
+    const widthPercent = 100 / totalCols;
+
+    eventAssignments.forEach(({ event, colIndex }) => {
+      const top = (event.start / 60) * hourHeight;
+      const height = Math.max(28, (event.duration / 60) * hourHeight);
+      result.push({
+        item: event.item,
+        top,
+        height,
+        leftPercent: colIndex * widthPercent,
+        widthPercent,
+      });
+    });
+  };
+
+  parsed.forEach((ev) => {
+    if (cluster.length > 0 && ev.start >= clusterEnd) {
+      processCluster(cluster);
+      cluster = [];
+      clusterEnd = -1;
+    }
+    cluster.push(ev);
+    clusterEnd = Math.max(clusterEnd, ev.end);
+  });
+
+  if (cluster.length > 0) {
+    processCluster(cluster);
+  }
+
+  return result;
+}

@@ -1,22 +1,35 @@
 import React, { useState } from 'react';
-import { useFullCalendar } from '../../hooks/useFullCalendar';
+import { useFullCalendar, FullCalendarViewType } from '../../hooks/useFullCalendar';
 import { useCalendarDragDrop } from '../../hooks/useCalendarDragDrop';
 import { GoogleCalendarHeader } from './GoogleCalendarHeader';
 import { GoogleCalendarSidebar } from './GoogleCalendarSidebar';
 import { GoogleCalendarMonthView } from './GoogleCalendarMonthView';
-import { GoogleCalendarWeekView } from './GoogleCalendarWeekView';
-import { GoogleCalendarThreeDayView } from './GoogleCalendarThreeDayView';
-import { GoogleCalendarDayView } from './GoogleCalendarDayView';
-import { GoogleCalendarScheduleView } from './GoogleCalendarScheduleView';
+import { CalendarSideViewType } from './GoogleCalendarRightPanel';
 import { GoogleCalendarEventDialog } from './GoogleCalendarEventDialog';
 import {
   GoogleCalendarQuickCreateModal,
   QuickCreateState,
 } from './GoogleCalendarQuickCreateModal';
+import {
+  GoogleCalendarContextMenu,
+  ContextMenuState,
+} from './GoogleCalendarContextMenu';
 import { useWorkspace } from '../../context/WorkspaceContext';
+import { CalendarScheduleItem } from '../../types';
 
 export const GoogleCalendarLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [sideViewType, setSideViewType] = useState<CalendarSideViewType>('day');
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState<boolean>(true);
+  const [initialEditDialogMode, setInitialEditDialogMode] = useState<boolean>(false);
+
+  // 우클릭 컨텍스트 메뉴 상태
+  const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
+    isOpen: false,
+    x: 0,
+    y: 0,
+    item: null,
+  });
 
   // 구글 캘린더 빠른 일정 생성 팝오버 상태
   const [quickCreateState, setQuickCreateState] = useState<QuickCreateState>({
@@ -65,7 +78,33 @@ export const GoogleCalendarLayout: React.FC = () => {
     handleDragEnd,
   } = useCalendarDragDrop();
 
-  const { subItems } = useWorkspace();
+  const { subItems, updateCalendarEvent, deleteCalendarEvent } = useWorkspace();
+
+  const handleContextMenu = (item: CalendarScheduleItem, e: React.MouseEvent) => {
+    setContextMenuState({
+      isOpen: true,
+      x: e.clientX,
+      y: e.clientY,
+      item,
+    });
+  };
+
+  const handleContextColorChange = (item: CalendarScheduleItem, colorId: string) => {
+    if (item.sourceType === 'calendar') {
+      updateCalendarEvent(item.id, { categoryId: colorId });
+    }
+  };
+
+  const handleContextEdit = (item: CalendarScheduleItem) => {
+    setInitialEditDialogMode(true);
+    setSelectedScheduleItem(item);
+  };
+
+  const handleContextDelete = (item: CalendarScheduleItem) => {
+    if (item.sourceType === 'calendar') {
+      deleteCalendarEvent(item.id);
+    }
+  };
 
   let headerTitle = '';
   if (viewType === 'month') {
@@ -124,13 +163,24 @@ export const GoogleCalendarLayout: React.FC = () => {
     });
   };
 
+  const handleHeaderViewTypeChange = (type: FullCalendarViewType) => {
+    if (type === 'month') {
+      setIsRightPanelOpen(false);
+      setViewType('month');
+    } else {
+      setIsRightPanelOpen(true);
+      setSideViewType(type);
+      setViewType(type);
+    }
+  };
+
   return (
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-white select-none">
-      {/* 1. 상단 글로벌 앱 헤더 (세그먼트 탭 [ 월 | 주 | 3일 | 일 ] 포함) */}
+      {/* 1. 상단 글로벌 앱 헤더 (세그먼트 탭 [ 월 | 주 | 3일 | 일 | 일정 ] 포함) */}
       <GoogleCalendarHeader
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         viewType={viewType}
-        onViewTypeChange={setViewType}
+        onViewTypeChange={handleHeaderViewTypeChange}
         title={headerTitle}
         onPrev={goToPrev}
         onNext={goToNext}
@@ -160,86 +210,38 @@ export const GoogleCalendarLayout: React.FC = () => {
         />
 
         <main className="flex-1 flex flex-col h-full overflow-hidden bg-white">
-          {viewType === 'month' && (
-            <GoogleCalendarMonthView
-              currentDateObj={currentDateObj}
-              selectedDate={selectedCalendarDate}
-              items={filteredItems}
-              onSelectDate={setDateByString}
-              onSelectItem={setSelectedScheduleItem}
-              onCellClick={(date) => handleOpenQuickCreate(date, '10:00', true)}
-              draggedItem={draggedItem}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDropOnDate={handleDropOnDate}
-              onDragEnd={handleDragEnd}
-            />
-          )}
-
-          {viewType === 'week' && (
-            <GoogleCalendarWeekView
-              currentDateObj={currentDateObj}
-              selectedDate={selectedCalendarDate}
-              items={filteredItems}
-              onSelectDate={setDateByString}
-              onSelectItem={setSelectedScheduleItem}
-              onCellClick={(date, time, isAllDay) =>
-                handleOpenQuickCreate(date, time, isAllDay || false)
+          <GoogleCalendarMonthView
+            currentDateObj={currentDateObj}
+            selectedDate={selectedCalendarDate}
+            items={filteredItems}
+            sideViewType={sideViewType}
+            onSideViewTypeChange={(type) => {
+              setSideViewType(type);
+              setViewType(type);
+            }}
+            isRightPanelOpen={isRightPanelOpen}
+            onToggleRightPanel={(isOpen) => {
+              setIsRightPanelOpen(isOpen);
+              if (!isOpen) {
+                setViewType('month');
+              } else {
+                setViewType(sideViewType);
               }
-              draggedItem={draggedItem}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDropOnTime={handleDropOnTime}
-              onDropAllDay={handleDropAllDay}
-              onDragEnd={handleDragEnd}
-            />
-          )}
-
-          {viewType === 'threeDay' && (
-            <GoogleCalendarThreeDayView
-              currentDateObj={currentDateObj}
-              selectedDate={selectedCalendarDate}
-              items={filteredItems}
-              onSelectDate={setDateByString}
-              onSelectItem={setSelectedScheduleItem}
-              onCellClick={(date, time, isAllDay) =>
-                handleOpenQuickCreate(date, time, isAllDay || false)
-              }
-              draggedItem={draggedItem}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDropOnTime={handleDropOnTime}
-              onDropAllDay={handleDropAllDay}
-              onDragEnd={handleDragEnd}
-            />
-          )}
-
-          {viewType === 'day' && (
-            <GoogleCalendarDayView
-              selectedDate={selectedCalendarDate}
-              items={filteredItems}
-              onSelectItem={setSelectedScheduleItem}
-              onCellClick={(date, time, isAllDay) =>
-                handleOpenQuickCreate(date, time, isAllDay || false)
-              }
-              draggedItem={draggedItem}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDropOnTime={handleDropOnTime}
-              onDropAllDay={handleDropAllDay}
-              onDragEnd={handleDragEnd}
-            />
-          )}
-
-          {viewType === 'schedule' && (
-            <GoogleCalendarScheduleView
-              items={filteredItems}
-              selectedDate={selectedCalendarDate}
-              onSelectDate={setDateByString}
-              onSelectItem={setSelectedScheduleItem}
-              onCellClick={(date) => handleOpenQuickCreate(date, '10:00', true)}
-            />
-          )}
+            }}
+            onSelectDate={setDateByString}
+            onSelectItem={setSelectedScheduleItem}
+            onCellClick={(date, time, isAllDay) =>
+              handleOpenQuickCreate(date, time || '10:00', isAllDay || false)
+            }
+            draggedItem={draggedItem}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDropOnDate={handleDropOnDate}
+            onDropOnTime={handleDropOnTime}
+            onDropAllDay={handleDropAllDay}
+            onDragEnd={handleDragEnd}
+            onContextMenu={handleContextMenu}
+          />
         </main>
       </div>
 
@@ -249,7 +251,11 @@ export const GoogleCalendarLayout: React.FC = () => {
           item={selectedScheduleItem}
           category={selectedCategory}
           subItem={selectedSubItem}
-          onClose={() => setSelectedScheduleItem(null)}
+          initialEditMode={initialEditDialogMode}
+          onClose={() => {
+            setSelectedScheduleItem(null);
+            setInitialEditDialogMode(false);
+          }}
           onToggleComplete={() =>
             toggleCheckItemCompleted(
               selectedScheduleItem.groupId || '',
@@ -266,6 +272,17 @@ export const GoogleCalendarLayout: React.FC = () => {
         onClose={() =>
           setQuickCreateState((prev) => ({ ...prev, isOpen: false }))
         }
+      />
+
+      {/* 5. 우클릭 컨텍스트 메뉴 (색상 선택 및 수정/삭제) */}
+      <GoogleCalendarContextMenu
+        state={contextMenuState}
+        onClose={() =>
+          setContextMenuState((prev) => ({ ...prev, isOpen: false, item: null }))
+        }
+        onColorChange={handleContextColorChange}
+        onEdit={handleContextEdit}
+        onDelete={handleContextDelete}
       />
     </div>
   );

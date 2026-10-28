@@ -5,8 +5,8 @@ import {
   TIMELINE_HOURS,
   TIMELINE_HOUR_HEIGHT,
   formatGoogleHourLabel,
+  computeOverlappingLayout,
 } from '../../utils/googleCalendarUtils';
-import { parseTimeToMinutes } from '../../utils/calendarUtils';
 
 interface GoogleCalendarWeekViewProps {
   currentDateObj: Date;
@@ -21,6 +21,7 @@ interface GoogleCalendarWeekViewProps {
   onDropOnTime: (targetDate: string, targetTime: string) => void;
   onDropAllDay: (targetDate: string) => void;
   onDragEnd: () => void;
+  onContextMenu?: (item: CalendarScheduleItem, e: React.MouseEvent) => void;
 }
 
 export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
@@ -36,6 +37,7 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
   onDropOnTime,
   onDropAllDay,
   onDragEnd,
+  onContextMenu,
 }) => {
   const dayOfWeek = currentDateObj.getDay();
   const sunday = new Date(currentDateObj);
@@ -63,7 +65,7 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
       {/* 1. 상단 고정: GMT 헤더 + 7개 요일 날짜 컬럼 */}
-      <div className="flex border-b border-[#dadce0] bg-white shrink-0 pr-4">
+      <div className="flex border-b border-[#dadce0] bg-white shrink-0">
         <div className="w-16 shrink-0 flex items-end justify-center pb-2 text-[10px] text-[#70757a] border-r border-[#dadce0]">
           GMT+9
         </div>
@@ -103,7 +105,7 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
       </div>
 
       {/* 2. 상단 고정 종일(All-day) 일정 슬롯 행 */}
-      <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[38px] pr-4">
+      <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[38px]">
         <div className="w-16 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
           종일
         </div>
@@ -134,6 +136,11 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelectItem(schedule);
+                      }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onContextMenu?.(schedule, e);
                       }}
                       className={`px-1.5 py-0.5 rounded-xs text-[11px] font-medium text-white truncate shadow-2xs cursor-grab active:cursor-grabbing ${
                         color.bg
@@ -205,43 +212,52 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
                   </div>
                 )}
 
-                {/* 해당 일자의 시간제 일정 블록들 */}
-                {timedItems.map((schedule) => {
-                  const color = getGoogleCategoryColor(schedule.categoryId);
-                  const min = parseTimeToMinutes(schedule.dueTime) ?? 9 * 60;
-                  const top = (min / 60) * TIMELINE_HOUR_HEIGHT;
-                  const height = 44;
-                  const isBeingDragged = draggedItem?.id === schedule.id;
+                {/* 해당 일자의 시간제 일정 블록들 (구글 캘린더 스타일 오버랩 레이아웃) */}
+                {computeOverlappingLayout(timedItems, TIMELINE_HOUR_HEIGHT, 60).map(
+                  ({ item: schedule, top, height, leftPercent, widthPercent }) => {
+                    const color = getGoogleCategoryColor(schedule.categoryId);
+                    const isBeingDragged = draggedItem?.id === schedule.id;
 
-                  return (
-                    <div
-                      key={schedule.id}
-                      draggable
-                      onDragStart={(e) => onDragStart(schedule, e)}
-                      onDragEnd={onDragEnd}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectItem(schedule);
-                      }}
-                      style={{ top: `${top}px`, height: `${height}px` }}
-                      className={`absolute left-0.5 right-1 rounded-sm px-2 py-1 text-xs cursor-grab active:cursor-grabbing shadow-xs transition-opacity z-10 overflow-hidden ${
-                        color.bg
-                      } ${color.text} ${
-                        schedule.isCompleted ? 'opacity-50 line-through' : 'hover:opacity-90'
-                      } ${
-                        isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
-                      }`}
-                      title={`${schedule.title} (${schedule.dueTime}) - 드래그하여 시간 이동`}
-                    >
-                      <div className="text-[10px] font-medium opacity-90 truncate">
-                        {schedule.dueTime}
+                    return (
+                      <div
+                        key={schedule.id}
+                        draggable
+                        onDragStart={(e) => onDragStart(schedule, e)}
+                        onDragEnd={onDragEnd}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectItem(schedule);
+                        }}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onContextMenu?.(schedule, e);
+                        }}
+                        style={{
+                          top: `${top}px`,
+                          height: `${height}px`,
+                          left: `calc(${leftPercent}% + 1px)`,
+                          width: `calc(${widthPercent}% - 2px)`,
+                        }}
+                        className={`absolute rounded-sm px-1.5 py-0.5 text-xs cursor-grab active:cursor-grabbing shadow-xs transition-opacity z-10 overflow-hidden ${
+                          color.bg
+                        } ${color.text} ${
+                          schedule.isCompleted ? 'opacity-50 line-through' : 'hover:opacity-90'
+                        } ${
+                          isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
+                        }`}
+                        title={`${schedule.title} (${schedule.dueTime}) - 드래그하여 시간 이동`}
+                      >
+                        <div className="text-[9px] font-medium opacity-90 truncate leading-none mb-0.5">
+                          {schedule.dueTime}
+                        </div>
+                        <div className="font-semibold truncate leading-tight text-[10px]">
+                          {schedule.title}
+                        </div>
                       </div>
-                      <div className="font-semibold truncate leading-tight">
-                        {schedule.title}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
             );
           })}

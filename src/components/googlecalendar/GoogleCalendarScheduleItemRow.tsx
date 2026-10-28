@@ -7,12 +7,14 @@ interface GoogleCalendarScheduleItemRowProps {
   item: CalendarScheduleItem;
   onSelectItem: (item: CalendarScheduleItem) => void;
   formatTimeRange: (dueTime?: string, endTime?: string) => string;
+  onContextMenu?: (item: CalendarScheduleItem, e: React.MouseEvent) => void;
 }
 
 export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemRowProps> = ({
   item,
   onSelectItem,
   formatTimeRange,
+  onContextMenu,
 }) => {
   const colorTheme = getGoogleCategoryColor(item.categoryId);
   const timeText = formatTimeRange(item.dueTime, item.endTime);
@@ -20,6 +22,11 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
   return (
     <div
       onClick={() => onSelectItem(item)}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onContextMenu?.(item, e);
+      }}
       className="flex items-center py-2 px-3 rounded-lg hover:bg-[#f1f3f4] transition-colors cursor-pointer group"
     >
       {/* 캘린더 색상 원형 뱃지 점 */}

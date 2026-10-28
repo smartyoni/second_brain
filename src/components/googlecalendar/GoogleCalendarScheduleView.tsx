@@ -10,6 +10,7 @@ interface GoogleCalendarScheduleViewProps {
   onSelectDate: (date: string) => void;
   onSelectItem: (item: CalendarScheduleItem) => void;
   onCellClick?: (dateStr: string) => void;
+  onContextMenu?: (item: CalendarScheduleItem, e: React.MouseEvent) => void;
 }
 
 interface GroupedDay {
@@ -27,6 +28,7 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
   onSelectDate,
   onSelectItem,
   onCellClick,
+  onContextMenu,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -207,6 +209,7 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
                   item={item}
                   onSelectItem={onSelectItem}
                   formatTimeRange={formatTimeRange}
+                  onContextMenu={onContextMenu}
                 />
               ))}
 
@@ -238,6 +241,7 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
                       item={item}
                       onSelectItem={onSelectItem}
                       formatTimeRange={formatTimeRange}
+                      onContextMenu={onContextMenu}
                     />
                   </React.Fragment>
                 );

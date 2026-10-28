@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Clock, Calendar as CalendarIcon, AlignLeft, Check } from 'lucide-react';
+import { X, Clock, AlignLeft, Check, Palette } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
+import { getGoogleCategoryColor, GOOGLE_COLORS } from '../../utils/googleCalendarUtils';
 
 export interface QuickCreateState {
   isOpen: boolean;
@@ -19,13 +19,13 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
   createState,
   onClose,
 }) => {
-  const { categoryItems, addCalendarEvent } = useWorkspace();
+  const { addCalendarEvent } = useWorkspace();
   const [eventType, setEventType] = useState<'event' | 'task'>('event');
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(createState.date);
   const [time, setTime] = useState(createState.time || '10:00');
   const [isAllDay, setIsAllDay] = useState(createState.isAllDay);
-  const [selectedCatId, setSelectedCatId] = useState<string>(categoryItems[0]?.id || 'cat-1');
+  const [selectedColorId, setSelectedColorId] = useState<string>(GOOGLE_COLORS[0].id);
   const [description, setDescription] = useState('');
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
       title: title.trim(),
       dueDate: date,
       dueTime: isAllDay ? undefined : time,
-      categoryId: selectedCatId,
+      categoryId: selectedColorId,
       description: description.trim() || undefined,
       eventType,
       isCompleted: false,
@@ -65,7 +65,7 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
     onClose();
   };
 
-  const selectedColor = getGoogleCategoryColor(selectedCatId);
+  const selectedColor = getGoogleCategoryColor(selectedColorId);
 
   return (
     <div
@@ -168,22 +168,31 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
             </div>
           </div>
 
-          {/* 캘린더 / 카테고리 선택 */}
-          <div className="flex items-center gap-3 text-[#3c4043]">
-            <CalendarIcon className="w-4 h-4 text-[#5f6368] shrink-0" />
-            <div className="flex items-center gap-2 flex-1 bg-[#f1f3f4] px-2.5 py-1.5 rounded">
-              <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${selectedColor.dot}`} />
-              <select
-                value={selectedCatId}
-                onChange={(e) => setSelectedCatId(e.target.value)}
-                className="w-full bg-transparent text-xs text-[#3c4043] outline-none cursor-pointer"
-              >
-                {categoryItems.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+          {/* 구글 캘린더 색상 라벨 팔레트 */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1.5 text-xs text-[#5f6368] font-medium">
+              <Palette className="w-3.5 h-3.5 text-[#1a73e8]" />
+              <span>색상 라벨: <strong className="text-[#3c4043]">{selectedColor.name}</strong></span>
+            </div>
+            <div className="flex items-center flex-wrap gap-2 p-2 bg-[#f1f3f4] rounded-lg">
+              {GOOGLE_COLORS.map((c) => {
+                const isSelected = selectedColorId === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSelectedColorId(c.id)}
+                    className={`w-5 h-5 rounded-full ${c.bg} flex items-center justify-center transition-all cursor-pointer hover:scale-110 shadow-2xs ${
+                      isSelected
+                        ? 'ring-2 ring-offset-2 ring-[#1a73e8] scale-110'
+                        : 'hover:opacity-90'
+                    }`}
+                    title={c.name}
+                  >
+                    {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

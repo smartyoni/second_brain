@@ -53,7 +53,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
   };
 
   return (
-    <aside className="w-80 shrink-0 bg-white border-l border-[#dadce0] flex flex-col h-full select-none shadow-sm z-10">
+    <aside className="w-[448px] shrink-0 bg-white border-l border-[#dadce0] flex flex-col h-full select-none shadow-sm z-10">
       {/* 1. 상단 헤더 */}
       <div className="p-4 border-b border-[#dadce0] bg-[#fafafa]">
         <div className="flex items-center justify-between">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CalendarScheduleItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
-import { GoogleCalendarMonthDayAgenda } from './GoogleCalendarMonthDayAgenda';
+import { GoogleCalendarRightPanel, CalendarSideViewType } from './GoogleCalendarRightPanel';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
 interface GoogleCalendarMonthViewProps {
@@ -9,13 +9,20 @@ interface GoogleCalendarMonthViewProps {
   selectedDate: string;
   items: CalendarScheduleItem[];
   draggedItem: CalendarScheduleItem | null;
+  sideViewType?: CalendarSideViewType;
+  onSideViewTypeChange?: (type: CalendarSideViewType) => void;
+  isRightPanelOpen?: boolean;
+  onToggleRightPanel?: (isOpen: boolean) => void;
   onSelectDate: (dateStr: string) => void;
   onSelectItem: (item: CalendarScheduleItem) => void;
-  onCellClick: (dateStr: string) => void;
+  onCellClick: (dateStr: string, time?: string, isAllDay?: boolean) => void;
   onDragStart: (item: CalendarScheduleItem, e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDropOnDate: (dateStr: string) => void;
+  onDropOnTime?: (targetDate: string, targetTime: string) => void;
+  onDropAllDay?: (targetDate: string) => void;
   onDragEnd: () => void;
+  onContextMenu?: (item: CalendarScheduleItem, e: React.MouseEvent) => void;
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -25,15 +32,41 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
   selectedDate,
   items,
   draggedItem,
+  sideViewType: controlledSideViewType,
+  onSideViewTypeChange: controlledOnSideViewTypeChange,
+  isRightPanelOpen: controlledIsRightPanelOpen,
+  onToggleRightPanel: controlledOnToggleRightPanel,
   onSelectDate,
   onSelectItem,
   onCellClick,
   onDragStart,
   onDragOver,
   onDropOnDate,
+  onDropOnTime,
+  onDropAllDay,
   onDragEnd,
+  onContextMenu,
 }) => {
-  const [isSideAgendaOpen, setIsSideAgendaOpen] = useState<boolean>(true);
+  const [internalIsOpen, setInternalIsOpen] = useState<boolean>(true);
+  const [internalSideViewType, setInternalSideViewType] = useState<CalendarSideViewType>('day');
+
+  const isSideOpen = controlledIsRightPanelOpen !== undefined ? controlledIsRightPanelOpen : internalIsOpen;
+  const setIsSideOpen = (open: boolean) => {
+    if (controlledOnToggleRightPanel) {
+      controlledOnToggleRightPanel(open);
+    } else {
+      setInternalIsOpen(open);
+    }
+  };
+
+  const sideView = controlledSideViewType !== undefined ? controlledSideViewType : internalSideViewType;
+  const setSideView = (type: CalendarSideViewType) => {
+    if (controlledOnSideViewTypeChange) {
+      controlledOnSideViewTypeChange(type);
+    } else {
+      setInternalSideViewType(type);
+    }
+  };
 
   const year = currentDateObj.getFullYear();
   const month = currentDateObj.getMonth();
@@ -78,9 +111,6 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
   const todayStr = new Date().toISOString().slice(0, 10);
   const totalWeeks = Math.ceil(days.length / 7);
 
-  // 현재 선택된 날짜에 등록된 일정 목록
-  const selectedDateItems = itemsByDate.get(selectedDate) || [];
-
   return (
     <div className="flex-1 flex flex-row h-full bg-white overflow-hidden select-none">
       {/* 1. 좌측 메인: 월간 캘린더 그리드 */}
@@ -112,9 +142,14 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
                 key={idx}
                 onClick={() => {
                   onSelectDate(item.dateStr);
-                  setIsSideAgendaOpen(true);
+                  setIsSideOpen(true);
                 }}
                 onDoubleClick={() => onCellClick(item.dateStr)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  onSelectDate(item.dateStr);
+                  onCellClick(item.dateStr);
+                }}
                 onDragOver={onDragOver}
                 onDrop={(e) => {
                   e.preventDefault();
@@ -151,7 +186,6 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
                 <div className="flex-1 space-y-0.5 overflow-hidden">
                   {dayItems.slice(0, 4).map((schedule) => {
                     const color = getGoogleCategoryColor(schedule.categoryId);
-                    const isAllDay = !schedule.dueTime;
                     const isBeingDragged = draggedItem?.id === schedule.id;
 
                     return (
@@ -164,23 +198,18 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
                           e.stopPropagation();
                           onSelectItem(schedule);
                         }}
-                        className={`w-full rounded-xs px-1.5 py-0.5 text-[11px] font-medium flex items-center gap-1.5 transition-all cursor-grab active:cursor-grabbing truncate ${
-                          isAllDay
-                            ? `${color.bg} text-white shadow-2xs`
-                            : `text-[#3c4043] hover:bg-[#f1f3f4]`
-                        } ${schedule.isCompleted ? 'line-through opacity-50' : 'hover:opacity-90'} ${
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onContextMenu?.(schedule, e);
+                        }}
+                        className={`w-full rounded-xs px-1.5 py-0.5 text-[11px] font-semibold flex items-center transition-all cursor-grab active:cursor-grabbing truncate border border-slate-200/80 border-l-[3px] ${color.border} ${color.lightBg} text-slate-900 hover:brightness-95 hover:shadow-2xs ${
+                          schedule.isCompleted ? 'line-through opacity-50 text-slate-500' : ''
+                        } ${
                           isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
                         }`}
                         title={`${schedule.title} (${schedule.dueTime || '종일'}) - 드래그하여 날짜 이동`}
                       >
-                        {!isAllDay && (
-                          <span className={`w-2 h-2 rounded-full ${color.dot} shrink-0`} />
-                        )}
-                        {schedule.dueTime && (
-                          <span className="text-[10px] font-normal text-[#70757a] shrink-0">
-                            {schedule.dueTime}
-                          </span>
-                        )}
                         <span className="truncate">{schedule.title}</span>
                       </div>
                     );
@@ -198,24 +227,35 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
         </div>
       </div>
 
-      {/* 2. 우측: 선택 일자 상세 아젠다 사이드 패널 */}
-      {isSideAgendaOpen ? (
-        <GoogleCalendarMonthDayAgenda
+      {/* 2. 우측: 일간 / 3일 / 주간 / 일정 뷰 사이드 패널 */}
+      {isSideOpen ? (
+        <GoogleCalendarRightPanel
+          sideViewType={sideView}
+          onSideViewTypeChange={setSideView}
+          currentDateObj={currentDateObj}
           selectedDate={selectedDate}
-          items={selectedDateItems}
+          items={items}
+          onSelectDate={onSelectDate}
           onSelectItem={onSelectItem}
-          onAddEvent={onCellClick}
-          onClose={() => setIsSideAgendaOpen(false)}
+          onCellClick={(dateStr, time, isAllDay) => onCellClick(dateStr, time, isAllDay)}
+          draggedItem={draggedItem}
+          onDragStart={onDragStart}
+          onDragOver={onDragOver}
+          onDropOnTime={onDropOnTime || (() => {})}
+          onDropAllDay={onDropAllDay || (() => {})}
+          onDragEnd={onDragEnd}
+          onContextMenu={onContextMenu}
+          onClose={() => setIsSideOpen(false)}
         />
       ) : (
         <div
-          onClick={() => setIsSideAgendaOpen(true)}
+          onClick={() => setIsSideOpen(true)}
           className="w-10 shrink-0 border-l border-[#dadce0] bg-[#fafafa] hover:bg-[#e8f0fe] transition-colors flex flex-col items-center pt-4 cursor-pointer text-[#5f6368] hover:text-[#1a73e8]"
-          title="일정 상세 패널 열기"
+          title="일정 뷰 패널 열기"
         >
           <CalendarIcon className="w-4 h-4 mb-3" />
           <span className="text-[11px] font-medium [writing-mode:vertical-rl] tracking-widest select-none">
-            일정 목록
+            일정 뷰 열기
           </span>
         </div>
       )}
