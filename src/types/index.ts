@@ -202,6 +202,10 @@ export interface WorkspaceContextType {
   getAllScheduleItems: () => CalendarScheduleItem[];
   jumpToSourceItem: (item: CalendarScheduleItem) => void;
 
+  // 동기화 상태
+  isLoaded?: boolean;
+  isSaving?: boolean;
+
   // 액션
   addQuickMemo: (content: string) => void;
   deleteQuickMemo: (id: string) => void;

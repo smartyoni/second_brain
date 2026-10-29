@@ -5,35 +5,27 @@ import {
   ChevronRight,
   Search,
   X,
-  LayoutGrid,
   Settings,
 } from 'lucide-react';
-import { FullCalendarViewType } from '../../hooks/useFullCalendar';
 
 interface GoogleCalendarHeaderProps {
   onToggleSidebar: () => void;
-  viewType: FullCalendarViewType;
-  onViewTypeChange: (type: FullCalendarViewType) => void;
   title: string;
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  onBackToWorkspace: () => void;
 }
 
 export const GoogleCalendarHeader: React.FC<GoogleCalendarHeaderProps> = ({
   onToggleSidebar,
-  viewType,
-  onViewTypeChange,
   title,
   onPrev,
   onNext,
   onToday,
   searchQuery,
   onSearchChange,
-  onBackToWorkspace,
 }) => {
   const todayNum = new Date().getDate();
 
@@ -118,80 +110,11 @@ export const GoogleCalendarHeader: React.FC<GoogleCalendarHeaderProps> = ({
         </div>
       </div>
 
-      {/* 3. 우측: 지식보관소 복귀 + [ 월 | 주 | 3일 | 일 ] 세그먼트 탭 + 프로필 */}
+      {/* 3. 우측: 설정 + 프로필 */}
       <div className="flex items-center gap-2 shrink-0">
         <button
           type="button"
-          onClick={onBackToWorkspace}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#e8f0fe] hover:bg-[#d2e3fc] text-[#1a73e8] border border-[#d2e3fc] rounded-full text-xs font-semibold transition-colors cursor-pointer mr-1"
-          title="4패널 지식보관소로 돌아가기"
-        >
-          <LayoutGrid className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">지식보관소(4패널)</span>
-        </button>
-
-        {/* 세그먼트 탭: [ 월 | 주 | 3일 | 일 | 일정 ] */}
-        <div className="flex items-center bg-[#f1f3f4] border border-[#dadce0] p-0.5 rounded-lg text-xs font-medium">
-          <button
-            type="button"
-            onClick={() => onViewTypeChange('month')}
-            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              viewType === 'month'
-                ? 'bg-white text-[#1a73e8] font-bold shadow-xs border border-[#dadce0]'
-                : 'text-[#5f6368] hover:text-[#202124] hover:bg-slate-200/50'
-            }`}
-          >
-            월
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewTypeChange('week')}
-            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              viewType === 'week'
-                ? 'bg-white text-[#1a73e8] font-bold shadow-xs border border-[#dadce0]'
-                : 'text-[#5f6368] hover:text-[#202124] hover:bg-slate-200/50'
-            }`}
-          >
-            주
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewTypeChange('threeDay')}
-            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              viewType === 'threeDay'
-                ? 'bg-white text-[#1a73e8] font-bold shadow-xs border border-[#dadce0]'
-                : 'text-[#5f6368] hover:text-[#202124] hover:bg-slate-200/50'
-            }`}
-          >
-            3일
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewTypeChange('day')}
-            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              viewType === 'day'
-                ? 'bg-white text-[#1a73e8] font-bold shadow-xs border border-[#dadce0]'
-                : 'text-[#5f6368] hover:text-[#202124] hover:bg-slate-200/50'
-            }`}
-          >
-            일
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewTypeChange('schedule')}
-            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              viewType === 'schedule'
-                ? 'bg-white text-[#1a73e8] font-bold shadow-xs border border-[#dadce0]'
-                : 'text-[#5f6368] hover:text-[#202124] hover:bg-slate-200/50'
-            }`}
-          >
-            일정
-          </button>
-        </div>
-
-        <button
-          type="button"
-          className="p-2 rounded-full hover:bg-[#f1f3f4] text-[#5f6368] hidden sm:flex cursor-pointer ml-1"
+          className="p-2 rounded-full hover:bg-[#f1f3f4] text-[#5f6368] hidden sm:flex cursor-pointer"
           title="설정"
         >
           <Settings className="w-5 h-5" />

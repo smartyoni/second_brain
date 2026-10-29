@@ -65,13 +65,20 @@ export const useFullCalendar = () => {
 
   // 필터 키 토글 (클릭 시 선택, 재클릭 시 해제, 중복 선택 지원)
   const toggleFilterKey = (key: string) => {
-    setSelectedFilterKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
+    setSelectedFilterKeys((prev) => {
+      const cleaned = prev.filter((k) => k !== '__none__');
+      return cleaned.includes(key)
+        ? cleaned.filter((k) => k !== key)
+        : [...cleaned, key];
+    });
   };
 
   const selectAll = () => {
     setSelectedFilterKeys([]);
+  };
+
+  const clearAll = () => {
+    setSelectedFilterKeys(['__none__']);
   };
 
   // 날짜 이동
@@ -131,10 +138,12 @@ export const useFullCalendar = () => {
     selectedFilterKeys,
     toggleFilterKey,
     selectAll,
+    clearAll,
     // 하위 호환 별칭
     selectedCategoryIds: selectedFilterKeys,
     toggleCategoryFilter: toggleFilterKey,
     selectAllCategories: selectAll,
+    clearAllCategories: clearAll,
     showCompleted,
     setShowCompleted,
     searchQuery,

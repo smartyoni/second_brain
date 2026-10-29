@@ -2,6 +2,8 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
 .vscode
 .idea
 *.suo
@@ -11,3 +13,4 @@ dist-ssr
 *.sw?
 .DS_Store
 *.tsbuildinfo
+.backup*

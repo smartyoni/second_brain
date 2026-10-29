@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useFullCalendar, FullCalendarViewType } from '../../hooks/useFullCalendar';
+import { useFullCalendar } from '../../hooks/useFullCalendar';
 import { useCalendarDragDrop } from '../../hooks/useCalendarDragDrop';
 import { GoogleCalendarHeader } from './GoogleCalendarHeader';
 import { GoogleCalendarSidebar } from './GoogleCalendarSidebar';
@@ -51,6 +51,7 @@ export const GoogleCalendarLayout: React.FC = () => {
     selectedFilterKeys,
     toggleFilterKey,
     selectAll,
+    clearAll,
     showCompleted,
     setShowCompleted,
     searchQuery,
@@ -163,31 +164,17 @@ export const GoogleCalendarLayout: React.FC = () => {
     });
   };
 
-  const handleHeaderViewTypeChange = (type: FullCalendarViewType) => {
-    if (type === 'month') {
-      setIsRightPanelOpen(false);
-      setViewType('month');
-    } else {
-      setIsRightPanelOpen(true);
-      setSideViewType(type);
-      setViewType(type);
-    }
-  };
-
   return (
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-white select-none">
-      {/* 1. 상단 글로벌 앱 헤더 (세그먼트 탭 [ 월 | 주 | 3일 | 일 | 일정 ] 포함) */}
+      {/* 1. 상단 글로벌 앱 헤더 */}
       <GoogleCalendarHeader
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        viewType={viewType}
-        onViewTypeChange={handleHeaderViewTypeChange}
         title={headerTitle}
         onPrev={goToPrev}
         onNext={goToNext}
         onToday={goToToday}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        onBackToWorkspace={() => setAppMode('workspace')}
       />
 
       {/* 2. 본문 영역 */}
@@ -202,11 +189,10 @@ export const GoogleCalendarLayout: React.FC = () => {
           selectedFilterKeys={selectedFilterKeys}
           onToggleFilterKey={toggleFilterKey}
           onSelectAll={selectAll}
+          onClearAll={clearAll}
           showCompleted={showCompleted}
           onToggleShowCompleted={() => setShowCompleted(!showCompleted)}
-          onOpenCreateModal={() =>
-            handleOpenQuickCreate(selectedCalendarDate, '10:00', false)
-          }
+          onBackToWorkspace={() => setAppMode('workspace')}
         />
 
         <main className="flex-1 flex flex-col h-full overflow-hidden bg-white">

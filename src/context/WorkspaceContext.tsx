@@ -11,6 +11,7 @@ import {
 import { useCalendarSchedule } from '../hooks/useCalendarSchedule';
 import { useWorkspaceData } from '../hooks/useWorkspaceData';
 import { useQuickMemoData } from '../hooks/useQuickMemoData';
+import { useFirebaseSync } from '../hooks/useFirebaseSync';
 
 const WorkspaceContext = createContext<WorkspaceContextType | null>(null);
 
@@ -141,6 +142,26 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     updateActivePanelState
   );
 
+  // 4. Firebase Firestore 실시간 동기화 및 자동 저장
+  const { isLoaded, isSaving } = useFirebaseSync({
+    topCategories,
+    setTopCategories,
+    categoryGroups,
+    setCategoryGroups,
+    categoryItems,
+    setCategoryItems,
+    subItems,
+    setSubItems,
+    textGroups,
+    setTextGroups,
+    checklistGroups,
+    setChecklistGroups,
+    quickMemos,
+    setQuickMemos,
+    calendarEvents,
+    setCalendarEvents,
+  });
+
   const jumpToSourceItem = (item: CalendarScheduleItem) => {
     baseJumpToSourceItem(item);
     setJumpedFromCalendar(true);
@@ -209,6 +230,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         addSubItem,
         addTextGroup,
         addChecklistGroup,
+        isLoaded,
+        isSaving,
       }}
     >
       {children}
