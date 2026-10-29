@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
+  <defs>
+    <linearGradient id="bgGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="glowGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#dbeafe" stop-opacity="0.85" />
+    </linearGradient>
+  </defs>
+
+  <rect width="192" height="192" rx="42" fill="url(#bgGrad192)" />
+
+  <!-- 세컨드브레인 네트워크 노드 심볼 -->
+  <g transform="translate(24, 24) scale(3)" stroke="url(#glowGrad192)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 뇌 좌측 로브 -->
+    <path d="M24 10 C16 10, 10 16, 10 24 C10 32, 16 38, 24 38" />
+    <path d="M16 16 C20 20, 20 28, 16 32" />
+
+    <!-- 뇌 우측 로브 -->
+    <path d="M24 10 C32 10, 38 16, 38 24 C38 32, 32 38, 24 38" />
+    <path d="M32 16 C28 20, 28 28, 32 32" />
+
+    <!-- 중앙 연결선 -->
+    <line x1="24" y1="12" x2="24" y2="36" />
+    <line x1="12" y1="24" x2="36" y2="24" />
+
+    <!-- 노드 점들 -->
+    <circle cx="24" cy="10" r="2.5" fill="#ffffff" />
+    <circle cx="24" cy="24" r="3" fill="#ffffff" />
+    <circle cx="24" cy="38" r="2.5" fill="#ffffff" />
+    <circle cx="10" cy="24" r="2.5" fill="#ffffff" />
+    <circle cx="38" cy="24" r="2.5" fill="#ffffff" />
+    <circle cx="16" cy="16" r="2" fill="#ffffff" />
+    <circle cx="32" cy="16" r="2" fill="#ffffff" />
+    <circle cx="16" cy="32" r="2" fill="#ffffff" />
+    <circle cx="32" cy="32" r="2" fill="#ffffff" />
+  </g>
+</svg>

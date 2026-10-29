@@ -30,23 +30,23 @@ export const GoogleCalendarHeader: React.FC<GoogleCalendarHeaderProps> = ({
   const todayNum = new Date().getDate();
 
   return (
-    <header className="h-16 px-4 bg-white border-b border-[#dadce0] flex items-center justify-between select-none shrink-0 z-30">
+    <header className="h-14 sm:h-16 px-2 sm:px-4 bg-white border-b border-[#dadce0] flex items-center justify-between select-none shrink-0 z-30">
       {/* 1. 좌측: 햄버거 메뉴 + 로고 + 네비게이션 + 날짜 */}
-      <div className="flex items-center gap-2 lg:gap-4 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 shrink-0 min-w-0">
         <button
           type="button"
           onClick={onToggleSidebar}
-          className="p-2.5 rounded-full hover:bg-[#f1f3f4] text-[#5f6368] transition-colors cursor-pointer"
+          className="p-2 sm:p-2.5 rounded-full hover:bg-[#f1f3f4] text-[#5f6368] transition-colors cursor-pointer"
           title="기본 메뉴"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         {/* 구글 캘린더 로고 스타일 */}
-        <div className="flex items-center gap-2 cursor-pointer pr-2">
-          <div className="w-9 h-9 bg-blue-600 rounded-lg flex flex-col items-center justify-center text-white shadow-2xs">
-            <span className="text-[9px] font-bold leading-none uppercase">CAL</span>
-            <span className="text-xs font-black leading-none mt-0.5">{todayNum}</span>
+        <div className="flex items-center gap-2 cursor-pointer pr-1 sm:pr-2">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-600 rounded-lg flex flex-col items-center justify-center text-white shadow-2xs">
+            <span className="text-[8px] sm:text-[9px] font-bold leading-none uppercase">CAL</span>
+            <span className="text-[11px] sm:text-xs font-black leading-none mt-0.5">{todayNum}</span>
           </div>
           <span className="text-xl font-normal text-[#3c4043] tracking-tight hidden sm:inline">
             캘린더
@@ -56,7 +56,7 @@ export const GoogleCalendarHeader: React.FC<GoogleCalendarHeaderProps> = ({
         <button
           type="button"
           onClick={onToday}
-          className="px-4 py-2 border border-[#dadce0] rounded-md text-sm font-medium text-[#3c4043] hover:bg-[#f1f3f4] transition-colors cursor-pointer ml-2"
+          className="px-2.5 sm:px-4 py-1.5 sm:py-2 border border-[#dadce0] rounded-md text-xs sm:text-sm font-medium text-[#3c4043] hover:bg-[#f1f3f4] transition-colors cursor-pointer ml-1"
         >
           오늘
         </button>
@@ -65,7 +65,7 @@ export const GoogleCalendarHeader: React.FC<GoogleCalendarHeaderProps> = ({
           <button
             type="button"
             onClick={onPrev}
-            className="p-2 rounded-full hover:bg-[#f1f3f4] text-[#5f6368] transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-full hover:bg-[#f1f3f4] text-[#5f6368] transition-colors cursor-pointer"
             title="이전"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -73,14 +73,14 @@ export const GoogleCalendarHeader: React.FC<GoogleCalendarHeaderProps> = ({
           <button
             type="button"
             onClick={onNext}
-            className="p-2 rounded-full hover:bg-[#f1f3f4] text-[#5f6368] transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-full hover:bg-[#f1f3f4] text-[#5f6368] transition-colors cursor-pointer"
             title="다음"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
-        <h2 className="text-lg sm:text-xl font-normal text-[#3c4043] tracking-tight ml-2">
+        <h2 className="text-sm sm:text-lg md:text-xl font-medium sm:font-normal text-[#3c4043] tracking-tight ml-1 sm:ml-2 truncate max-w-[120px] sm:max-w-none">
           {title}
         </h2>
       </div>

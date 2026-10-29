@@ -4,15 +4,14 @@
 
 ## 프로젝트 개요
 - 앱 설명: 카테고리별로 개인의 지식, 경험, 정보를 분류하고 저장하는 세컨드브레인 앱
-- 기술 스택: React, TypeScript, Vite, Firebase
+- 기술 스택: React, TypeScript, Vite, Firebase, PWA (`vite-plugin-pwa`)
 - **디테일 설정 규격**: 화면 배치 및 세부 UI/인터랙션 구현 시 반드시 [DETAIL.MD](./DETAIL.MD)를 함께 참조하여 준수한다.
 
 ## 명령어
-<!-- 작성 필요: 실제 사용하는 명령어로 교체 -->
-- 설치:
-- 실행:
-- 빌드:
-- 테스트:
+- 설치: `npm install`
+- 실행: `npm run dev`
+- 빌드: `npm run build`
+- 미리보기: `npm run preview`
 
 ---
 

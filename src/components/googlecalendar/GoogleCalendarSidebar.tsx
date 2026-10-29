@@ -47,7 +47,7 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
   const calendarCount = allItems.filter((i) => i.sourceType === 'calendar').length;
 
   return (
-    <aside className="w-64 shrink-0 h-full bg-white border-r border-[#dadce0] flex flex-col select-none overflow-y-auto px-3 py-3 space-y-3">
+    <aside className="w-full lg:w-64 shrink-0 h-full bg-white border-r border-[#dadce0] flex flex-col select-none overflow-y-auto px-3 py-3 space-y-3">
       {/* 1. 지식보관소 바로가기 버튼 */}
       {onBackToWorkspace && (
         <div>

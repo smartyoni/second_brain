@@ -16,12 +16,16 @@ import {
 } from './GoogleCalendarContextMenu';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { CalendarScheduleItem } from '../../types';
+import { CalendarMobilePanel } from './GoogleCalendarMobileNavBar';
+import { GoogleCalendarMobileView } from './GoogleCalendarMobileView';
+import { getGoogleCalendarHeaderTitle } from '../../utils/googleCalendarUtils';
 
 export const GoogleCalendarLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [sideViewType, setSideViewType] = useState<CalendarSideViewType>('day');
   const [isRightPanelOpen, setIsRightPanelOpen] = useState<boolean>(true);
   const [initialEditDialogMode, setInitialEditDialogMode] = useState<boolean>(false);
+  const [mobilePanel, setMobilePanel] = useState<CalendarMobilePanel>('month');
 
   // 우클릭 컨텍스트 메뉴 상태
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
@@ -43,8 +47,6 @@ export const GoogleCalendarLayout: React.FC = () => {
     viewType,
     setViewType,
     currentDateObj,
-    currentYear,
-    currentMonth,
     selectedCalendarDate,
     allItems,
     filteredItems,
@@ -107,45 +109,12 @@ export const GoogleCalendarLayout: React.FC = () => {
     }
   };
 
-  let headerTitle = '';
-  if (viewType === 'month') {
-    headerTitle = `${currentYear}년 ${currentMonth + 1}월`;
-  } else if (viewType === 'week') {
-    const dayOfWeek = currentDateObj.getDay();
-    const sunday = new Date(currentDateObj);
-    sunday.setDate(sunday.getDate() - dayOfWeek);
-    const saturday = new Date(sunday);
-    saturday.setDate(saturday.getDate() + 6);
-    headerTitle = `${sunday.getMonth() + 1}월 ${sunday.getDate()}일 ~ ${saturday.getMonth() + 1}월 ${saturday.getDate()}일`;
-  } else if (viewType === 'threeDay') {
-    const endObj = new Date(currentDateObj);
-    endObj.setDate(endObj.getDate() + 2);
-    headerTitle = `${currentDateObj.getMonth() + 1}월 ${currentDateObj.getDate()}일 ~ ${endObj.getMonth() + 1}월 ${endObj.getDate()}일`;
-  } else if (viewType === 'schedule') {
-    const dates = filteredItems.map((i) => i.dueDate).filter(Boolean).sort();
-    if (dates.length > 0) {
-      const minDate = new Date(dates[0]);
-      const maxDate = new Date(dates[dates.length - 1]);
-      if (!isNaN(minDate.getTime()) && !isNaN(maxDate.getTime())) {
-        const minStr = `${minDate.getFullYear()}년 ${minDate.getMonth() + 1}월`;
-        const maxStr = `${maxDate.getFullYear()}년 ${maxDate.getMonth() + 1}월`;
-        headerTitle = minStr === maxStr ? minStr : `${minStr} ~ ${maxStr}`;
-      } else {
-        headerTitle = `${currentYear}년 ${currentMonth + 1}월`;
-      }
-    } else {
-      headerTitle = `${currentYear}년 ${currentMonth + 1}월`;
-    }
-  } else {
-    headerTitle = !isNaN(currentDateObj.getTime())
-      ? currentDateObj.toLocaleDateString('ko-KR', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          weekday: 'short',
-        })
-      : selectedCalendarDate;
-  }
+  const headerTitle = getGoogleCalendarHeaderTitle(
+    viewType,
+    currentDateObj,
+    selectedCalendarDate,
+    filteredItems
+  );
 
   const selectedCategory = selectedScheduleItem
     ? categoryItems.find((c) => c.id === selectedScheduleItem.categoryId)
@@ -164,11 +133,16 @@ export const GoogleCalendarLayout: React.FC = () => {
     });
   };
 
+  const handleHeaderMenuToggle = () => {
+    setIsSidebarOpen((prev) => !prev);
+    setMobilePanel((prev) => (prev === 'sidebar' ? 'month' : 'sidebar'));
+  };
+
   return (
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-white select-none">
       {/* 1. 상단 글로벌 앱 헤더 */}
       <GoogleCalendarHeader
-        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        onToggleSidebar={handleHeaderMenuToggle}
         title={headerTitle}
         onPrev={goToPrev}
         onNext={goToNext}
@@ -177,8 +151,8 @@ export const GoogleCalendarLayout: React.FC = () => {
         onSearchChange={setSearchQuery}
       />
 
-      {/* 2. 본문 영역 */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* 2. 데스크탑 뷰 (1024px 이상): 3패널 상시 분할 레이아웃 */}
+      <div className="hidden lg:flex flex-1 overflow-hidden">
         <GoogleCalendarSidebar
           isOpen={isSidebarOpen}
           currentDateObj={currentDateObj}
@@ -208,11 +182,7 @@ export const GoogleCalendarLayout: React.FC = () => {
             isRightPanelOpen={isRightPanelOpen}
             onToggleRightPanel={(isOpen) => {
               setIsRightPanelOpen(isOpen);
-              if (!isOpen) {
-                setViewType('month');
-              } else {
-                setViewType(sideViewType);
-              }
+              setViewType(isOpen ? sideViewType : 'month');
             }}
             onSelectDate={setDateByString}
             onSelectItem={setSelectedScheduleItem}
@@ -231,7 +201,45 @@ export const GoogleCalendarLayout: React.FC = () => {
         </main>
       </div>
 
-      {/* 3. 일정 상세 팝오버 다이얼로그 */}
+      {/* 3. 모바일 뷰 (1024px 미만): 패널별 단일 뷰 드릴다운 & 탭 전환 */}
+      <div className="flex lg:hidden flex-1 overflow-hidden">
+        <GoogleCalendarMobileView
+          mobilePanel={mobilePanel}
+          onChangePanel={setMobilePanel}
+          currentDateObj={currentDateObj}
+          selectedDate={selectedCalendarDate}
+          items={filteredItems}
+          draggedItem={draggedItem}
+          sideViewType={sideViewType}
+          onSideViewTypeChange={(type) => {
+            setSideViewType(type);
+            setViewType(type);
+          }}
+          onSelectDate={setDateByString}
+          onSelectItem={setSelectedScheduleItem}
+          onCellClick={(date, time, isAllDay) =>
+            handleOpenQuickCreate(date, time || '10:00', isAllDay || false)
+          }
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDropOnDate={handleDropOnDate}
+          onDropOnTime={handleDropOnTime}
+          onDropAllDay={handleDropAllDay}
+          onDragEnd={handleDragEnd}
+          onContextMenu={handleContextMenu}
+          allItems={allItems}
+          topCategories={topCategories}
+          selectedFilterKeys={selectedFilterKeys}
+          onToggleFilterKey={toggleFilterKey}
+          onSelectAll={selectAll}
+          onClearAll={clearAll}
+          showCompleted={showCompleted}
+          onToggleShowCompleted={() => setShowCompleted(!showCompleted)}
+          onBackToWorkspace={() => setAppMode('workspace')}
+        />
+      </div>
+
+      {/* 4. 일정 상세 팝오버 다이얼로그 */}
       {selectedScheduleItem && (
         <GoogleCalendarEventDialog
           item={selectedScheduleItem}
@@ -252,7 +260,7 @@ export const GoogleCalendarLayout: React.FC = () => {
         />
       )}
 
-      {/* 4. 구글 캘린더 빠른 일정 생성 팝오버 */}
+      {/* 5. 구글 캘린더 빠른 일정 생성 팝오버 */}
       <GoogleCalendarQuickCreateModal
         createState={quickCreateState}
         onClose={() =>
@@ -260,7 +268,7 @@ export const GoogleCalendarLayout: React.FC = () => {
         }
       />
 
-      {/* 5. 우클릭 컨텍스트 메뉴 (색상 선택 및 수정/삭제) */}
+      {/* 6. 우클릭 컨텍스트 메뉴 (색상 선택 및 수정/삭제) */}
       <GoogleCalendarContextMenu
         state={contextMenuState}
         onClose={() =>

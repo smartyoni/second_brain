@@ -67,7 +67,7 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
   const isToday = selectedDate === todayStr;
 
   return (
-    <aside className="w-[448px] shrink-0 bg-white border-l border-[#dadce0] flex flex-col h-full select-none shadow-sm z-10">
+    <aside className="w-full lg:w-[448px] shrink-0 bg-white border-l border-[#dadce0] flex flex-col h-full select-none shadow-sm z-10">
       {/* 1. 상단 컨트롤 바 */}
       <div className="p-3 border-b border-[#dadce0] bg-[#fafafa] flex flex-col gap-2 shrink-0">
         {/* 상단 타이틀 및 닫기 */}

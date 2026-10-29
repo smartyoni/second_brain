@@ -146,3 +146,52 @@ export function computeOverlappingLayout(
 
   return result;
 }
+
+export function getGoogleCalendarHeaderTitle(
+  viewType: string,
+  currentDateObj: Date,
+  selectedCalendarDate: string,
+  filteredItems: CalendarScheduleItem[]
+): string {
+  const currentYear = currentDateObj.getFullYear();
+  const currentMonth = currentDateObj.getMonth();
+
+  if (viewType === 'month') {
+    return `${currentYear}년 ${currentMonth + 1}월`;
+  }
+  if (viewType === 'week') {
+    const dayOfWeek = currentDateObj.getDay();
+    const sunday = new Date(currentDateObj);
+    sunday.setDate(sunday.getDate() - dayOfWeek);
+    const saturday = new Date(sunday);
+    saturday.setDate(saturday.getDate() + 6);
+    return `${sunday.getMonth() + 1}월 ${sunday.getDate()}일 ~ ${saturday.getMonth() + 1}월 ${saturday.getDate()}일`;
+  }
+  if (viewType === 'threeDay') {
+    const endObj = new Date(currentDateObj);
+    endObj.setDate(endObj.getDate() + 2);
+    return `${currentDateObj.getMonth() + 1}월 ${currentDateObj.getDate()}일 ~ ${endObj.getMonth() + 1}월 ${endObj.getDate()}일`;
+  }
+  if (viewType === 'schedule') {
+    const dates = filteredItems.map((i) => i.dueDate).filter(Boolean).sort();
+    if (dates.length > 0) {
+      const minDate = new Date(dates[0]);
+      const maxDate = new Date(dates[dates.length - 1]);
+      if (!isNaN(minDate.getTime()) && !isNaN(maxDate.getTime())) {
+        const minStr = `${minDate.getFullYear()}년 ${minDate.getMonth() + 1}월`;
+        const maxStr = `${maxDate.getFullYear()}년 ${maxDate.getMonth() + 1}월`;
+        return minStr === maxStr ? minStr : `${minStr} ~ ${maxStr}`;
+      }
+    }
+    return `${currentYear}년 ${currentMonth + 1}월`;
+  }
+
+  return !isNaN(currentDateObj.getTime())
+    ? currentDateObj.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'short',
+      })
+    : selectedCalendarDate;
+}
