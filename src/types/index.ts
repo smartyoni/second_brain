@@ -205,6 +205,7 @@ export interface WorkspaceContextType {
   // 동기화 상태
   isLoaded?: boolean;
   isSaving?: boolean;
+  syncError?: string | null;
 
   // 액션
   addQuickMemo: (content: string) => void;

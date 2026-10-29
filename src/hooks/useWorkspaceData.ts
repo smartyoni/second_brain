@@ -42,7 +42,7 @@ export const useWorkspaceData = (
     const newItem: CategoryItem = {
       id: `cat-${Date.now()}`,
       topCategoryId,
-      groupId,
+      ...(groupId ? { groupId } : {}),
       name: '새 카테고리',
       itemCount: 0,
       order: categoryItems.length,

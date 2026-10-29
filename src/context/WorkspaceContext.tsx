@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   ActivePanel,
   DetailTab,
@@ -13,6 +13,24 @@ import { useWorkspaceData } from '../hooks/useWorkspaceData';
 import { useQuickMemoData } from '../hooks/useQuickMemoData';
 import { useFirebaseSync } from '../hooks/useFirebaseSync';
 
+const defaultPanelState: PanelDetailState = {
+  topCategoryId: 'top-1',
+  categoryId: null,
+  subItemId: null,
+  activeTab: 'text',
+};
+
+const loadPanelState = (key: string): PanelDetailState => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.topCategoryId) return parsed;
+    }
+  } catch {}
+  return defaultPanelState;
+};
+
 const WorkspaceContext = createContext<WorkspaceContextType | null>(null);
 
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -21,19 +39,25 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [mobileStep, setMobileStep] = useState<MobileStep>('category');
   const [activePanel, setActivePanel] = useState<ActivePanel>('panel-3');
 
-  const [panel3State, setPanel3State] = useState<PanelDetailState>({
-    topCategoryId: 'top-1',
-    categoryId: null,
-    subItemId: null,
-    activeTab: 'text',
-  });
+  const [panel3State, setPanel3State] = useState<PanelDetailState>(() =>
+    loadPanelState('sb_panel3_state_v2')
+  );
 
-  const [panel4State, setPanel4State] = useState<PanelDetailState>({
-    topCategoryId: 'top-1',
-    categoryId: null,
-    subItemId: null,
-    activeTab: 'text',
-  });
+  const [panel4State, setPanel4State] = useState<PanelDetailState>(() =>
+    loadPanelState('sb_panel4_state_v2')
+  );
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sb_panel3_state_v2', JSON.stringify(panel3State));
+    } catch {}
+  }, [panel3State]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sb_panel4_state_v2', JSON.stringify(panel4State));
+    } catch {}
+  }, [panel4State]);
 
   const getCurrentActiveState = () => (activePanel === 'panel-3' ? panel3State : panel4State);
 
@@ -143,7 +167,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   );
 
   // 4. Firebase Firestore 실시간 동기화 및 자동 저장
-  const { isLoaded, isSaving } = useFirebaseSync({
+  const { isLoaded, isSaving, syncError } = useFirebaseSync({
     topCategories,
     setTopCategories,
     categoryGroups,
@@ -204,10 +228,10 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setQuickMemos,
         calendarEvents,
         selectedDetailItem,
-    setSelectedDetailItem,
-    updateCheckItemMemo,
-    updateTextBlockMemo,
-    setCalendarEvents,
+        setSelectedDetailItem,
+        updateCheckItemMemo,
+        updateTextBlockMemo,
+        setCalendarEvents,
         addCalendarEvent,
         updateCalendarEvent,
         deleteCalendarEvent,
@@ -232,6 +256,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         addChecklistGroup,
         isLoaded,
         isSaving,
+        syncError,
       }}
     >
       {children}

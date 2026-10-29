@@ -11,6 +11,7 @@ import {
   QuickMemo,
   CalendarEvent,
 } from '../types';
+import { initialTopCategories } from '../context/initialData';
 
 interface FirebaseSyncProps {
   topCategories: TopCategory[];
@@ -30,6 +31,40 @@ interface FirebaseSyncProps {
   calendarEvents: CalendarEvent[];
   setCalendarEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>>;
 }
+
+interface WorkspacePayload {
+  topCategories: TopCategory[];
+  categoryGroups: CategoryGroup[];
+  categoryItems: CategoryItem[];
+  subItems: SubItem[];
+  textGroups: TextGroupData[];
+  checklistGroups: ChecklistGroupData[];
+  quickMemos: QuickMemo[];
+  calendarEvents: CalendarEvent[];
+}
+
+interface CachedWorkspace {
+  payload: WorkspacePayload;
+  updatedAt: string;
+  pendingSync: boolean;
+}
+
+const CACHE_KEY = 'sb_workspace_cache_v2';
+const LEGACY_KEYS = [
+  'sb_top_categories',
+  'sb_category_groups',
+  'sb_category_items',
+  'sb_sub_items',
+  'sb_text_groups',
+  'sb_checklist_groups',
+  'sb_quick_memos',
+  'sb_calendar_events',
+  'sb_panel3_state',
+  'sb_panel4_state',
+];
+
+const sanitizePayload = (payload: WorkspacePayload): WorkspacePayload =>
+  JSON.parse(JSON.stringify(payload));
 
 export const useFirebaseSync = ({
   topCategories,
@@ -51,15 +86,44 @@ export const useFirebaseSync = ({
 }: FirebaseSyncProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const isRemoteUpdatingRef = useRef(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const lastSyncedJsonRef = useRef<string>('');
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 1. 실시간 동기화 수신 (Firestore -> Local)
+  const applyPayloadToState = (payload: WorkspacePayload) => {
+    setTopCategories(payload.topCategories);
+    setCategoryGroups(payload.categoryGroups);
+    setCategoryItems(payload.categoryItems);
+    setSubItems(payload.subItems);
+    setTextGroups(payload.textGroups);
+    setChecklistGroups(payload.checklistGroups);
+    setQuickMemos(payload.quickMemos);
+    setCalendarEvents(payload.calendarEvents);
+  };
+
+  // 1. 초기 캐시 복원 및 Firestore 실시간 동기화 수신 (Firestore -> Local)
   useEffect(() => {
+    try {
+      LEGACY_KEYS.forEach((key) => localStorage.removeItem(key));
+      const rawCache = localStorage.getItem(CACHE_KEY);
+      if (rawCache) {
+        const cached: CachedWorkspace = JSON.parse(rawCache);
+        if (cached?.payload) {
+          applyPayloadToState(cached.payload);
+          if (!cached.pendingSync) {
+            lastSyncedJsonRef.current = JSON.stringify(cached.payload);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('로컬 캐시 복원 오류:', e);
+    }
+
     const docRef = doc(db, 'workspace', 'main');
     const unsubscribe = onSnapshot(
       docRef,
       (snapshot) => {
+        setSyncError(null);
         if (!snapshot.exists()) {
           setIsLoaded(true);
           return;
@@ -67,26 +131,58 @@ export const useFirebaseSync = ({
 
         const data = snapshot.data();
         if (data) {
-          isRemoteUpdatingRef.current = true;
-          if (Array.isArray(data.topCategories)) setTopCategories(data.topCategories);
-          if (Array.isArray(data.categoryGroups)) setCategoryGroups(data.categoryGroups);
-          if (Array.isArray(data.categoryItems)) setCategoryItems(data.categoryItems);
-          if (Array.isArray(data.subItems)) setSubItems(data.subItems);
-          if (Array.isArray(data.textGroups)) setTextGroups(data.textGroups);
-          if (Array.isArray(data.checklistGroups)) setChecklistGroups(data.checklistGroups);
-          if (Array.isArray(data.quickMemos)) setQuickMemos(data.quickMemos);
-          if (Array.isArray(data.calendarEvents)) setCalendarEvents(data.calendarEvents);
+          const remotePayload = sanitizePayload({
+            topCategories:
+              Array.isArray(data.topCategories) && data.topCategories.length > 0
+                ? data.topCategories
+                : initialTopCategories,
+            categoryGroups: Array.isArray(data.categoryGroups) ? data.categoryGroups : [],
+            categoryItems: Array.isArray(data.categoryItems) ? data.categoryItems : [],
+            subItems: Array.isArray(data.subItems) ? data.subItems : [],
+            textGroups: Array.isArray(data.textGroups) ? data.textGroups : [],
+            checklistGroups: Array.isArray(data.checklistGroups) ? data.checklistGroups : [],
+            quickMemos: Array.isArray(data.quickMemos) ? data.quickMemos : [],
+            calendarEvents: Array.isArray(data.calendarEvents) ? data.calendarEvents : [],
+          });
 
-          // React 상태 업데이트 주기 이후 플래그 해제
-          setTimeout(() => {
-            isRemoteUpdatingRef.current = false;
-          }, 100);
+          const remoteUpdatedAt = typeof data.updatedAt === 'string' ? data.updatedAt : '';
+
+          // 새로고침 직전 미전송(pendingSync) 로컬 변경본이 더 최신이면 로컬 변경본 유지 후 업로드 유도
+          try {
+            const rawCache = localStorage.getItem(CACHE_KEY);
+            if (rawCache) {
+              const cached: CachedWorkspace = JSON.parse(rawCache);
+              if (cached?.pendingSync && cached.updatedAt > remoteUpdatedAt) {
+                lastSyncedJsonRef.current = JSON.stringify(remotePayload);
+                applyPayloadToState(cached.payload);
+                setIsLoaded(true);
+                return;
+              }
+            }
+          } catch {}
+
+          const remoteJson = JSON.stringify(remotePayload);
+          try {
+            localStorage.setItem(
+              CACHE_KEY,
+              JSON.stringify({
+                payload: remotePayload,
+                updatedAt: remoteUpdatedAt || new Date().toISOString(),
+                pendingSync: false,
+              })
+            );
+          } catch {}
+
+          if (remoteJson !== lastSyncedJsonRef.current) {
+            lastSyncedJsonRef.current = remoteJson;
+            applyPayloadToState(remotePayload);
+          }
         }
         setIsLoaded(true);
       },
       (error) => {
         console.error('Firestore onSnapshot 에러:', error);
-        setIsLoaded(true);
+        setSyncError('클라우드 연결 오류');
       }
     );
 
@@ -102,12 +198,40 @@ export const useFirebaseSync = ({
     setCalendarEvents,
   ]);
 
-  // 2. 로컬 변경 사항 Firestore 자동 저장 (Local -> Firestore)
+  // 2. 로컬 변경 사항 즉시 캐시 백업 및 Firestore 자동 저장 (Local -> Firestore)
   useEffect(() => {
-    // 최초 로드 전이거나 Firestore로부터의 수신 업데이트인 경우 저장 건너뜀
-    if (!isLoaded || isRemoteUpdatingRef.current) {
+    if (!isLoaded) {
       return;
     }
+
+    const cleanPayload = sanitizePayload({
+      topCategories,
+      categoryGroups,
+      categoryItems,
+      subItems,
+      textGroups,
+      checklistGroups,
+      quickMemos,
+      calendarEvents,
+    });
+    const currentJson = JSON.stringify(cleanPayload);
+
+    // Firestore에서 방금 수신한 상태와 동일하면 저장 건너뜀
+    if (currentJson === lastSyncedJsonRef.current) {
+      return;
+    }
+
+    const nowIso = new Date().toISOString();
+    try {
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          payload: cleanPayload,
+          updatedAt: nowIso,
+          pendingSync: true,
+        })
+      );
+    } catch {}
 
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -116,28 +240,35 @@ export const useFirebaseSync = ({
     debounceTimerRef.current = setTimeout(async () => {
       try {
         setIsSaving(true);
+        setSyncError(null);
+        lastSyncedJsonRef.current = currentJson;
         const docRef = doc(db, 'workspace', 'main');
         await setDoc(
           docRef,
           {
-            topCategories,
-            categoryGroups,
-            categoryItems,
-            subItems,
-            textGroups,
-            checklistGroups,
-            quickMemos,
-            calendarEvents,
-            updatedAt: new Date().toISOString(),
+            ...cleanPayload,
+            updatedAt: nowIso,
           },
           { merge: true }
         );
+        try {
+          localStorage.setItem(
+            CACHE_KEY,
+            JSON.stringify({
+              payload: cleanPayload,
+              updatedAt: nowIso,
+              pendingSync: false,
+            })
+          );
+        } catch {}
       } catch (error) {
         console.error('Firestore 저장 실패:', error);
+        lastSyncedJsonRef.current = '';
+        setSyncError('저장 실패');
       } finally {
         setIsSaving(false);
       }
-    }, 800);
+    }, 300);
 
     return () => {
       if (debounceTimerRef.current) {
@@ -156,5 +287,5 @@ export const useFirebaseSync = ({
     calendarEvents,
   ]);
 
-  return { isLoaded, isSaving };
+  return { isLoaded, isSaving, syncError };
 };

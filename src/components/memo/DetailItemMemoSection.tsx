@@ -15,7 +15,7 @@ export const DetailItemMemoSection: React.FC = () => {
           선택된 항목이 없습니다.
         </p>
         <p className="text-[11px] text-slate-400 max-w-[240px] leading-relaxed">
-          3번 패널이나 상단 간트차트에서 항목을 클릭하면, 여기에 항목별 세부 메모를 작성할 수 있습니다.
+          3번 패널이나 하단 간트차트에서 항목을 클릭하면, 여기에 항목별 세부 메모를 작성할 수 있습니다.
         </p>
       </div>
     );
