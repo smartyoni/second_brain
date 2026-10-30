@@ -27,40 +27,58 @@ export const useDetailItemMemo = () => {
     }
   }, [selectedDetailItem, checklistGroups, textGroups]);
 
-  // 로컬 텍스트 상태 (빠른 입력 반영용)
+  // 로컬 텍스트 상태 및 수정 모드 상태
   const [localMemo, setLocalMemo] = useState<string>('');
-  const [isSaved, setIsSaved] = useState<boolean>(true);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  // 대상 아이템 변경 시 로컬 메모 갱신
+  // 대상 아이템 변경 시 로컬 메모 갱신 및 수정 모드 종료
   useEffect(() => {
     if (targetItem) {
       setLocalMemo(targetItem.memo);
-      setIsSaved(true);
     } else {
       setLocalMemo('');
     }
+    setIsEditing(false);
   }, [selectedDetailItem?.itemId]);
 
-  // 변경 핸들러
+  // 수정 모드 진입
+  const handleStartEdit = () => {
+    if (!targetItem) return;
+    setLocalMemo(targetItem.memo);
+    setIsEditing(true);
+  };
+
+  // 입력값 변경 핸들러 (로컬 상태만 업데이트)
   const handleMemoChange = (val: string) => {
     setLocalMemo(val);
-    setIsSaved(false);
+  };
 
+  // 저장 핸들러 (저장 버튼 클릭 시 반영)
+  const handleSave = () => {
     if (!selectedDetailItem) return;
     const { type, groupId, itemId } = selectedDetailItem;
 
     if (type === 'checklist') {
-      updateCheckItemMemo(groupId, itemId, val);
+      updateCheckItemMemo(groupId, itemId, localMemo);
     } else {
-      updateTextBlockMemo(groupId, itemId, val);
+      updateTextBlockMemo(groupId, itemId, localMemo);
     }
-    setIsSaved(true);
+    setIsEditing(false);
+  };
+
+  // 취소 핸들러
+  const handleCancel = () => {
+    setLocalMemo(targetItem?.memo || '');
+    setIsEditing(false);
   };
 
   return {
     targetItem,
     localMemo,
-    isSaved,
+    isEditing,
+    handleStartEdit,
     handleMemoChange,
+    handleSave,
+    handleCancel,
   };
 };

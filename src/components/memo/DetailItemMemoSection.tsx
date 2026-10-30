@@ -1,9 +1,18 @@
 import React from 'react';
-import { FileText, CheckCircle2, Calendar, CheckSquare, AlignLeft, Info } from 'lucide-react';
+import { FileText, Calendar, CheckSquare, AlignLeft, Info, Pencil, Check, X } from 'lucide-react';
 import { useDetailItemMemo } from '../../hooks/useDetailItemMemo';
+import { SmartText } from '../shared/SmartText';
 
 export const DetailItemMemoSection: React.FC = () => {
-  const { targetItem, localMemo, isSaved, handleMemoChange } = useDetailItemMemo();
+  const {
+    targetItem,
+    localMemo,
+    isEditing,
+    handleStartEdit,
+    handleMemoChange,
+    handleSave,
+    handleCancel,
+  } = useDetailItemMemo();
 
   if (!targetItem) {
     return (
@@ -22,11 +31,12 @@ export const DetailItemMemoSection: React.FC = () => {
   }
 
   const isChecklist = targetItem.type === 'checklist';
+  const currentText = isEditing ? localMemo : targetItem.memo;
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
       {/* 헤더 바 */}
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-b border-slate-200 shrink-0">
+      <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-b border-slate-200 shrink-0 gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <span
             className={`flex items-center justify-center w-5 h-5 rounded text-white shadow-2xs shrink-0 ${
@@ -56,31 +66,84 @@ export const DetailItemMemoSection: React.FC = () => {
           </div>
         </div>
 
-        {/* 저장 상태 */}
-        <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 shrink-0">
-          <CheckCircle2 className="w-3 h-3" />
-          <span>{isSaved ? '자동 저장됨' : '저장 중...'}</span>
+        {/* 우측: 수정 / 저장·취소 버튼 */}
+        <div className="flex items-center gap-1 shrink-0">
+          {isEditing ? (
+            <>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold text-slate-600 bg-white hover:bg-slate-100 border border-slate-300 transition-colors cursor-pointer"
+              >
+                <X className="w-3 h-3" />
+                <span>취소</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-2xs cursor-pointer"
+              >
+                <Check className="w-3 h-3" />
+                <span>저장</span>
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={handleStartEdit}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 transition-colors shadow-2xs cursor-pointer"
+            >
+              <Pencil className="w-3 h-3 text-slate-500" />
+              <span>수정</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* 텍스트 메모 작성 영역 */}
+      {/* 텍스트 메모 영역 (조회 모드 / 수정 모드) */}
       <div className="flex-1 p-3 flex flex-col min-h-0">
-        <textarea
-          value={localMemo}
-          onChange={(e) => handleMemoChange(e.target.value)}
-          placeholder="이 항목에 대한 추가적인 사항, 진행 내역, 아이디어 등을 자유롭게 기록하세요..."
-          className="w-full flex-1 resize-none text-xs leading-relaxed text-slate-800 placeholder:text-slate-400 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-200 font-sans transition-all"
-        />
+        {isEditing ? (
+          <textarea
+            autoFocus
+            value={localMemo}
+            onChange={(e) => handleMemoChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                handleCancel();
+              } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                handleSave();
+              }
+            }}
+            placeholder="이 항목에 대한 추가적인 사항, 진행 내역, 아이디어 등을 자유롭게 기록하세요..."
+            className="w-full flex-1 resize-none text-xs leading-relaxed text-slate-800 placeholder:text-slate-400 p-2.5 border border-blue-400 ring-1 ring-blue-100 rounded-lg outline-none font-sans transition-all bg-white"
+          />
+        ) : (
+          <div
+            onDoubleClick={handleStartEdit}
+            title="더블클릭하거나 상단 [수정] 버튼을 눌러 편집"
+            className="w-full flex-1 overflow-y-auto text-xs leading-relaxed text-slate-800 p-2.5 border border-slate-200 rounded-lg bg-slate-50/40 select-text whitespace-pre-wrap break-words"
+          >
+            {targetItem.memo ? (
+              <SmartText text={targetItem.memo} />
+            ) : (
+              <span className="text-slate-400">
+                등록된 세부 메모가 없습니다. 우측 상단의 [수정] 버튼을 눌러 메모를 작성하세요.
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 하단 정보 바 */}
       <div className="flex items-center justify-between px-3 py-1 bg-slate-50 border-t border-slate-100 text-[10px] text-slate-400 select-none shrink-0">
         <span className="flex items-center gap-1">
           <Info className="w-3 h-3" />
-          항목별 전속 메모
+          {isEditing ? '편집 중 (Ctrl+Enter 저장 / Esc 취소)' : '항목별 전속 메모'}
         </span>
         <span>
-          {localMemo.length}자 ({localMemo.split('\n').length}줄)
+          {currentText.length}자 ({currentText ? currentText.split('\n').length : 0}줄)
         </span>
       </div>
     </div>
