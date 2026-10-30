@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFullCalendar } from '../../hooks/useFullCalendar';
 import { useCalendarDragDrop } from '../../hooks/useCalendarDragDrop';
 import { GoogleCalendarHeader } from './GoogleCalendarHeader';
@@ -19,7 +19,9 @@ export const GoogleCalendarLayout: React.FC = () => {
   const [sideViewType, setSideViewType] = useState<CalendarSideViewType>('day');
   const [isRightPanelOpen, setIsRightPanelOpen] = useState<boolean>(true);
   const [initialEditDialogMode, setInitialEditDialogMode] = useState<boolean>(false);
-  const [mobilePanel, setMobilePanel] = useState<CalendarMobilePanel>('month');
+  // 모바일(1024px 미만) 진입 시 기본 뷰는 일간뷰(detail + day)
+  const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const [mobilePanel, setMobilePanel] = useState<CalendarMobilePanel>(isMobileInit ? 'detail' : 'month');
 
   // 우클릭 컨텍스트 메뉴 상태
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
@@ -144,6 +146,11 @@ export const GoogleCalendarLayout: React.FC = () => {
       isAllDay,
     });
   };
+
+  useEffect(() => {
+    if (isMobileInit) setViewType('day');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleHeaderMenuToggle = () => {
     setIsSidebarOpen((prev) => !prev);
