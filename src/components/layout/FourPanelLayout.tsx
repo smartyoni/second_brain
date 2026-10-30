@@ -19,7 +19,7 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
 
   return (
     <div className="h-full w-full overflow-hidden bg-slate-300">
-      {/* 1. PC/태블릿 뷰 (1024px 이상): 상시 4패널 고정 분할 */}
+      {/* 1. PC / 태블릿 가로모드 뷰 (1200px 이상 & landscape): 상시 4패널 고정 분할 */}
       <div className="hidden lg:flex h-full w-full divide-x divide-slate-400">
         {/* 1번 패널: 카테고리 패널 (너비 345px) */}
         <div className="w-[345px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
@@ -42,7 +42,7 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
         </div>
       </div>
 
-      {/* 2. 모바일/스마트폰 뷰 (1024px 미만): 1개 패널 순차 드릴다운 네비게이션 */}
+      {/* 2. 모바일 / 태블릿 세로모드 뷰: 1개 패널 순차 드릴다운 네비게이션 */}
       <div className="flex lg:hidden h-full w-full bg-white flex-col overflow-hidden">
         {mobileStep === 'category' && (
           <div className="h-full w-full flex flex-col overflow-hidden">

@@ -163,7 +163,7 @@ export const GoogleCalendarLayout: React.FC = () => {
         onSearchChange={setSearchQuery}
       />
 
-      {/* 2. 데스크탑 뷰 (1024px 이상): 3패널 상시 분할 레이아웃 */}
+      {/* 2. 데스크탑 / 태블릿 가로모드 뷰 (1200px 이상 & landscape): 3패널 상시 분할 레이아웃 */}
       <div className="hidden lg:flex flex-1 overflow-hidden">
         <GoogleCalendarSidebar
           isOpen={isSidebarOpen}
