@@ -21,22 +21,22 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
     <div className="h-full w-full overflow-hidden bg-slate-300">
       {/* 1. PC / 태블릿 가로모드 뷰 (1200px 이상 & landscape): 상시 4패널 고정 분할 */}
       <div className="hidden lg:flex h-full w-full divide-x divide-slate-400">
-        {/* 1번 패널: 카테고리 패널 (기존 345px의 80% 축소: 276px 고정) */}
-        <div className="w-[276px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
+        {/* 1번 패널: 카테고리 패널 (276px의 120% 확장: 331px 고정) */}
+        <div className="w-[331px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
           {panel1}
         </div>
 
-        {/* 2번 패널: 하위 항목 리스트 패널 (1번 패널과 동일한 너비: 276px 고정) */}
+        {/* 2번 패널: 하위 항목 리스트 패널 (너비 276px 고정) */}
         <div className="w-[276px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
           {panel2}
         </div>
 
-        {/* 3번 패널: 메인 상세 내용 (확보된 너비를 3·4번 패널에 동일 부여: flex-1 1:1 분할) */}
+        {/* 3번 패널: 메인 상세 내용 (3·4번 패널 동일 너비: flex-1 1:1 분할) */}
         <div className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden relative">
           {panel3}
         </div>
 
-        {/* 4번 패널: 항목 연동 세부 메모 및 체크리스트 (3번 패널과 동일 너비: flex-1 1:1 분할) */}
+        {/* 4번 패널: 항목 연동 세부 메모 및 체크리스트 (3·4번 패널 동일 너비: flex-1 1:1 분할) */}
         <div className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden">
           {panel4}
         </div>
