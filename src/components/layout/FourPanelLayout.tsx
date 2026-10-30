@@ -98,7 +98,7 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
                 <span>상세 항목으로</span>
               </button>
             </div>
-            {/* 모바일 4번 패널: 항목 세부 메모 및 간트차트 */}
+            {/* 모바일 4번 패널: 항목 세부 메모 및 체크리스트 */}
             <div className="flex-1 overflow-hidden">{panel4}</div>
           </div>
         )}

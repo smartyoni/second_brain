@@ -1,6 +1,6 @@
 import React from 'react';
-import { GanttChartSection } from '../gantt/GanttChartSection';
 import { DetailItemMemoSection } from '../memo/DetailItemMemoSection';
+import { DetailItemChecklistSection } from '../memo/DetailItemChecklistSection';
 
 export const GanttMemoPanel: React.FC = () => {
   return (
@@ -10,9 +10,9 @@ export const GanttMemoPanel: React.FC = () => {
         <DetailItemMemoSection />
       </div>
 
-      {/* 4번 패널 하단: 2번 패널 중분류 전속 간트차트 */}
+      {/* 4번 패널 하단: 3번 패널 항목 전속 세부 체크리스트 */}
       <div className="h-1/2 flex flex-col overflow-hidden min-h-[160px]">
-        <GanttChartSection />
+        <DetailItemChecklistSection />
       </div>
     </div>
   );

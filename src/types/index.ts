@@ -33,6 +33,14 @@ export interface SubItem {
   order: number;
 }
 
+// 4번 패널 하단: 항목별 전속 하위 체크리스트 아이템
+export interface SubCheckItem {
+  id: string;
+  text: string;
+  isCompleted: boolean;
+  order: number;
+}
+
 // 3번 패널: 텍스트 블록
 export interface TextBlock {
   id: string;
@@ -41,7 +49,8 @@ export interface TextBlock {
   dueDate?: string; // YYYY-MM-DD
   dueTime?: string; // HH:mm
   endDate?: string; // YYYY-MM-DD (마감일)
-  memo?: string; // 4번 패널 하단 전속 추가 메모
+  memo?: string; // 4번 패널 상단 전속 추가 메모
+  checklist?: SubCheckItem[]; // 4번 패널 하단 전속 체크리스트
   colorId?: string; // 캘린더 커스텀 색상 ID
 }
 
@@ -64,7 +73,8 @@ export interface CheckItem {
   dueDate?: string; // YYYY-MM-DD
   dueTime?: string; // HH:mm
   endDate?: string; // YYYY-MM-DD (마감일)
-  memo?: string; // 4번 패널 하단 전속 추가 메모
+  memo?: string; // 4번 패널 상단 전속 추가 메모
+  checklist?: SubCheckItem[]; // 4번 패널 하단 전속 체크리스트
   colorId?: string; // 캘린더 커스텀 색상 ID
 }
 
