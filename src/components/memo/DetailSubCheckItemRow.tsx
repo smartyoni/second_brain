@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { CheckSquare, Square } from 'lucide-react';
 import { SubCheckItem } from '../../types';
 import { SmartText } from '../shared/SmartText';
-import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 import { InlineEditableTextarea } from '../shared/InlineEditableTextarea';
 
 interface DetailSubCheckItemRowProps {
   item: SubCheckItem;
   isDragging: boolean;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMove?: (id: string, direction: MoveDirection) => void;
   forceEdit?: boolean;
   onClearForceEdit?: () => void;
   onToggleComplete: (id: string) => void;
@@ -22,6 +25,9 @@ interface DetailSubCheckItemRowProps {
 export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
   item,
   isDragging,
+  canMoveUp = true,
+  canMoveDown = true,
+  onMove,
   forceEdit = false,
   onClearForceEdit,
   onToggleComplete,
@@ -111,6 +117,9 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
           </div>
 
           <ThreeDotMenu
+            onMove={onMove ? (dir) => onMove(item.id, dir) : undefined}
+            canMoveUp={canMoveUp}
+            canMoveDown={canMoveDown}
             onEdit={() => setIsEditing(true)}
             onCopy={() => navigator.clipboard.writeText(item.text)}
             onDelete={() => onDelete(item.id)}

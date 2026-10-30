@@ -6,12 +6,14 @@ import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 import { SchedulePickerPopover } from '../shared/SchedulePickerPopover';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { CheckItemRow } from './CheckItemRow';
+import { getChecklistMoveBounds } from '../../utils/orderUtils';
 
 interface ChecklistGroupSectionProps {
   group: ChecklistGroupData;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveGroup?: (groupId: string, direction: MoveDirection) => void;
+  onMoveItem?: (groupId: string, itemId: string, direction: MoveDirection) => void;
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
@@ -26,6 +28,7 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
   canMoveUp = true,
   canMoveDown = true,
   onMoveGroup,
+  onMoveItem,
   onToggleExpand,
   onUpdateGroupName,
   onDeleteGroup,
@@ -108,17 +111,24 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
       {/* 하위 항목 목록 */}
       {group.isExpanded && (
         <div className="divide-y divide-slate-100">
-          {sortedItems.map((item) => (
-            <CheckItemRow
-              key={item.id}
-              item={item}
-              groupId={group.id}
-              onToggleComplete={onToggleItemComplete}
-              onUpdateText={onUpdateItemText}
-              onDeleteItem={onDeleteItem}
-              onOpenSchedule={(itemId) => setSchedulingItemId(itemId)}
-            />
-          ))}
+          {sortedItems.map((item) => {
+            const { canMoveUp: canItemUp, canMoveDown: canItemDown } =
+              getChecklistMoveBounds(sortedItems, item.id);
+            return (
+              <CheckItemRow
+                key={item.id}
+                item={item}
+                groupId={group.id}
+                canMoveUp={canItemUp}
+                canMoveDown={canItemDown}
+                onMoveItem={onMoveItem}
+                onToggleComplete={onToggleItemComplete}
+                onUpdateText={onUpdateItemText}
+                onDeleteItem={onDeleteItem}
+                onOpenSchedule={(itemId) => setSchedulingItemId(itemId)}
+              />
+            );
+          })}
         </div>
       )}
 

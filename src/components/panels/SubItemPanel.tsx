@@ -4,6 +4,7 @@ import { useDragSort } from '../../hooks/useDragSort';
 import { SubItem } from '../../types';
 import { SubItemHeader } from '../subitem/SubItemHeader';
 import { SubItemRow } from '../subitem/SubItemRow';
+import { moveScopedItem } from '../../utils/orderUtils';
 
 export const SubItemPanel: React.FC = () => {
   const {
@@ -49,12 +50,19 @@ export const SubItemPanel: React.FC = () => {
       />
 
       <div className="flex-1 overflow-y-auto">
-        {currentSubItems.map((item) => (
+        {currentSubItems.map((item, idx) => (
           <SubItemRow
             key={item.id}
             item={item}
             isSelected={item.id === selectedSubItemId}
             isDragged={item.id === draggedId}
+            canMoveUp={idx > 0}
+            canMoveDown={idx < currentSubItems.length - 1}
+            onMove={(dir) =>
+              setSubItems((prev) =>
+                moveScopedItem(prev, (s) => s.categoryId === selectedCategoryId, item.id, dir)
+              )
+            }
             onSelect={() => selectSubItem(item.id)}
             onUpdateTitle={(id, title) =>
               setSubItems((prev) =>

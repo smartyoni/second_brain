@@ -3,6 +3,7 @@ import { useWorkspace } from '../../context/WorkspaceContext';
 import { Calendar, ChevronRight } from 'lucide-react';
 import { InlineEditableText } from '../shared/InlineEditableText';
 import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { moveScopedItem } from '../../utils/orderUtils';
 
 interface QuickMemoMonthListProps {
   selectedCategoryId: string | null;
@@ -55,7 +56,7 @@ export const QuickMemoMonthList: React.FC<QuickMemoMonthListProps> = ({
         </div>
       ) : (
         <div className="divide-y divide-slate-200">
-          {monthCategories.map((month) => {
+          {monthCategories.map((month, idx) => {
             const isSelected = month.id === selectedCategoryId;
             const count = subItems.filter((s) => s.categoryId === month.id).length;
             const isEditing = editingId === month.id;
@@ -114,6 +115,13 @@ export const QuickMemoMonthList: React.FC<QuickMemoMonthListProps> = ({
                 />
 
                 <ThreeDotMenu
+                  canMoveUp={idx > 0}
+                  canMoveDown={idx < monthCategories.length - 1}
+                  onMove={(dir) =>
+                    setCategoryItems((prev) =>
+                      moveScopedItem(prev, (c) => c.topCategoryId === 'top-1', month.id, dir)
+                    )
+                  }
                   onEdit={() => setEditingId(month.id)}
                   onDelete={() => handleDeleteMonth(month.id)}
                   deleteTitle={`'${month.name}' 퀵메모 모음을 삭제하시겠습니까?`}

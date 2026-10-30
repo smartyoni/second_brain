@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { CategoryGroup, CategoryItem } from '../../types';
 import { InlineEditableText } from '../shared/InlineEditableText';
-import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 import { CategoryItemRow } from './CategoryItemRow';
 
 interface CategoryGroupAccordionProps {
@@ -10,6 +10,10 @@ interface CategoryGroupAccordionProps {
   items: CategoryItem[];
   selectedCategoryId: string | null;
   draggedCategoryId: string | null;
+  canMoveGroupUp?: boolean;
+  canMoveGroupDown?: boolean;
+  onMoveGroup?: (groupId: string, direction: MoveDirection) => void;
+  onMoveCategory?: (catId: string, direction: MoveDirection) => void;
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
@@ -28,6 +32,10 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
   items,
   selectedCategoryId,
   draggedCategoryId,
+  canMoveGroupUp = false,
+  canMoveGroupDown = false,
+  onMoveGroup,
+  onMoveCategory,
   onToggleExpand,
   onUpdateGroupName,
   onDeleteGroup,
@@ -90,6 +98,9 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
         </button>
 
         <ThreeDotMenu
+          onMove={onMoveGroup ? (dir) => onMoveGroup(group.id, dir) : undefined}
+          canMoveUp={canMoveGroupUp}
+          canMoveDown={canMoveGroupDown}
           onEdit={() => setIsEditing(true)}
           onDelete={() => onDeleteGroup(group.id)}
           deleteTitle={`'${group.name}' 그룹을 삭제하시겠습니까?`}
@@ -99,12 +110,15 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
       {/* 내부 카테고리 목록 */}
       {group.isExpanded && (
         <div className="bg-white">
-          {items.map((item) => (
+          {items.map((item, idx) => (
             <CategoryItemRow
               key={item.id}
               item={item}
               isSelected={item.id === selectedCategoryId}
               isDragged={item.id === draggedCategoryId}
+              canMoveUp={idx > 0}
+              canMoveDown={idx < items.length - 1}
+              onMove={onMoveCategory ? (dir) => onMoveCategory(item.id, dir) : undefined}
               onSelect={() => onSelectCategory(item.id)}
               onUpdateName={onUpdateCategoryName}
               onDelete={onDeleteCategory}

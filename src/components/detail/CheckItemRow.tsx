@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { Calendar as CalendarIcon, CheckSquare, Square } from 'lucide-react';
 import { CheckItem } from '../../types';
 import { SmartText } from '../shared/SmartText';
-import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 import { InlineEditableTextarea } from '../shared/InlineEditableTextarea';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
 interface CheckItemRowProps {
   item: CheckItem;
   groupId: string;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveItem?: (groupId: string, itemId: string, direction: MoveDirection) => void;
   onToggleComplete: (groupId: string, itemId: string) => void;
   onUpdateText: (groupId: string, itemId: string, text: string) => void;
   onDeleteItem: (groupId: string, itemId: string) => void;
@@ -18,6 +21,9 @@ interface CheckItemRowProps {
 export const CheckItemRow: React.FC<CheckItemRowProps> = ({
   item,
   groupId,
+  canMoveUp = true,
+  canMoveDown = true,
+  onMoveItem,
   onToggleComplete,
   onUpdateText,
   onDeleteItem,
@@ -143,6 +149,9 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
             </button>
 
             <ThreeDotMenu
+              onMove={onMoveItem ? (dir) => onMoveItem(groupId, item.id, dir) : undefined}
+              canMoveUp={canMoveUp}
+              canMoveDown={canMoveDown}
               onEdit={() => setIsEditing(true)}
               onCopy={() => copyToClipboard(item.text)}
               onDelete={() => onDeleteItem(groupId, item.id)}

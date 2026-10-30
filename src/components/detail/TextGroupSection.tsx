@@ -12,6 +12,7 @@ interface TextGroupSectionProps {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveGroup?: (groupId: string, direction: MoveDirection) => void;
+  onMoveBlock?: (groupId: string, blockId: string, direction: MoveDirection) => void;
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
@@ -25,6 +26,7 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
   canMoveUp = true,
   canMoveDown = true,
   onMoveGroup,
+  onMoveBlock,
   onToggleExpand,
   onUpdateGroupName,
   onDeleteGroup,
@@ -97,11 +99,14 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
       {/* 하위 텍스트 블록 목록 */}
       {group.isExpanded && (
         <div className="divide-y divide-slate-100">
-          {group.blocks.map((block) => (
+          {group.blocks.map((block, idx) => (
             <TextBlockRow
               key={block.id}
               block={block}
               groupId={group.id}
+              canMoveUp={idx > 0}
+              canMoveDown={idx < group.blocks.length - 1}
+              onMoveBlock={onMoveBlock}
               onUpdateText={onUpdateBlockText}
               onDeleteBlock={onDeleteBlock}
               onOpenSchedule={(blockId) => setSchedulingBlockId(blockId)}

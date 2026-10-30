@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { SubItem } from '../../types';
 import { InlineEditableText } from '../shared/InlineEditableText';
-import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 
 interface SubItemRowProps {
   item: SubItem;
   isSelected: boolean;
   isDragged: boolean;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMove?: (direction: MoveDirection) => void;
   onSelect: () => void;
   onUpdateTitle: (id: string, newTitle: string) => void;
   onDelete: (id: string) => void;
@@ -20,6 +23,9 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
   item,
   isSelected,
   isDragged,
+  canMoveUp = true,
+  canMoveDown = true,
+  onMove,
   onSelect,
   onUpdateTitle,
   onDelete,
@@ -68,6 +74,9 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
       </div>
 
       <ThreeDotMenu
+        onMove={onMove}
+        canMoveUp={canMoveUp}
+        canMoveDown={canMoveDown}
         onEdit={() => setIsEditing(true)}
         onDelete={() => onDelete(item.id)}
         deleteTitle={`'${item.title}' 문서를 삭제하시겠습니까?`}

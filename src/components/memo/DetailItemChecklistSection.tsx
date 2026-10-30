@@ -3,6 +3,7 @@ import { ListChecks, Plus, Info, CheckSquare } from 'lucide-react';
 import { useDetailItemChecklist } from '../../hooks/useDetailItemChecklist';
 import { useDragSort } from '../../hooks/useDragSort';
 import { DetailSubCheckItemRow } from './DetailSubCheckItemRow';
+import { moveChecklistItem, getChecklistMoveBounds } from '../../utils/orderUtils';
 
 export const DetailItemChecklistSection: React.FC = () => {
   const {
@@ -102,24 +103,35 @@ export const DetailItemChecklistSection: React.FC = () => {
       <div className="flex-1 overflow-y-auto min-h-0 bg-white">
         {checklistItems.length > 0 ? (
           <div className="divide-y divide-slate-100">
-            {checklistItems.map((item) => (
-              <DetailSubCheckItemRow
-                key={item.id}
-                item={item}
-                isDragging={draggedId === item.id}
-                forceEdit={editingItemId === item.id}
-                onClearForceEdit={() => {
-                  if (editingItemId === item.id) setEditingItemId(null);
-                }}
-                onToggleComplete={handleToggleComplete}
-                onUpdateText={handleUpdateText}
-                onDelete={handleDeleteItem}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onDragEnd={handleDragEnd}
-              />
-            ))}
+            {checklistItems.map((item) => {
+              const { canMoveUp, canMoveDown } = getChecklistMoveBounds(
+                checklistItems,
+                item.id
+              );
+              return (
+                <DetailSubCheckItemRow
+                  key={item.id}
+                  item={item}
+                  isDragging={draggedId === item.id}
+                  canMoveUp={canMoveUp}
+                  canMoveDown={canMoveDown}
+                  onMove={(id, dir) =>
+                    handleReorderItems(moveChecklistItem(checklistItems, id, dir))
+                  }
+                  forceEdit={editingItemId === item.id}
+                  onClearForceEdit={() => {
+                    if (editingItemId === item.id) setEditingItemId(null);
+                  }}
+                  onToggleComplete={handleToggleComplete}
+                  onUpdateText={handleUpdateText}
+                  onDelete={handleDeleteItem}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  onDragEnd={handleDragEnd}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="h-full flex flex-col items-center justify-center p-6 text-center text-slate-400">

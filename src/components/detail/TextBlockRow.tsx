@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { TextBlock } from '../../types';
 import { SmartText } from '../shared/SmartText';
-import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 import { InlineEditableTextarea } from '../shared/InlineEditableTextarea';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
 interface TextBlockRowProps {
   block: TextBlock;
   groupId: string;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveBlock?: (groupId: string, blockId: string, direction: MoveDirection) => void;
   onUpdateText: (groupId: string, blockId: string, text: string) => void;
   onDeleteBlock: (groupId: string, blockId: string) => void;
   onOpenSchedule: (blockId: string) => void;
@@ -17,6 +20,9 @@ interface TextBlockRowProps {
 export const TextBlockRow: React.FC<TextBlockRowProps> = ({
   block,
   groupId,
+  canMoveUp = true,
+  canMoveDown = true,
+  onMoveBlock,
   onUpdateText,
   onDeleteBlock,
   onOpenSchedule,
@@ -128,6 +134,9 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
             </button>
 
             <ThreeDotMenu
+              onMove={onMoveBlock ? (dir) => onMoveBlock(groupId, block.id, dir) : undefined}
+              canMoveUp={canMoveUp}
+              canMoveDown={canMoveDown}
               onEdit={() => setIsEditing(true)}
               onCopy={() => copyToClipboard(block.text)}
               onDelete={() => onDeleteBlock(groupId, block.id)}

@@ -9,6 +9,7 @@ import { QuickMemoBar } from '../category/QuickMemoBar';
 import { QuickMemoModal } from '../category/QuickMemoModal';
 import { QuickMemoMonthList } from '../category/QuickMemoMonthList';
 import { QuickMemoSegment } from '../../types';
+import { moveScopedItem } from '../../utils/orderUtils';
 
 export const CategoryPanel: React.FC = () => {
   const {
@@ -111,7 +112,7 @@ export const CategoryPanel: React.FC = () => {
           />
 
           <div className="flex-1 overflow-y-auto">
-            {currentGroups.map((group) => {
+            {currentGroups.map((group, groupIdx) => {
               const groupItems = currentItems.filter((c) => c.groupId === group.id);
               return (
                 <CategoryGroupAccordion
@@ -120,6 +121,23 @@ export const CategoryPanel: React.FC = () => {
                   items={groupItems}
                   selectedCategoryId={selectedCategoryId}
                   draggedCategoryId={draggedCategoryId}
+                  canMoveGroupUp={groupIdx > 0}
+                  canMoveGroupDown={groupIdx < currentGroups.length - 1}
+                  onMoveGroup={(id, dir) =>
+                    setCategoryGroups((prev) =>
+                      moveScopedItem(prev, (g) => g.topCategoryId === currentTopId, id, dir)
+                    )
+                  }
+                  onMoveCategory={(catId, dir) =>
+                    setCategoryItems((prev) =>
+                      moveScopedItem(
+                        prev,
+                        (c) => c.topCategoryId === currentTopId && c.groupId === group.id,
+                        catId,
+                        dir
+                      )
+                    )
+                  }
                   onToggleExpand={(id) =>
                     setCategoryGroups((prev) =>
                       prev.map((g) => (g.id === id ? { ...g, isExpanded: !g.isExpanded } : g))
@@ -168,6 +186,17 @@ export const CategoryPanel: React.FC = () => {
                 items={unclassifiedItems}
                 selectedCategoryId={selectedCategoryId}
                 draggedCategoryId={draggedCategoryId}
+                onMoveGroup={() => {}}
+                onMoveCategory={(catId, dir) =>
+                  setCategoryItems((prev) =>
+                    moveScopedItem(
+                      prev,
+                      (c) => c.topCategoryId === currentTopId && !c.groupId,
+                      catId,
+                      dir
+                    )
+                  )
+                }
                 onToggleExpand={() => {}}
                 onUpdateGroupName={() => {}}
                 onDeleteGroup={() => {}}

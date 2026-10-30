@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { Folder } from 'lucide-react';
 import { CategoryItem } from '../../types';
 import { InlineEditableText } from '../shared/InlineEditableText';
-import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 
 interface CategoryItemRowProps {
   item: CategoryItem;
   isSelected: boolean;
   isDragged: boolean;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMove?: (direction: MoveDirection) => void;
   onSelect: () => void;
   onUpdateName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
@@ -21,6 +24,9 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
   item,
   isSelected,
   isDragged,
+  canMoveUp = true,
+  canMoveDown = true,
+  onMove,
   onSelect,
   onUpdateName,
   onDelete,
@@ -75,6 +81,9 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
       </span>
 
       <ThreeDotMenu
+        onMove={onMove}
+        canMoveUp={canMoveUp}
+        canMoveDown={canMoveDown}
         onEdit={() => setIsEditing(true)}
         onDelete={() => onDelete(item.id)}
         deleteTitle={`'${item.name}' 카테고리를 삭제하시겠습니까?`}
