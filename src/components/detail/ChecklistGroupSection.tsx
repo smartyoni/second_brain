@@ -14,6 +14,8 @@ interface ChecklistGroupSectionProps {
   canMoveDown?: boolean;
   onMoveGroup?: (groupId: string, direction: MoveDirection) => void;
   onMoveItem?: (groupId: string, itemId: string, direction: MoveDirection) => void;
+  groupTargets?: { id: string; name: string }[];
+  onMoveItemToGroup?: (groupId: string, itemId: string, toGroupId: string) => void;
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
@@ -28,7 +30,7 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
   canMoveUp = true,
   canMoveDown = true,
   onMoveGroup,
-  onMoveItem,
+  onMoveItem,  groupTargets,  onMoveItemToGroup,
   onToggleExpand,
   onUpdateGroupName,
   onDeleteGroup,
@@ -122,6 +124,8 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
                 canMoveUp={canItemUp}
                 canMoveDown={canItemDown}
                 onMoveItem={onMoveItem}
+                groupTargets={groupTargets?.filter((g) => g.id !== group.id)}
+                onMoveToGroup={onMoveItemToGroup}
                 onToggleComplete={onToggleItemComplete}
                 onUpdateText={onUpdateItemText}
                 onDeleteItem={onDeleteItem}

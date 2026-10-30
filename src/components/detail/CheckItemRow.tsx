@@ -12,6 +12,8 @@ interface CheckItemRowProps {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveItem?: (groupId: string, itemId: string, direction: MoveDirection) => void;
+  groupTargets?: { id: string; name: string }[];
+  onMoveToGroup?: (groupId: string, itemId: string, toGroupId: string) => void;
   onToggleComplete: (groupId: string, itemId: string) => void;
   onUpdateText: (groupId: string, itemId: string, text: string) => void;
   onDeleteItem: (groupId: string, itemId: string) => void;
@@ -23,7 +25,7 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
   groupId,
   canMoveUp = true,
   canMoveDown = true,
-  onMoveItem,
+  onMoveItem,  groupTargets,  onMoveToGroup,
   onToggleComplete,
   onUpdateText,
   onDeleteItem,
@@ -150,6 +152,8 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
 
             <ThreeDotMenu
               onMove={onMoveItem ? (dir) => onMoveItem(groupId, item.id, dir) : undefined}
+        groupTargets={groupTargets}
+        onMoveToGroup={onMoveToGroup ? (gid) => onMoveToGroup(groupId, item.id, gid) : undefined}
               canMoveUp={canMoveUp}
               canMoveDown={canMoveDown}
               onEdit={() => setIsEditing(true)}

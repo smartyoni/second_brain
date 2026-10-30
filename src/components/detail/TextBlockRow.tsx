@@ -12,6 +12,8 @@ interface TextBlockRowProps {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveBlock?: (groupId: string, blockId: string, direction: MoveDirection) => void;
+  groupTargets?: { id: string; name: string }[];
+  onMoveToGroup?: (groupId: string, blockId: string, toGroupId: string) => void;
   onUpdateText: (groupId: string, blockId: string, text: string) => void;
   onDeleteBlock: (groupId: string, blockId: string) => void;
   onOpenSchedule: (blockId: string) => void;
@@ -22,7 +24,7 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
   groupId,
   canMoveUp = true,
   canMoveDown = true,
-  onMoveBlock,
+  onMoveBlock,  groupTargets,  onMoveToGroup,
   onUpdateText,
   onDeleteBlock,
   onOpenSchedule,
@@ -135,6 +137,8 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
 
             <ThreeDotMenu
               onMove={onMoveBlock ? (dir) => onMoveBlock(groupId, block.id, dir) : undefined}
+        groupTargets={groupTargets}
+        onMoveToGroup={onMoveToGroup ? (gid) => onMoveToGroup(groupId, block.id, gid) : undefined}
               canMoveUp={canMoveUp}
               canMoveDown={canMoveDown}
               onEdit={() => setIsEditing(true)}

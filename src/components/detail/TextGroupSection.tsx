@@ -13,6 +13,8 @@ interface TextGroupSectionProps {
   canMoveDown?: boolean;
   onMoveGroup?: (groupId: string, direction: MoveDirection) => void;
   onMoveBlock?: (groupId: string, blockId: string, direction: MoveDirection) => void;
+  groupTargets?: { id: string; name: string }[];
+  onMoveBlockToGroup?: (groupId: string, blockId: string, toGroupId: string) => void;
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
@@ -26,7 +28,7 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
   canMoveUp = true,
   canMoveDown = true,
   onMoveGroup,
-  onMoveBlock,
+  onMoveBlock,  groupTargets,  onMoveBlockToGroup,
   onToggleExpand,
   onUpdateGroupName,
   onDeleteGroup,
@@ -107,6 +109,8 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
               canMoveUp={idx > 0}
               canMoveDown={idx < group.blocks.length - 1}
               onMoveBlock={onMoveBlock}
+              groupTargets={groupTargets?.filter((g) => g.id !== group.id)}
+              onMoveToGroup={onMoveBlockToGroup}
               onUpdateText={onUpdateBlockText}
               onDeleteBlock={onDeleteBlock}
               onOpenSchedule={(blockId) => setSchedulingBlockId(blockId)}

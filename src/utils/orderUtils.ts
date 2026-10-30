@@ -96,3 +96,47 @@ export const getChecklistMoveBounds = <
     canMoveDown: idx !== -1 && idx < sameSection.length - 1,
   };
 };
+
+/** 텍스트 블록을 다른 그룹의 맨 아래로 이동 */
+export const moveBlockToGroup = <B extends { id: string; order: number }, G extends { id: string; blocks: B[] }>(
+  groups: G[],
+  fromGroupId: string,
+  blockId: string,
+  toGroupId: string
+): G[] => {
+  const block = groups.find((g) => g.id === fromGroupId)?.blocks.find((b) => b.id === blockId);
+  if (!block || fromGroupId === toGroupId) return groups;
+  return groups.map((g) => {
+    if (g.id === fromGroupId) return { ...g, blocks: g.blocks.filter((b) => b.id !== blockId) };
+    if (g.id === toGroupId) {
+      return { ...g, blocks: [...g.blocks, block].map((b, i) => ({ ...b, order: i })) };
+    }
+    return g;
+  });
+};
+
+/** 체크리스트 항목을 다른 그룹으로 이동 (미완료는 완료 항목 앞, 완료는 맨 뒤) */
+export const moveChecklistItemToGroup = <
+  I extends { id: string; order: number; isCompleted: boolean },
+  G extends { id: string; items: I[] }
+>(
+  groups: G[],
+  fromGroupId: string,
+  itemId: string,
+  toGroupId: string
+): G[] => {
+  const item = groups.find((g) => g.id === fromGroupId)?.items.find((i) => i.id === itemId);
+  if (!item || fromGroupId === toGroupId) return groups;
+  return groups.map((g) => {
+    if (g.id === fromGroupId) return { ...g, items: g.items.filter((i) => i.id !== itemId) };
+    if (g.id === toGroupId) {
+      const incomplete = g.items.filter((i) => !i.isCompleted);
+      const completed = g.items.filter((i) => i.isCompleted);
+      const next = item.isCompleted
+        ? [...incomplete, ...completed, item]
+        : [...incomplete, item, ...completed];
+      return { ...g, items: next.map((i, idx) => ({ ...i, order: idx })) };
+    }
+    return g;
+  });
+};

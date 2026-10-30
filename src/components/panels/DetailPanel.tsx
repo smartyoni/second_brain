@@ -9,6 +9,8 @@ import {
   moveScopedItem,
   moveArrayItem,
   moveChecklistItem,
+  moveBlockToGroup,
+  moveChecklistItemToGroup,
 } from '../../utils/orderUtils';
 
 interface DetailPanelProps {
@@ -27,6 +29,8 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
     setChecklistGroups,
     addTextGroup,
     addChecklistGroup,
+    selectedDetailItem,
+    setSelectedDetailItem,
   } = useWorkspace();
 
   const currentState = panelId === 'panel-3' ? panel3State : panel4State;
@@ -38,6 +42,21 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
   const currentChecklistGroups = checklistGroups.filter(
     (g) => g.subItemId === currentState.subItemId
   );
+
+  const textGroupTargets = currentTextGroups.map((g) => ({ id: g.id, name: g.name }));
+  const checklistGroupTargets = currentChecklistGroups.map((g) => ({ id: g.id, name: g.name }));
+
+  // 이동한 항목이 선택 상태라면 새 그룹 기준으로 선택 정보 갱신
+  const keepSelection = (type: 'text' | 'checklist', fromId: string, itemId: string, toId: string) => {
+    if (
+      selectedDetailItem &&
+      selectedDetailItem.type === type &&
+      selectedDetailItem.groupId === fromId &&
+      selectedDetailItem.itemId === itemId
+    ) {
+      setSelectedDetailItem({ ...selectedDetailItem, groupId: toId });
+    }
+  };
 
   const handleAddGroup = () => {
     if (!currentState.subItemId) return;
@@ -73,6 +92,11 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
                     moveScopedItem(prev, (g) => g.subItemId === group.subItemId, id, direction)
                   )
                 }
+                groupTargets={textGroupTargets}
+                onMoveBlockToGroup={(fromId, blockId, toId) => {
+                  setTextGroups((prev) => moveBlockToGroup(prev, fromId, blockId, toId));
+                  keepSelection('text', fromId, blockId, toId);
+                }}
                 onMoveBlock={(gId, bId, direction) =>
                   setTextGroups((prev) =>
                     prev.map((g) =>
@@ -154,6 +178,11 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
                     moveScopedItem(prev, (g) => g.subItemId === group.subItemId, id, direction)
                   )
                 }
+                groupTargets={checklistGroupTargets}
+                onMoveItemToGroup={(fromId, itemId, toId) => {
+                  setChecklistGroups((prev) => moveChecklistItemToGroup(prev, fromId, itemId, toId));
+                  keepSelection('checklist', fromId, itemId, toId);
+                }}
                 onMoveItem={(gId, itemId, direction) =>
                   setChecklistGroups((prev) =>
                     prev.map((g) =>
