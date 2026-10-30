@@ -11,6 +11,7 @@ import {
 import { CalendarScheduleItem } from '../../types';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
+import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarMonthDayAgendaProps {
   selectedDate: string;
@@ -156,7 +157,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
                     schedule.isCompleted ? 'line-through text-[#70757a]' : ''
                   }`}
                 >
-                  {schedule.title}
+                  <SmartText text={schedule.title} />
                 </h3>
 
                 {/* 하단 메타 정보 (시간, 장소, 출처 지식문서) */}
@@ -169,14 +170,18 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
                   {schedule.description && (
                     <div className="flex items-center gap-1.5">
                       <AlignLeft className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
-                      <span className="truncate">{schedule.description}</span>
+                      <span className="truncate">
+                        <SmartText text={schedule.description} />
+                      </span>
                     </div>
                   )}
 
                   {subItem && (
                     <div className="flex items-center gap-1.5">
                       <FileText className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
-                      <span className="truncate">{subItem.title}</span>
+                      <span className="truncate">
+                        <SmartText text={subItem.title} />
+                      </span>
                     </div>
                   )}
                 </div>

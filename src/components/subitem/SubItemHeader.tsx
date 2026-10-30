@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
+import { SmartText } from '../shared/SmartText';
 
 interface SubItemHeaderProps {
   categoryTitle: string;
@@ -15,7 +16,8 @@ export const SubItemHeader: React.FC<SubItemHeaderProps> = ({
   return (
     <div className="h-9 px-2.5 bg-slate-100 border-b border-slate-300 flex items-center justify-between text-xs shrink-0 select-none">
       <span className="font-bold text-slate-800 truncate">
-        {categoryTitle || '카테고리'} <span className="text-slate-600 font-normal">({totalCount})</span>
+        <SmartText text={categoryTitle || '카테고리'} />{' '}
+        <span className="text-slate-600 font-normal">({totalCount})</span>
       </span>
 
       <div className="flex items-center gap-1 shrink-0">

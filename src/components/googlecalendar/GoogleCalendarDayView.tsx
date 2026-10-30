@@ -7,6 +7,7 @@ import {
   formatGoogleHourLabel,
   computeOverlappingLayout,
 } from '../../utils/googleCalendarUtils';
+import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarDayViewProps {
   selectedDate: string;
@@ -113,7 +114,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
                   isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
                 }`}
               >
-                {schedule.title}
+                <SmartText text={schedule.title} />
               </div>
             );
           })}
@@ -207,7 +208,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
                     {schedule.dueTime}
                   </div>
                   <div className="font-semibold truncate text-xs leading-tight">
-                    {schedule.title}
+                    <SmartText text={schedule.title} />
                   </div>
                 </div>
               );

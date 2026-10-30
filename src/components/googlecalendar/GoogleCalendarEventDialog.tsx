@@ -4,6 +4,7 @@ import { CalendarScheduleItem, CategoryItem, SubItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { GoogleCalendarEventEditForm } from './GoogleCalendarEventEditForm';
+import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarEventDialogProps {
   item: CalendarScheduleItem;
@@ -189,7 +190,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                       currentItem.isCompleted ? 'line-through text-[#70757a]' : ''
                     }`}
                   >
-                    {currentItem.title}
+                    <SmartText text={currentItem.title} />
                   </h3>
                   <p className="text-xs text-[#70757a] mt-0.5">
                     {isCalendarOwnEvent
@@ -234,7 +235,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                 <div className="flex items-start gap-4 text-xs text-[#3c4043]">
                   <AlignLeft className="w-4 h-4 text-[#5f6368] shrink-0 mt-0.5" />
                   <div className="flex-1 whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-100">
-                    {currentItem.description || currentItem.memo}
+                    <SmartText text={currentItem.description || currentItem.memo || ''} />
                   </div>
                 </div>
               )}

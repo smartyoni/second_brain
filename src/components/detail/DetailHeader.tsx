@@ -2,6 +2,7 @@ import React from 'react';
 import { SubItem } from '../../types';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { Calendar as CalendarIcon, ArrowRight } from 'lucide-react';
+import { SmartText } from '../shared/SmartText';
 
 interface DetailHeaderProps {
   subItem?: SubItem;
@@ -15,7 +16,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ subItem }) => {
       {/* 좌측: 문서 제목 */}
       <div className="flex items-center gap-2 truncate flex-1 min-w-0 mr-2">
         <h2 className="font-bold text-slate-900 text-sm truncate">
-          {subItem?.title || '선택된 문서 없음'}
+          <SmartText text={subItem?.title || '선택된 문서 없음'} />
         </h2>
       </div>
 

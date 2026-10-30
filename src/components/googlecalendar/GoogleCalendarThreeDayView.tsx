@@ -7,6 +7,7 @@ import {
   formatGoogleHourLabel,
   computeOverlappingLayout,
 } from '../../utils/googleCalendarUtils';
+import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarThreeDayViewProps {
   currentDateObj: Date;
@@ -144,7 +145,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
                         isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
                       }`}
                     >
-                      {schedule.title}
+                      <SmartText text={schedule.title} />
                     </div>
                   );
                 })}
@@ -247,7 +248,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
                           {schedule.dueTime}
                         </div>
                         <div className="font-semibold truncate leading-tight text-[11px]">
-                          {schedule.title}
+                          <SmartText text={schedule.title} />
                         </div>
                       </div>
                     );

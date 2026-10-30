@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SmartText } from './SmartText';
 
 interface InlineEditableTextProps {
   value: string;
@@ -61,5 +62,9 @@ export const InlineEditableText: React.FC<InlineEditableTextProps> = ({
     );
   }
 
-  return <span className={`truncate ${className}`}>{value}</span>;
+  return (
+    <span className={`truncate ${className}`}>
+      <SmartText text={value} />
+    </span>
+  );
 };

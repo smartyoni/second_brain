@@ -7,6 +7,7 @@ import {
   formatGoogleHourLabel,
   computeOverlappingLayout,
 } from '../../utils/googleCalendarUtils';
+import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarWeekViewProps {
   currentDateObj: Date;
@@ -148,7 +149,7 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
                         isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
                       }`}
                     >
-                      {schedule.title}
+                      <SmartText text={schedule.title} />
                     </div>
                   );
                 })}
@@ -252,7 +253,7 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
                           {schedule.dueTime}
                         </div>
                         <div className="font-semibold truncate leading-tight text-[10px]">
-                          {schedule.title}
+                          <SmartText text={schedule.title} />
                         </div>
                       </div>
                     );

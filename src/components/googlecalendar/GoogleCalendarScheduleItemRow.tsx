@@ -2,6 +2,7 @@ import React from 'react';
 import { CalendarScheduleItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
 import { Check } from 'lucide-react';
+import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarScheduleItemRowProps {
   item: CalendarScheduleItem;
@@ -44,7 +45,7 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
           item.isCompleted ? 'line-through text-slate-400' : ''
         }`}
       >
-        {item.title}
+        <SmartText text={item.title} />
       </span>
       {/* 완료 상태 아이콘 */}
       {item.isCompleted && (

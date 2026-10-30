@@ -7,8 +7,9 @@ export interface SmartTextToken {
 export function parseSmartText(text: string): SmartTextToken[] {
   if (!text) return [];
 
-  // URL 및 휴대폰 번호 통합 정규식
-  const pattern = /(https?:\/\/[^\s]+)|(010[-.\s]?[0-9]{4}[-.\s]?[0-9]{4}|010[0-9]{8})/g;
+  // URL(http/https/www) 및 전화번호(휴대폰 01X, 일반전화 02/0XX, 070/050 등) 통합 정규식
+  const pattern =
+    /(https?:\/\/[^\s]+|www\.[^\s]+)|((?<![0-9-])(?:01[016789][-.\s]?[0-9]{3,4}[-.\s]?[0-9]{4}|01[016789][0-9]{7,8}|0(?:2|[3-6][1-5]|70|50[0-9]?)[-.\s]?[0-9]{3,4}[-.\s]?[0-9]{4})(?![0-9-]))/g;
   const tokens: SmartTextToken[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -23,13 +24,15 @@ export function parseSmartText(text: string): SmartTextToken[] {
 
     if (match[1]) {
       // URL
+      const rawUrl = match[1];
+      const href = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
       tokens.push({
         type: 'url',
-        content: match[1],
-        href: match[1],
+        content: rawUrl,
+        href,
       });
     } else if (match[2]) {
-      // 휴대폰 번호
+      // 전화번호 -> SMS 연결
       const cleanPhone = match[2].replace(/[^0-9]/g, '');
       tokens.push({
         type: 'phone',

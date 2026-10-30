@@ -1,6 +1,7 @@
 import React from 'react';
 import { CalendarScheduleItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
+import { SmartText } from '../shared/SmartText';
 
 export interface GoogleCalendarMonthGridProps {
   currentDateObj: Date;
@@ -179,7 +180,9 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
                       }`}
                       title={`${schedule.title} (${schedule.dueTime || '종일'})`}
                     >
-                      <span className="truncate">{schedule.title}</span>
+                      <span className="truncate">
+                        <SmartText text={schedule.title} />
+                      </span>
                     </div>
                   );
                 })}

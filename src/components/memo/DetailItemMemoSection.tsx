@@ -48,7 +48,7 @@ export const DetailItemMemoSection: React.FC = () => {
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] font-bold text-slate-800 truncate">
-                {targetItem.title || '(무제 항목)'}
+                <SmartText text={targetItem.title || '(무제 항목)'} />
               </span>
               <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 font-medium shrink-0">
                 {isChecklist ? '체크 항목' : '텍스트 블록'}

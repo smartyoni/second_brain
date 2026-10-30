@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
 import { GanttBarData } from '../../hooks/useGanttChart';
+import { SmartText } from '../shared/SmartText';
 
 interface GanttBarItemProps {
   bar: GanttBarData;
@@ -62,7 +63,7 @@ export const GanttBarItem: React.FC<GanttBarItemProps> = ({
         <Circle className="w-2.5 h-2.5 shrink-0 opacity-75" />
       )}
       <span className="text-[11px] truncate leading-none">
-        {item.title || '(무제 항목)'}
+        <SmartText text={item.title || '(무제 항목)'} />
       </span>
       {!isMilestone && (
         <span className="text-[9px] opacity-80 shrink-0 hidden sm:inline ml-auto">
