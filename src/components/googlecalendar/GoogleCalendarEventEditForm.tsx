@@ -8,6 +8,7 @@ interface GoogleCalendarEventEditFormProps {
   onSave: (updates: {
     title: string;
     dueDate: string;
+    endDate?: string;
     dueTime?: string;
     categoryId: string;
     description?: string;
@@ -20,10 +21,12 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
   onSave,
   onCancel,
 }) => {
+  const isCalendarOwnEvent = item.sourceType === 'calendar';
   const currentColor = getGoogleCategoryColor(item.categoryId);
 
   const [editTitle, setEditTitle] = useState(item.title);
   const [editDate, setEditDate] = useState(item.dueDate || '');
+  const [editEndDate, setEditEndDate] = useState(item.endDate || '');
   const [editTime, setEditTime] = useState(item.dueTime || '10:00');
   const [editIsAllDay, setEditIsAllDay] = useState(!item.dueTime);
   const [editColorId, setEditColorId] = useState(
@@ -31,17 +34,23 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
       ? item.categoryId
       : currentColor.id
   );
-  const [editDescription, setEditDescription] = useState(item.description || '');
+  const [editDescription, setEditDescription] = useState(
+    item.description ?? item.memo ?? ''
+  );
 
   const activeColor = getGoogleCategoryColor(editColorId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editTitle.trim()) return;
+    if (!editTitle.trim() || !editDate) return;
+
+    const validEndDate =
+      editEndDate && editEndDate >= editDate ? editEndDate : undefined;
 
     onSave({
       title: editTitle.trim(),
       dueDate: editDate,
+      endDate: validEndDate,
       dueTime: editIsAllDay ? undefined : editTime,
       categoryId: editColorId,
       description: editDescription.trim() || undefined,
@@ -64,13 +73,23 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
 
       {/* 날짜 및 시간 선택 */}
       <div className="space-y-2 bg-[#f8f9fa] p-3 rounded-lg border border-[#dadce0]">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <CalendarIcon className="w-4 h-4 text-[#5f6368] shrink-0" />
           <input
             type="date"
             value={editDate}
             onChange={(e) => setEditDate(e.target.value)}
-            className="px-2.5 py-1.5 border border-[#dadce0] rounded-md text-xs bg-white text-[#3c4043] outline-none focus:border-[#1a73e8]"
+            className="px-2 py-1.5 border border-[#dadce0] rounded-md text-xs bg-white text-[#3c4043] outline-none focus:border-[#1a73e8]"
+            title="시작일"
+          />
+          <span className="text-[#5f6368]">~</span>
+          <input
+            type="date"
+            value={editEndDate}
+            min={editDate}
+            onChange={(e) => setEditEndDate(e.target.value)}
+            className="px-2 py-1.5 border border-[#dadce0] rounded-md text-xs bg-white text-[#3c4043] outline-none focus:border-[#1a73e8]"
+            title="종료일 (선택)"
           />
           <label className="flex items-center gap-1.5 text-xs text-[#3c4043] cursor-pointer ml-auto select-none">
             <input
@@ -96,33 +115,35 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
         )}
       </div>
 
-      {/* 구글 캘린더 색상 라벨 팔레트 */}
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5 text-xs text-[#5f6368] font-medium">
-          <Palette className="w-3.5 h-3.5 text-[#1a73e8]" />
-          <span>
-            색상 라벨: <strong className="text-[#3c4043]">{activeColor.name}</strong>
-          </span>
+      {/* 구글 캘린더 색상 라벨 팔레트 (캘린더 자체 일정인 경우) */}
+      {isCalendarOwnEvent && (
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 text-xs text-[#5f6368] font-medium">
+            <Palette className="w-3.5 h-3.5 text-[#1a73e8]" />
+            <span>
+              색상 라벨: <strong className="text-[#3c4043]">{activeColor.name}</strong>
+            </span>
+          </div>
+          <div className="flex items-center flex-wrap gap-2 p-2.5 bg-[#f8f9fa] rounded-lg border border-[#dadce0]">
+            {GOOGLE_COLORS.map((c) => {
+              const isSelected = editColorId === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setEditColorId(c.id)}
+                  className={`w-6 h-6 rounded-full ${c.bg} flex items-center justify-center transition-all cursor-pointer hover:scale-110 shadow-2xs ${
+                    isSelected ? 'ring-2 ring-offset-2 ring-[#1a73e8] scale-110' : 'hover:opacity-90'
+                  }`}
+                  title={c.name}
+                >
+                  {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div className="flex items-center flex-wrap gap-2 p-2.5 bg-[#f8f9fa] rounded-lg border border-[#dadce0]">
-          {GOOGLE_COLORS.map((c) => {
-            const isSelected = editColorId === c.id;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setEditColorId(c.id)}
-                className={`w-6 h-6 rounded-full ${c.bg} flex items-center justify-center transition-all cursor-pointer hover:scale-110 shadow-2xs ${
-                  isSelected ? 'ring-2 ring-offset-2 ring-[#1a73e8] scale-110' : 'hover:opacity-90'
-                }`}
-                title={c.name}
-              >
-                {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      )}
 
       {/* 메모(설명) */}
       <div>

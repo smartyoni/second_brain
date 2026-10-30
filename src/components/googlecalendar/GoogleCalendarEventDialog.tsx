@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  ExternalLink,
-  CheckCircle,
-  Clock,
-  FileText,
-  Trash2,
-  AlignLeft,
-  Pencil,
-  Palette,
-} from 'lucide-react';
+import { X, ExternalLink, CheckCircle, Clock, FileText, Trash2, AlignLeft, Pencil, Palette } from 'lucide-react';
 import { CalendarScheduleItem, CategoryItem, SubItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
 import { useWorkspace } from '../../context/WorkspaceContext';
@@ -38,28 +28,38 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     deleteCalendarEvent,
     toggleCalendarEventCompleted,
     updateCalendarEvent,
+    setChecklistGroups,
+    setTextGroups,
+    updateCheckItemDueDate,
+    updateTextBlockDueDate,
+    getAllScheduleItems,
   } = useWorkspace();
 
-  const isCalendarOwnEvent = item.sourceType === 'calendar';
-  const activeColor = getGoogleCategoryColor(item.categoryId);
+  const currentItem =
+    getAllScheduleItems().find((i) => i.id === item.id && i.sourceType === item.sourceType) || item;
 
-  // 수정 모드 상태
+  const isCalendarOwnEvent = currentItem.sourceType === 'calendar';
+  const activeColor = getGoogleCategoryColor(currentItem.categoryId);
   const [isEditing, setIsEditing] = useState(initialEditMode);
 
   useEffect(() => {
     setIsEditing(initialEditMode);
-  }, [item, initialEditMode]);
+  }, [item.id, initialEditMode]);
 
   const handleDelete = () => {
     if (isCalendarOwnEvent) {
-      deleteCalendarEvent(item.id);
-      onClose();
+      deleteCalendarEvent(currentItem.id);
+    } else if (currentItem.sourceType === 'checklist') {
+      updateCheckItemDueDate(currentItem.groupId, currentItem.id, undefined, undefined, undefined);
+    } else if (currentItem.sourceType === 'text') {
+      updateTextBlockDueDate(currentItem.groupId, currentItem.id, undefined, undefined, undefined);
     }
+    onClose();
   };
 
   const handleToggle = () => {
     if (isCalendarOwnEvent) {
-      toggleCalendarEventCompleted(item.id);
+      toggleCalendarEventCompleted(currentItem.id);
     } else {
       onToggleComplete();
     }
@@ -68,12 +68,44 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
   const handleSaveForm = (updates: {
     title: string;
     dueDate: string;
+    endDate?: string;
     dueTime?: string;
     categoryId: string;
     description?: string;
   }) => {
     if (isCalendarOwnEvent) {
-      updateCalendarEvent(item.id, updates);
+      updateCalendarEvent(currentItem.id, updates);
+    } else if (currentItem.sourceType === 'checklist') {
+      setChecklistGroups((prev) =>
+        prev.map((g) =>
+          g.id === currentItem.groupId
+            ? {
+                ...g,
+                items: g.items.map((i) =>
+                  i.id === currentItem.id
+                    ? { ...i, text: updates.title, dueDate: updates.dueDate, endDate: updates.endDate, dueTime: updates.dueTime, memo: updates.description }
+                    : i
+                ),
+              }
+            : g
+        )
+      );
+    } else if (currentItem.sourceType === 'text') {
+      setTextGroups((prev) =>
+        prev.map((g) =>
+          g.id === currentItem.groupId
+            ? {
+                ...g,
+                blocks: g.blocks.map((b) => {
+                  if (b.id !== currentItem.id) return b;
+                  const lines = b.text.split('\n');
+                  lines[0] = updates.title;
+                  return { ...b, text: lines.join('\n'), dueDate: updates.dueDate, endDate: updates.endDate, dueTime: updates.dueTime, memo: updates.description };
+                }),
+              }
+            : g
+        )
+      );
     }
     setIsEditing(false);
   };
@@ -108,7 +140,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           </span>
 
           <div className="flex items-center gap-1">
-            {isCalendarOwnEvent && !isEditing && (
+            {!isEditing && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
@@ -119,16 +151,14 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
               </button>
             )}
 
-            {isCalendarOwnEvent && (
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="p-1.5 rounded-full hover:bg-red-50 text-[#5f6368] hover:text-red-600 transition-colors cursor-pointer"
-                title="일정 삭제"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="p-1.5 rounded-full hover:bg-red-50 text-[#5f6368] hover:text-red-600 transition-colors cursor-pointer"
+              title={isCalendarOwnEvent ? '일정 삭제' : '일정 해제 (원본 항목 유지)'}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
 
             <button
               type="button"
@@ -144,7 +174,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
         {/* 본문 (수정 폼 vs 조회 뷰) */}
         {isEditing ? (
           <GoogleCalendarEventEditForm
-            item={item}
+            item={currentItem}
             onSave={handleSaveForm}
             onCancel={() => setIsEditing(false)}
           />
@@ -156,15 +186,15 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                 <div className="flex-1 min-w-0">
                   <h3
                     className={`text-lg font-normal text-[#3c4043] leading-snug break-words ${
-                      item.isCompleted ? 'line-through text-[#70757a]' : ''
+                      currentItem.isCompleted ? 'line-through text-[#70757a]' : ''
                     }`}
                   >
-                    {item.title}
+                    {currentItem.title}
                   </h3>
                   <p className="text-xs text-[#70757a] mt-0.5">
                     {isCalendarOwnEvent
                       ? '캘린더 일정'
-                      : item.sourceType === 'checklist'
+                      : currentItem.sourceType === 'checklist'
                       ? '체크리스트 할 일'
                       : '텍스트 메모'}
                   </p>
@@ -175,7 +205,9 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
               <div className="flex items-center gap-4 text-xs text-[#3c4043]">
                 <Clock className="w-4 h-4 text-[#5f6368] shrink-0" />
                 <span>
-                  {item.dueDate} {item.dueTime ? `· ${item.dueTime}` : '· 종일'}
+                  {currentItem.dueDate}
+                  {currentItem.endDate ? ` ~ ${currentItem.endDate}` : ''}{' '}
+                  {currentItem.dueTime ? `· ${currentItem.dueTime}` : '· 종일'}
                 </span>
               </div>
 
@@ -198,11 +230,11 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
               )}
 
               {/* 상세 설명(메모) */}
-              {item.description && (
+              {(currentItem.description || currentItem.memo) && (
                 <div className="flex items-start gap-4 text-xs text-[#3c4043]">
                   <AlignLeft className="w-4 h-4 text-[#5f6368] shrink-0 mt-0.5" />
                   <div className="flex-1 whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-100">
-                    {item.description}
+                    {currentItem.description || currentItem.memo}
                   </div>
                 </div>
               )}
@@ -210,30 +242,34 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
 
             {/* 하단 액션 바 */}
             <div className="px-6 py-3 bg-[#f8f9fa] border-t border-[#dadce0] flex items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={handleToggle}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border cursor-pointer transition-colors ${
-                  item.isCompleted
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                    : 'bg-white text-[#3c4043] border-[#dadce0] hover:bg-[#f1f3f4]'
-                }`}
-              >
-                <CheckCircle className="w-3.5 h-3.5" />
-                <span>{item.isCompleted ? '완료 취소' : '완료 체크'}</span>
-              </button>
+              {currentItem.sourceType !== 'text' && (
+                <button
+                  type="button"
+                  onClick={handleToggle}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border cursor-pointer transition-colors ${
+                    currentItem.isCompleted
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                      : 'bg-white text-[#3c4043] border-[#dadce0] hover:bg-[#f1f3f4]'
+                  }`}
+                >
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  <span>{currentItem.isCompleted ? '완료 취소' : '완료 체크'}</span>
+                </button>
+              )}
 
               <div className="flex items-center gap-2 ml-auto">
-                {isCalendarOwnEvent && (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-md text-xs font-medium transition-colors shadow-2xs cursor-pointer"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                    <span>수정</span>
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-medium transition-colors shadow-2xs cursor-pointer ${
+                    isCalendarOwnEvent
+                      ? 'bg-[#1a73e8] hover:bg-[#1557b0] text-white'
+                      : 'bg-white hover:bg-[#f1f3f4] text-[#3c4043] border border-[#dadce0]'
+                  }`}
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>수정</span>
+                </button>
 
                 {!isCalendarOwnEvent && subItem && (
                   <button
@@ -242,7 +278,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                     className="flex items-center gap-1.5 px-4 py-1.5 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-md text-xs font-medium transition-colors shadow-2xs cursor-pointer"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
-                    <span>세컨드브레인 문서에서 열기</span>
+                    <span>문서에서 열기</span>
                   </button>
                 )}
               </div>
