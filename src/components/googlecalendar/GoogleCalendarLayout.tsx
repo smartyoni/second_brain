@@ -217,7 +217,10 @@ export const GoogleCalendarLayout: React.FC = () => {
       <div className="flex lg:hidden flex-1 overflow-hidden">
         <GoogleCalendarMobileView
           mobilePanel={mobilePanel}
-          onChangePanel={setMobilePanel}
+          onChangePanel={(panel) => {
+            setMobilePanel(panel);
+            setViewType(panel === 'detail' ? sideViewType : 'month');
+          }}
           currentDateObj={currentDateObj}
           selectedDate={selectedCalendarDate}
           items={filteredItems}

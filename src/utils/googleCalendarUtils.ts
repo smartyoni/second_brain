@@ -195,3 +195,52 @@ export function getGoogleCalendarHeaderTitle(
       })
     : selectedCalendarDate;
 }
+
+export function shiftDateBySideView(
+  selectedDate: string,
+  sideViewType: string,
+  direction: 'prev' | 'next'
+): string {
+  const d = new Date(selectedDate);
+  const base = isNaN(d.getTime()) ? new Date() : d;
+  const delta = direction === 'prev' ? -1 : 1;
+
+  if (sideViewType === 'week') {
+    base.setDate(base.getDate() + delta * 7);
+  } else if (sideViewType === 'threeDay') {
+    base.setDate(base.getDate() + delta * 3);
+  } else {
+    base.setDate(base.getDate() + delta * 1);
+  }
+  return base.toISOString().slice(0, 10);
+}
+
+export function getSidePanelDateLabel(
+  sideViewType: string,
+  currentDateObj: Date,
+  selectedDate: string
+): string {
+  const isValid = !isNaN(currentDateObj.getTime());
+  if (!isValid) return selectedDate;
+
+  if (sideViewType === 'week') {
+    const dayOfWeek = currentDateObj.getDay();
+    const sunday = new Date(currentDateObj);
+    sunday.setDate(sunday.getDate() - dayOfWeek);
+    const saturday = new Date(sunday);
+    saturday.setDate(saturday.getDate() + 6);
+    return `${sunday.getMonth() + 1}월 ${sunday.getDate()}일 ~ ${saturday.getMonth() + 1}월 ${saturday.getDate()}일`;
+  }
+
+  if (sideViewType === 'threeDay') {
+    const endObj = new Date(currentDateObj);
+    endObj.setDate(endObj.getDate() + 2);
+    return `${currentDateObj.getMonth() + 1}월 ${currentDateObj.getDate()}일 ~ ${endObj.getMonth() + 1}월 ${endObj.getDate()}일`;
+  }
+
+  return currentDateObj.toLocaleDateString('ko-KR', {
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+  });
+}

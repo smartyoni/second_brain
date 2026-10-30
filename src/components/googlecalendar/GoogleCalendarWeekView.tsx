@@ -66,7 +66,7 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
       {/* 1. 상단 고정: GMT 헤더 + 7개 요일 날짜 컬럼 */}
       <div className="flex border-b border-[#dadce0] bg-white shrink-0">
-        <div className="w-16 shrink-0 flex items-end justify-center pb-2 text-[10px] text-[#70757a] border-r border-[#dadce0]">
+        <div className="w-12 sm:w-16 shrink-0 flex items-end justify-center pb-2 text-[10px] text-[#70757a] border-r border-[#dadce0]">
           GMT+9
         </div>
         <div className="flex-1 grid grid-cols-7 divide-x divide-[#dadce0]">
@@ -106,7 +106,7 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
 
       {/* 2. 상단 고정 종일(All-day) 일정 슬롯 행 */}
       <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[38px]">
-        <div className="w-16 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
+        <div className="w-12 sm:w-16 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
           종일
         </div>
         <div className="flex-1 grid grid-cols-7 divide-x divide-[#dadce0]">
@@ -161,12 +161,12 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
       {/* 3. 스크롤 24시간 타임라인 그리드 */}
       <div className="flex-1 overflow-y-auto flex relative">
         {/* 좌측 시간 라벨 */}
-        <div className="w-16 shrink-0 select-none border-r border-[#dadce0]">
+        <div className="w-12 sm:w-16 shrink-0 select-none border-r border-[#dadce0]">
           {TIMELINE_HOURS.map((hour) => (
             <div
               key={hour}
               style={{ height: `${TIMELINE_HOUR_HEIGHT}px` }}
-              className="text-[10px] text-[#70757a] text-right pr-2 relative -top-2"
+              className="text-[9px] sm:text-[10px] text-[#70757a] text-right pr-1.5 sm:pr-2 relative -top-2"
             >
               {formatGoogleHourLabel(hour)}
             </div>
