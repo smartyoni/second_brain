@@ -6,6 +6,9 @@ import {
   TIMELINE_HOUR_HEIGHT,
   formatGoogleHourLabel,
   computeOverlappingLayout,
+  getTimelineColumnDate,
+  getSlotRealDate,
+  getNowTimelinePosition,
 } from '../../utils/googleCalendarUtils';
 import { SmartText } from '../shared/SmartText';
 
@@ -55,9 +58,8 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
   }
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const redLineTop = (currentMinutes / 60) * TIMELINE_HOUR_HEIGHT;
+  const nowPos = getNowTimelinePosition(TIMELINE_HOUR_HEIGHT);
+  const redLineTop = nowPos.top;
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
@@ -173,8 +175,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
         {/* 3개 컬럼 메인 영역 */}
         <div className="flex-1 grid grid-cols-3 divide-x divide-[#dadce0] relative">
           {threeDays.map((col) => {
-            const isToday = col.dateStr === todayStr;
-            const timedItems = items.filter((i) => i.dueDate === col.dateStr && !!i.dueTime);
+            const timedItems = items.filter((i) => !!i.dueTime && getTimelineColumnDate(i.dueDate, i.dueTime) === col.dateStr);
 
             return (
               <div key={col.dateStr} className="relative h-full">
@@ -185,11 +186,11 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
                     <div
                       key={hour}
                       style={{ height: `${TIMELINE_HOUR_HEIGHT}px` }}
-                      onClick={() => onCellClick(col.dateStr, timeStr, false)}
+                      onClick={() => onCellClick(getSlotRealDate(col.dateStr, hour), timeStr, false)}
                       onDragOver={onDragOver}
                       onDrop={(e) => {
                         e.preventDefault();
-                        onDropOnTime(col.dateStr, timeStr);
+                        onDropOnTime(getSlotRealDate(col.dateStr, hour), timeStr);
                       }}
                       className="border-b border-[#f1f3f4] hover:bg-blue-50/20 transition-colors cursor-pointer"
                       title={`${col.dateStr} ${timeStr} 클릭하여 일정 추가`}
@@ -198,7 +199,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
                 })}
 
                 {/* 현재 시각 빨간선 */}
-                {isToday && (
+                {col.dateStr === nowPos.dateStr && (
                   <div
                     className="absolute left-0 right-0 z-20 pointer-events-none flex items-center"
                     style={{ top: `${redLineTop}px` }}

@@ -42,14 +42,46 @@ export const getGoogleCategoryColor = (categoryId?: string): GoogleColorTheme =>
 };
 
 // 24시간 타임라인 (0시 ~ 23시)
-export const TIMELINE_HOURS = Array.from({ length: 24 }, (_, i) => i);
+// 시간 체계: 당일 07:00 시작 ~ 다음날 06:59 종료 (24시간제)
+export const TIMELINE_START_HOUR = 7;
+export const TIMELINE_HOURS = Array.from({ length: 24 }, (_, i) => (TIMELINE_START_HOUR + i) % 24);
+
+// 날짜 문자열(YYYY-MM-DD)을 일 단위로 이동
+export const shiftDateStr = (dateStr: string, days: number): string => {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+
+// 분(0~1439)을 타임라인 시작(07:00) 기준 오프셋 분으로 변환
+export const toTimelineOffsetMinutes = (minutes: number): number =>
+  (minutes - TIMELINE_START_HOUR * 60 + 1440) % 1440;
+
+// 일정이 표시될 타임라인 컬럼 날짜 (07:00 이전 시각은 전날 컬럼에 표시)
+export const getTimelineColumnDate = (dueDate: string, dueTime?: string): string => {
+  const m = parseTimeToMinutes(dueTime);
+  return m !== null && m !== undefined && m < TIMELINE_START_HOUR * 60 ? shiftDateStr(dueDate, -1) : dueDate;
+};
+
+// 컬럼 날짜 + 슬롯 시각 → 실제 날짜 (07시 이전 슬롯은 다음날)
+export const getSlotRealDate = (columnDate: string, hour: number): string =>
+  hour < TIMELINE_START_HOUR ? shiftDateStr(columnDate, 1) : columnDate;
+
+// 현재 시각의 타임라인 컬럼 날짜와 세로 위치
+export const getNowTimelinePosition = (hourHeight: number = 48) => {
+  const now = new Date();
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const local = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  return {
+    dateStr: mins < TIMELINE_START_HOUR * 60 ? shiftDateStr(local, -1) : local,
+    top: (toTimelineOffsetMinutes(mins) / 60) * hourHeight,
+  };
+};
 export const TIMELINE_HOUR_HEIGHT = 48; // 구글 캘린더 1시간당 48px
 
 export const formatGoogleHourLabel = (hour: number): string => {
-  if (hour === 0) return '';
-  if (hour < 12) return `오전 ${hour}시`;
-  if (hour === 12) return '오후 12시';
-  return `오후 ${hour - 12}시`;
+  return `${String(hour).padStart(2, '0')}:00`;
 };
 
 // 타임라인 오버랩(시간 겹침) 구글 캘린더 스타일 분할 레이아웃 계산
@@ -70,12 +102,16 @@ export function computeOverlappingLayout(
 
   // 1. 분 단위 시작/종료 계산
   const parsed = items.map((item) => {
-    const start = parseTimeToMinutes(item.dueTime) ?? 9 * 60;
-    const end = item.endTime
-      ? parseTimeToMinutes(item.endTime) ?? (start + defaultDurationMinutes)
-      : start + defaultDurationMinutes;
-    // 최소 지속시간 30분
-    const duration = Math.max(30, end - start);
+    const rawStart = parseTimeToMinutes(item.dueTime) ?? 9 * 60;
+    const rawEnd = item.endTime
+      ? parseTimeToMinutes(item.endTime) ?? (rawStart + defaultDurationMinutes)
+      : rawStart + defaultDurationMinutes;
+    // 최소 지속시간 30분 (자정을 넘기는 종료 시각은 +24시간 보정)
+    let span = rawEnd - rawStart;
+    if (item.endTime && span < 0) span += 1440;
+    // 타임라인(07:00 시작) 기준 오프셋 분으로 변환 (컬럼 하단을 넘지 않도록 제한)
+    const start = toTimelineOffsetMinutes(rawStart);
+    const duration = Math.max(30, Math.min(span, 1440 - start));
     return {
       item,
       start,

@@ -6,6 +6,9 @@ import {
   TIMELINE_HOUR_HEIGHT,
   formatGoogleHourLabel,
   computeOverlappingLayout,
+  getTimelineColumnDate,
+  getSlotRealDate,
+  getNowTimelinePosition,
 } from '../../utils/googleCalendarUtils';
 import { SmartText } from '../shared/SmartText';
 
@@ -36,9 +39,11 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
   onDragEnd,
   onContextMenu,
 }) => {
-  const dayItems = items.filter((i) => i.dueDate === selectedDate);
-  const allDayItems = dayItems.filter((i) => !i.dueTime);
-  const timedItems = dayItems.filter((i) => !!i.dueTime);
+  const allDayItems = items.filter((i) => i.dueDate === selectedDate && !i.dueTime);
+  const timedItems = items.filter(
+    (i) => !!i.dueTime && getTimelineColumnDate(i.dueDate, i.dueTime) === selectedDate
+  );
+  const dayItems = [...allDayItems, ...timedItems];
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const isToday = selectedDate === todayStr;
@@ -49,9 +54,9 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
     : '';
   const dayNum = !isNaN(dateObj.getTime()) ? dateObj.getDate() : '';
 
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const redLineTop = (currentMinutes / 60) * TIMELINE_HOUR_HEIGHT;
+  const nowPos = getNowTimelinePosition(TIMELINE_HOUR_HEIGHT);
+  const redLineTop = nowPos.top;
+  const isNowColumn = selectedDate === nowPos.dateStr;
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
@@ -145,11 +150,11 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
               <div
                 key={hour}
                 style={{ height: `${TIMELINE_HOUR_HEIGHT}px` }}
-                onClick={() => onCellClick(selectedDate, timeStr, false)}
+                onClick={() => onCellClick(getSlotRealDate(selectedDate, hour), timeStr, false)}
                 onDragOver={onDragOver}
                 onDrop={(e) => {
                   e.preventDefault();
-                  onDropOnTime(selectedDate, timeStr);
+                  onDropOnTime(getSlotRealDate(selectedDate, hour), timeStr);
                 }}
                 className="border-b border-[#f1f3f4] hover:bg-blue-50/20 transition-colors cursor-pointer"
                 title={`${timeStr} 클릭하여 일정 추가`}
@@ -158,7 +163,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
           })}
 
           {/* 현재 시각 빨간선 */}
-          {isToday && (
+          {isNowColumn && (
             <div
               className="absolute left-0 right-0 z-20 pointer-events-none flex items-center"
               style={{ top: `${redLineTop}px` }}
