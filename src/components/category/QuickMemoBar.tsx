@@ -41,13 +41,13 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
   const isCalendarActive = appMode === 'calendar';
 
   return (
-    <div className="flex items-center justify-between px-3 py-1.5 bg-slate-100 border-b border-slate-300 shrink-0 select-none">
+    <div className="flex items-center justify-between px-2 py-1.5 bg-slate-100 border-b border-slate-300 shrink-0 select-none gap-1">
       {/* 좌측 세그먼트: [ 퀵메모이동 | 퀵메모 | 캘린더 ] 통합 */}
-      <div className="flex items-center bg-slate-200 border border-slate-300 p-0.5 rounded-md text-xs font-medium">
+      <div className="flex items-center bg-slate-200 border border-slate-300 p-0.5 rounded-md text-[11px] font-medium whitespace-nowrap">
         <button
           type="button"
           onClick={handleSelectMove}
-          className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+          className={`px-2 py-1 rounded transition-all cursor-pointer ${
             isMoveActive
               ? 'bg-white text-blue-700 font-bold shadow-xs border border-slate-300'
               : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60'
@@ -60,7 +60,7 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
         <button
           type="button"
           onClick={handleSelectMemo}
-          className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+          className={`px-2 py-1 rounded transition-all cursor-pointer ${
             isMemoActive
               ? 'bg-white text-blue-700 font-bold shadow-xs border border-slate-300'
               : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60'
@@ -73,7 +73,7 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
         <button
           type="button"
           onClick={handleSelectCalendar}
-          className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+          className={`px-2 py-1 rounded transition-all cursor-pointer ${
             isCalendarActive
               ? 'bg-white text-blue-700 font-bold shadow-xs border border-slate-300'
               : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60'
@@ -85,7 +85,7 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
       </div>
 
       {/* 우측: 현재 미분류 퀵메모 개수 표시 */}
-      <div className="text-[11px] text-slate-600 font-medium">
+      <div className="text-[11px] text-slate-600 font-medium whitespace-nowrap shrink-0">
         메모 <span className="text-blue-700 font-bold">{memoCount}</span>건
       </div>
     </div>

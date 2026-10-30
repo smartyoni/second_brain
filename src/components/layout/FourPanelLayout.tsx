@@ -21,23 +21,23 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
     <div className="h-full w-full overflow-hidden bg-slate-300">
       {/* 1. PC / 태블릿 가로모드 뷰 (1200px 이상 & landscape): 상시 4패널 고정 분할 */}
       <div className="hidden lg:flex h-full w-full divide-x divide-slate-400">
-        {/* 1번 패널: 카테고리 패널 (너비 345px) */}
-        <div className="w-[345px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
+        {/* 1번 패널: 카테고리 패널 (기존 345px의 80% 축소: 276px 고정) */}
+        <div className="w-[276px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
           {panel1}
         </div>
 
-        {/* 2번 패널: 하위 항목 리스트 패널 (기존 345px의 130% 확장: 449px) */}
-        <div className="w-[449px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
+        {/* 2번 패널: 하위 항목 리스트 패널 (1번 패널과 동일한 너비: 276px 고정) */}
+        <div className="w-[276px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
           {panel2}
         </div>
 
-        {/* 3번 패널: 메인 상세 내용 (텍스트/체크 - 2번 패널이 늘어난 만큼 가변 flex-1 축소) */}
-        <div className="flex-1 h-full bg-white flex flex-col overflow-hidden relative">
+        {/* 3번 패널: 메인 상세 내용 (확보된 너비를 3·4번 패널에 동일 부여: flex-1 1:1 분할) */}
+        <div className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden relative">
           {panel3}
         </div>
 
-        {/* 4번 패널: 상시 캘린더 패널 (기존의 130% 확장: 468px ~ 494px) */}
-        <div className="w-[468px] xl:w-[494px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
+        {/* 4번 패널: 항목 연동 세부 메모 및 체크리스트 (3번 패널과 동일 너비: flex-1 1:1 분할) */}
+        <div className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden">
           {panel4}
         </div>
       </div>
