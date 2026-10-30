@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   MoreVertical,
-  ArrowUpToLine,
-  ArrowDownToLine,
-  ArrowUp,
-  ArrowDown,
+  ChevronsUp,
+  ChevronsDown,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import { ConfirmPopover } from './ConfirmPopover';
 
@@ -116,7 +116,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                     : 'text-slate-300 cursor-not-allowed'
                 }`}
               >
-                <ArrowUpToLine className="w-3.5 h-3.5" />
+                <ChevronsUp className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
@@ -133,7 +133,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                     : 'text-slate-300 cursor-not-allowed'
                 }`}
               >
-                <ArrowDownToLine className="w-3.5 h-3.5" />
+                <ChevronsDown className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
@@ -150,7 +150,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                     : 'text-slate-300 cursor-not-allowed'
                 }`}
               >
-                <ArrowUp className="w-3.5 h-3.5" />
+                <ChevronUp className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
@@ -167,7 +167,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                     : 'text-slate-300 cursor-not-allowed'
                 }`}
               >
-                <ArrowDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
