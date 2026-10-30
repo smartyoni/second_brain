@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, Power } from 'lucide-react';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
 import { FourPanelLayout } from './components/layout/FourPanelLayout';
 import { CategoryPanel } from './components/panels/CategoryPanel';
@@ -17,58 +18,76 @@ const AppContent: React.FC = () => {
   const lastBackPressRef = useRef<number>(0);
   const toastTimerRef = useRef<number | null>(null);
 
+  const exitApp = () => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    setShowExitToast(false);
+    try {
+      window.close();
+    } catch {}
+    if (window.history.length > 1) {
+      window.history.go(-window.history.length);
+    } else {
+      window.history.back();
+    }
+  };
+
+  const triggerExitConfirm = (fromPopState = false) => {
+    const now = Date.now();
+    if (now - lastBackPressRef.current < 2000) {
+      exitApp();
+      return;
+    }
+
+    lastBackPressRef.current = now;
+    setShowExitToast(true);
+    if (fromPopState) {
+      window.history.pushState({ sbGuard: true }, '');
+    }
+
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => {
+      setShowExitToast(false);
+    }, 2000);
+  };
+
+  const handleBackNavigation = (fromPopState = false) => {
+    const { appMode: curMode, mobileStep: curStep } = navStateRef.current;
+
+    if (curMode === 'calendar') {
+      setAppMode('workspace');
+      if (fromPopState) window.history.pushState({ sbGuard: true }, '');
+      return;
+    }
+
+    if (curStep === 'memo') {
+      setMobileStep('detail');
+      if (fromPopState) window.history.pushState({ sbGuard: true }, '');
+      return;
+    }
+    if (curStep === 'detail') {
+      setMobileStep('subitem');
+      if (fromPopState) window.history.pushState({ sbGuard: true }, '');
+      return;
+    }
+    if (curStep === 'subitem') {
+      setMobileStep('category');
+      if (fromPopState) window.history.pushState({ sbGuard: true }, '');
+      return;
+    }
+
+    // 최상위 패널(1번 카테고리 패널)인 경우 종료 확인 토스트
+    triggerExitConfirm(fromPopState);
+  };
+
   useEffect(() => {
-    // 모바일 하드웨어/브라우저 뒤로가기 방어용 히스토리 엔트리 추가
     window.history.pushState({ sbGuard: true }, '');
 
     const handlePopState = () => {
-      const { appMode: curMode, mobileStep: curStep } = navStateRef.current;
-
-      // 1. 캘린더 모드에서는 지식보관소로 복귀
-      if (curMode === 'calendar') {
-        setAppMode('workspace');
-        window.history.pushState({ sbGuard: true }, '');
-        return;
-      }
-
-      // 2. 지식보관소 하위 패널(4번 -> 3번 -> 2번 -> 1번)에서는 상위 패널로 이동
-      if (curStep === 'memo') {
-        setMobileStep('detail');
-        window.history.pushState({ sbGuard: true }, '');
-        return;
-      }
-      if (curStep === 'detail') {
-        setMobileStep('subitem');
-        window.history.pushState({ sbGuard: true }, '');
-        return;
-      }
-      if (curStep === 'subitem') {
-        setMobileStep('category');
-        window.history.pushState({ sbGuard: true }, '');
-        return;
-      }
-
-      // 3. 최상위 패널(1번 카테고리 패널)에서 뒤로가기 입력 시: 2초 내 재입력 확인
-      const now = Date.now();
-      if (now - lastBackPressRef.current < 2000) {
-        if (toastTimerRef.current) {
-          window.clearTimeout(toastTimerRef.current);
-        }
-        setShowExitToast(false);
-        window.history.back();
-        return;
-      }
-
-      lastBackPressRef.current = now;
-      setShowExitToast(true);
-      window.history.pushState({ sbGuard: true }, '');
-
-      if (toastTimerRef.current) {
-        window.clearTimeout(toastTimerRef.current);
-      }
-      toastTimerRef.current = window.setTimeout(() => {
-        setShowExitToast(false);
-      }, 2000);
+      handleBackNavigation(true);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -78,27 +97,51 @@ const AppContent: React.FC = () => {
         window.clearTimeout(toastTimerRef.current);
       }
     };
-  }, [setAppMode, setMobileStep]);
+  }, []);
 
   return (
-    <>
-      {appMode === 'calendar' ? (
-        <GoogleCalendarLayout />
-      ) : (
-        <FourPanelLayout
-          panel1={<CategoryPanel />}
-          panel2={<SubItemPanel />}
-          panel3={<DetailPanel panelId="panel-3" />}
-          panel4={<GanttMemoPanel />}
-        />
-      )}
+    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-white">
+      {/* 메인 콘텐츠 영역 */}
+      <div className="flex-1 min-h-0 w-full overflow-hidden">
+        {appMode === 'calendar' ? (
+          <GoogleCalendarLayout />
+        ) : (
+          <FourPanelLayout
+            panel1={<CategoryPanel />}
+            panel2={<SubItemPanel />}
+            panel3={<DetailPanel panelId="panel-3" />}
+            panel4={<GanttMemoPanel />}
+          />
+        )}
+      </div>
+
+      {/* 모바일 전용 하단 푸터 (폰 내비게이션 바 가림 방지를 위해 dvh + safe-area 하단 여백 적용) */}
+      <footer className="lg:hidden shrink-0 bg-slate-900 border-t border-slate-700 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+10px)] flex items-center gap-2.5 select-none z-40">
+        <button
+          type="button"
+          onClick={() => handleBackNavigation(false)}
+          className="flex-1 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-700 transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4 text-slate-300" />
+          <span>뒤로가기</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => triggerExitConfirm(false)}
+          className="flex-1 h-9 rounded-lg bg-red-950/80 hover:bg-red-900 active:bg-red-800 text-red-200 text-xs font-semibold flex items-center justify-center gap-1.5 border border-red-800/70 transition-colors cursor-pointer"
+        >
+          <Power className="w-3.5 h-3.5 text-red-400" />
+          <span>앱 종료</span>
+        </button>
+      </footer>
 
       {showExitToast && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 bg-slate-900/90 text-white text-xs font-medium rounded-full shadow-lg pointer-events-none whitespace-nowrap animate-in fade-in duration-150">
-          뒤로가기 버튼을 한 번 더 누르면 앱이 종료됩니다.
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 bg-slate-900/95 text-white text-xs font-medium rounded-full shadow-lg border border-slate-700 pointer-events-none whitespace-nowrap animate-in fade-in duration-150">
+          한 번 더 누르면 앱이 종료됩니다.
         </div>
       )}
-    </>
+    </div>
   );
 };
 

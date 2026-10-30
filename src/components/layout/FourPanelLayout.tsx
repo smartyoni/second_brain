@@ -18,7 +18,7 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
   const { mobileStep, setMobileStep } = useWorkspace();
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-slate-300">
+    <div className="h-full w-full overflow-hidden bg-slate-300">
       {/* 1. PC/태블릿 뷰 (1024px 이상): 상시 4패널 고정 분할 */}
       <div className="hidden lg:flex h-full w-full divide-x divide-slate-400">
         {/* 1번 패널: 카테고리 패널 (너비 345px) */}

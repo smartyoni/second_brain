@@ -151,7 +151,7 @@ export const GoogleCalendarLayout: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-white select-none">
+    <div className="h-full w-full overflow-hidden flex flex-col bg-white select-none">
       {/* 1. 상단 글로벌 앱 헤더 */}
       <GoogleCalendarHeader
         onToggleSidebar={handleHeaderMenuToggle}
