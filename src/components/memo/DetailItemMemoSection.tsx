@@ -117,13 +117,13 @@ export const DetailItemMemoSection: React.FC = () => {
               }
             }}
             placeholder="이 항목에 대한 추가적인 사항, 진행 내역, 아이디어 등을 자유롭게 기록하세요..."
-            className="w-full flex-1 resize-none text-xs leading-relaxed text-slate-800 placeholder:text-slate-400 p-0 m-0 border-0 rounded-none outline-none font-sans transition-all bg-white"
+            className="w-full flex-1 resize-none text-xs leading-relaxed text-slate-800 placeholder:text-slate-400 px-3 py-2 m-0 border-0 rounded-none outline-none font-sans transition-all bg-white"
           />
         ) : (
           <div
             onDoubleClick={handleStartEdit}
             title="더블클릭하거나 상단 [수정] 버튼을 눌러 편집"
-            className="w-full flex-1 overflow-y-auto text-xs leading-relaxed text-slate-800 p-0 m-0 border-0 rounded-none bg-slate-50/40 select-text whitespace-pre-wrap break-words"
+            className="w-full flex-1 overflow-y-auto text-xs leading-relaxed text-slate-800 px-3 py-2 m-0 border-0 rounded-none bg-slate-50/40 select-text whitespace-pre-wrap break-words"
           >
             {targetItem.memo ? (
               <SmartText text={targetItem.memo} />
