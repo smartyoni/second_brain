@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Calendar, FolderKanban } from 'lucide-react';
+import { ArrowLeft, Calendar, FolderKanban, PenLine } from 'lucide-react';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
 import { FourPanelLayout } from './components/layout/FourPanelLayout';
 import { CategoryPanel } from './components/panels/CategoryPanel';
@@ -7,10 +7,12 @@ import { SubItemPanel } from './components/panels/SubItemPanel';
 import { DetailPanel } from './components/panels/DetailPanel';
 import { GanttMemoPanel } from './components/panels/GanttMemoPanel';
 import { GoogleCalendarLayout } from './components/googlecalendar/GoogleCalendarLayout';
+import { QuickMemoModal } from './components/category/QuickMemoModal';
 
 const AppContent: React.FC = () => {
-  const { appMode, setAppMode, mobileStep, setMobileStep } = useWorkspace();
+  const { appMode, setAppMode, mobileStep, setMobileStep, addQuickMemo } = useWorkspace();
   const [showExitToast, setShowExitToast] = useState(false);
+  const [isQuickMemoOpen, setIsQuickMemoOpen] = useState(false);
 
   const navStateRef = useRef({ appMode, mobileStep });
   navStateRef.current = { appMode, mobileStep };
@@ -116,34 +118,49 @@ const AppContent: React.FC = () => {
       </div>
 
       {/* 모바일 전용 하단 푸터 (폰 내비게이션 바 가림 방지를 위해 dvh + safe-area 하단 여백 적용) */}
-      <footer className="lg:hidden shrink-0 bg-slate-900 border-t border-slate-700 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+10px)] flex items-center gap-2.5 select-none z-40">
+      <footer className="lg:hidden shrink-0 bg-slate-900 border-t border-slate-700 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+10px)] flex items-center gap-2 select-none z-40">
         <button
           type="button"
           onClick={() => handleBackNavigation(false)}
-          className="flex-1 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-700 transition-colors cursor-pointer"
+          className="flex-1 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-xs font-semibold flex items-center justify-center gap-1 border border-slate-700 transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4 text-slate-300" />
+          <ArrowLeft className="w-3.5 h-3.5 text-slate-300" />
           <span>뒤로가기</span>
         </button>
 
         <button
           type="button"
+          onClick={() => setIsQuickMemoOpen(true)}
+          className="flex-1 h-9 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-semibold flex items-center justify-center gap-1 border border-emerald-500 transition-colors cursor-pointer"
+        >
+          <PenLine className="w-3.5 h-3.5 text-emerald-100" />
+          <span>퀵메모</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setAppMode(appMode === 'calendar' ? 'workspace' : 'calendar')}
-          className="flex-1 h-9 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 border border-blue-500 transition-colors cursor-pointer"
+          className="flex-1 h-9 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1 border border-blue-500 transition-colors cursor-pointer"
         >
           {appMode === 'calendar' ? (
             <>
-              <FolderKanban className="w-4 h-4 text-blue-100" />
-              <span>지식보관소 전환</span>
+              <FolderKanban className="w-3.5 h-3.5 text-blue-100" />
+              <span>지식보관소</span>
             </>
           ) : (
             <>
-              <Calendar className="w-4 h-4 text-blue-100" />
-              <span>캘린더 전환</span>
+              <Calendar className="w-3.5 h-3.5 text-blue-100" />
+              <span>캘린더</span>
             </>
           )}
         </button>
       </footer>
+
+      <QuickMemoModal
+        isOpen={isQuickMemoOpen}
+        onClose={() => setIsQuickMemoOpen(false)}
+        onSave={addQuickMemo}
+      />
 
       {showExitToast && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 bg-slate-900/95 text-white text-xs font-medium rounded-full shadow-lg border border-slate-700 pointer-events-none whitespace-nowrap animate-in fade-in duration-150">
