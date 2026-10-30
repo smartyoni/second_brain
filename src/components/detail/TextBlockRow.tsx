@@ -145,16 +145,6 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
               onCopy={() => copyToClipboard(block.text)}
               onDelete={() => onDeleteBlock(groupId, block.id)}
               deleteTitle="이 텍스트 블록을 삭제하시겠습니까?"
-              customItems={
-                block.dueDate
-                  ? [
-                      {
-                        label: '📅 캘린더 일정으로 이동',
-                        onClick: () => setSelectedCalendarDate(block.dueDate!),
-                      },
-                    ]
-                  : undefined
-              }
             />
           </div>
         </div>

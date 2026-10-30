@@ -160,16 +160,6 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
               onCopy={() => copyToClipboard(item.text)}
               onDelete={() => onDeleteItem(groupId, item.id)}
               deleteTitle="이 체크 항목을 삭제하시겠습니까?"
-              customItems={
-                item.dueDate
-                  ? [
-                      {
-                        label: '📅 캘린더 일정으로 이동',
-                        onClick: () => setSelectedCalendarDate(item.dueDate!),
-                      },
-                    ]
-                  : undefined
-              }
             />
           </div>
         </div>
