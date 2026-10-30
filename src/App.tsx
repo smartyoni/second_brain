@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Power } from 'lucide-react';
+import { ArrowLeft, Calendar, FolderKanban } from 'lucide-react';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
 import { FourPanelLayout } from './components/layout/FourPanelLayout';
 import { CategoryPanel } from './components/panels/CategoryPanel';
@@ -128,11 +128,20 @@ const AppContent: React.FC = () => {
 
         <button
           type="button"
-          onClick={() => triggerExitConfirm(false)}
-          className="flex-1 h-9 rounded-lg bg-red-950/80 hover:bg-red-900 active:bg-red-800 text-red-200 text-xs font-semibold flex items-center justify-center gap-1.5 border border-red-800/70 transition-colors cursor-pointer"
+          onClick={() => setAppMode(appMode === 'calendar' ? 'workspace' : 'calendar')}
+          className="flex-1 h-9 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 border border-blue-500 transition-colors cursor-pointer"
         >
-          <Power className="w-3.5 h-3.5 text-red-400" />
-          <span>앱 종료</span>
+          {appMode === 'calendar' ? (
+            <>
+              <FolderKanban className="w-4 h-4 text-blue-100" />
+              <span>지식보관소 전환</span>
+            </>
+          ) : (
+            <>
+              <Calendar className="w-4 h-4 text-blue-100" />
+              <span>캘린더 전환</span>
+            </>
+          )}
         </button>
       </footer>
 
