@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Folder } from 'lucide-react';
 import { CategoryItem } from '../../types';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { InlineEditableText } from '../shared/InlineEditableText';
 import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 
@@ -38,6 +39,8 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
   onDragEnd,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const { subItems } = useWorkspace();
+  const subItemCount = subItems.filter((s) => s.categoryId === item.id).length;
 
   return (
     <div
@@ -79,7 +82,7 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
       </div>
 
       <span className="text-[10px] text-slate-400 px-1 shrink-0 font-mono">
-        ({item.itemCount})
+        ({subItemCount})
       </span>
 
       <ThreeDotMenu
