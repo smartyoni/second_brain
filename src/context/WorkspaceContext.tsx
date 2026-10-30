@@ -143,7 +143,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setSelectedCalendarDate,
     calendarEvents,
     selectedDetailItem,
-    setSelectedDetailItem,
+    setSelectedDetailItem: baseSetSelectedDetailItem,
     updateCheckItemMemo,
     updateTextBlockMemo,
     setCalendarEvents,
@@ -165,6 +165,13 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     categoryItems,
     updateActivePanelState
   );
+
+  const setSelectedDetailItem = (item: typeof selectedDetailItem) => {
+    baseSetSelectedDetailItem(item);
+    if (item) {
+      setMobileStep('memo');
+    }
+  };
 
   // 4. Firebase Firestore 실시간 동기화 및 자동 저장
   const { isLoaded, isSaving, syncError } = useFirebaseSync({

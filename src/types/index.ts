@@ -121,7 +121,7 @@ export interface ChecklistGroupData {
 // 4패널 상태 모델
 export type ActivePanel = 'panel-3' | 'panel-4';
 export type DetailTab = 'text' | 'check';
-export type MobileStep = 'category' | 'subitem' | 'detail';
+export type MobileStep = 'category' | 'subitem' | 'detail' | 'memo';
 export type AppMode = 'workspace' | 'calendar';
 
 export interface PanelDetailState {

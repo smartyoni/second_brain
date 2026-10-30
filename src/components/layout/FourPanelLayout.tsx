@@ -84,6 +84,24 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
             <div className="flex-1 overflow-hidden">{panel3}</div>
           </div>
         )}
+
+        {mobileStep === 'memo' && (
+          <div className="h-full w-full flex flex-col overflow-hidden">
+            {/* 뒤로가기 네비게이션 바 */}
+            <div className="h-9 px-3 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
+              <button
+                type="button"
+                onClick={() => setMobileStep('detail')}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-blue-600"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>상세 항목으로</span>
+              </button>
+            </div>
+            {/* 모바일 4번 패널: 항목 세부 메모 및 간트차트 */}
+            <div className="flex-1 overflow-hidden">{panel4}</div>
+          </div>
+        )}
       </div>
     </div>
   );
