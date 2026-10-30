@@ -47,17 +47,17 @@ export const DetailItemChecklistSection: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
-      {/* 상단 헤더 바 */}
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-b border-slate-200 shrink-0 gap-2">
+      {/* 상단 헤더 바 (h-9 높이 + 핑크색 테마) */}
+      <div className="h-9 flex items-center justify-between px-3 bg-pink-100 border-b border-pink-300 shrink-0 gap-2 select-none">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="flex items-center justify-center w-5 h-5 rounded bg-blue-600 text-white shadow-2xs shrink-0">
+          <span className="flex items-center justify-center w-5 h-5 rounded bg-pink-600 text-white shadow-2xs shrink-0">
             <ListChecks className="w-3 h-3" />
           </span>
           <div className="min-w-0 flex items-center gap-1.5">
-            <span className="text-[11px] font-bold text-slate-800 truncate">
+            <span className="text-xs font-bold text-pink-950 truncate">
               체크리스트
             </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold shrink-0">
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-pink-200/80 text-pink-900 font-semibold shrink-0">
               {completedCount}/{totalCount}
             </span>
           </div>
@@ -66,7 +66,7 @@ export const DetailItemChecklistSection: React.FC = () => {
         <button
           type="button"
           onClick={() => handleAddChecklistItem()}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-2xs cursor-pointer shrink-0"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-white bg-pink-600 hover:bg-pink-700 transition-colors shadow-2xs cursor-pointer shrink-0"
         >
           <Plus className="w-3 h-3" />
           <span>항목 추가</span>

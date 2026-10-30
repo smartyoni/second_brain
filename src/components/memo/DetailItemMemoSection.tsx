@@ -35,9 +35,9 @@ export const DetailItemMemoSection: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
-      {/* 헤더 바 */}
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-b border-slate-200 shrink-0 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+      {/* 헤더 바 (3번 패널 헤더와 동일한 h-9 높이 + 녹색 테마) */}
+      <div className="h-9 flex items-center justify-between px-3 bg-emerald-100 border-b border-emerald-300 shrink-0 gap-2 select-none">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <span
             className={`flex items-center justify-center w-5 h-5 rounded text-white shadow-2xs shrink-0 ${
               isChecklist ? 'bg-blue-600' : 'bg-emerald-600'
@@ -45,23 +45,21 @@ export const DetailItemMemoSection: React.FC = () => {
           >
             {isChecklist ? <CheckSquare className="w-3 h-3" /> : <AlignLeft className="w-3 h-3" />}
           </span>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-bold text-slate-800 truncate">
-                <SmartText text={targetItem.title || '(무제 항목)'} />
-              </span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 font-medium shrink-0">
-                {isChecklist ? '체크 항목' : '텍스트 블록'}
-              </span>
-            </div>
+          <div className="min-w-0 flex items-center gap-1.5 flex-1">
+            <span className="text-xs font-bold text-emerald-950 truncate">
+              <SmartText text={targetItem.title || '(무제 항목)'} />
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-200/80 text-emerald-900 font-semibold shrink-0">
+              {isChecklist ? '체크 항목' : '텍스트 블록'}
+            </span>
             {targetItem.dueDate && (
-              <div className="flex items-center gap-1 text-[10px] text-blue-600">
+              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-800 font-medium shrink-0">
                 <Calendar className="w-2.5 h-2.5" />
                 <span>
                   {targetItem.dueDate}
                   {targetItem.endDate ? ` ~ ${targetItem.endDate}` : ''}
                 </span>
-              </div>
+              </span>
             )}
           </div>
         </div>
@@ -73,7 +71,7 @@ export const DetailItemMemoSection: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold text-slate-600 bg-white hover:bg-slate-100 border border-slate-300 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-emerald-300 transition-colors cursor-pointer"
               >
                 <X className="w-3 h-3" />
                 <span>취소</span>
@@ -81,7 +79,7 @@ export const DetailItemMemoSection: React.FC = () => {
               <button
                 type="button"
                 onClick={handleSave}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-2xs cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer"
               >
                 <Check className="w-3 h-3" />
                 <span>저장</span>
@@ -91,9 +89,9 @@ export const DetailItemMemoSection: React.FC = () => {
             <button
               type="button"
               onClick={handleStartEdit}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 transition-colors shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-emerald-900 bg-white/90 hover:bg-white border border-emerald-300 transition-colors shadow-2xs cursor-pointer"
             >
-              <Pencil className="w-3 h-3 text-slate-500" />
+              <Pencil className="w-3 h-3 text-emerald-700" />
               <span>수정</span>
             </button>
           )}
