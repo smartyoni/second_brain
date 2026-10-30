@@ -110,26 +110,40 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
             )}
           </div>
 
-          <ThreeDotMenu
-            onEdit={() => setIsEditing(true)}
-            onCopy={() => copyToClipboard(block.text)}
-            onDelete={() => onDeleteBlock(groupId, block.id)}
-            deleteTitle="이 텍스트 블록을 삭제하시겠습니까?"
-            customItems={[
-              ...(block.dueDate
-                ? [
-                    {
-                      label: '📅 캘린더 일정으로 이동',
-                      onClick: () => setSelectedCalendarDate(block.dueDate!),
-                    },
-                  ]
-                : []),
-              {
-                label: block.dueDate ? '📅 일정 수정/해제' : '📅 일정 등록',
-                onClick: () => onOpenSchedule(block.id),
-              },
-            ]}
-          />
+          <div className="flex items-center gap-0.5 shrink-0">
+            <button
+              type="button"
+              title={block.dueDate ? '일정 수정/해제' : '일정 등록'}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenSchedule(block.id);
+              }}
+              className={`p-0.5 rounded transition-colors cursor-pointer ${
+                block.dueDate
+                  ? 'text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100'
+                  : 'text-slate-400 hover:text-emerald-600 hover:bg-slate-200/60'
+              }`}
+            >
+              <CalendarIcon className="w-3.5 h-3.5" />
+            </button>
+
+            <ThreeDotMenu
+              onEdit={() => setIsEditing(true)}
+              onCopy={() => copyToClipboard(block.text)}
+              onDelete={() => onDeleteBlock(groupId, block.id)}
+              deleteTitle="이 텍스트 블록을 삭제하시겠습니까?"
+              customItems={
+                block.dueDate
+                  ? [
+                      {
+                        label: '📅 캘린더 일정으로 이동',
+                        onClick: () => setSelectedCalendarDate(block.dueDate!),
+                      },
+                    ]
+                  : undefined
+              }
+            />
+          </div>
         </div>
       )}
     </div>

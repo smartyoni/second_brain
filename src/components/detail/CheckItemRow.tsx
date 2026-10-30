@@ -125,26 +125,40 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
             )}
           </div>
 
-          <ThreeDotMenu
-            onEdit={() => setIsEditing(true)}
-            onCopy={() => copyToClipboard(item.text)}
-            onDelete={() => onDeleteItem(groupId, item.id)}
-            deleteTitle="이 체크 항목을 삭제하시겠습니까?"
-            customItems={[
-              ...(item.dueDate
-                ? [
-                    {
-                      label: '📅 캘린더 일정으로 이동',
-                      onClick: () => setSelectedCalendarDate(item.dueDate!),
-                    },
-                  ]
-                : []),
-              {
-                label: item.dueDate ? '📅 일정 수정/해제' : '📅 일정 등록',
-                onClick: () => onOpenSchedule(item.id),
-              },
-            ]}
-          />
+          <div className="flex items-center gap-0.5 shrink-0">
+            <button
+              type="button"
+              title={item.dueDate ? '일정 수정/해제' : '일정 등록'}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenSchedule(item.id);
+              }}
+              className={`p-0.5 rounded transition-colors cursor-pointer ${
+                item.dueDate
+                  ? 'text-blue-600 hover:text-blue-800 hover:bg-blue-100'
+                  : 'text-slate-400 hover:text-blue-600 hover:bg-slate-200/60'
+              }`}
+            >
+              <CalendarIcon className="w-3.5 h-3.5" />
+            </button>
+
+            <ThreeDotMenu
+              onEdit={() => setIsEditing(true)}
+              onCopy={() => copyToClipboard(item.text)}
+              onDelete={() => onDeleteItem(groupId, item.id)}
+              deleteTitle="이 체크 항목을 삭제하시겠습니까?"
+              customItems={
+                item.dueDate
+                  ? [
+                      {
+                        label: '📅 캘린더 일정으로 이동',
+                        onClick: () => setSelectedCalendarDate(item.dueDate!),
+                      },
+                    ]
+                  : undefined
+              }
+            />
+          </div>
         </div>
       )}
     </div>
