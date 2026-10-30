@@ -85,7 +85,7 @@ export const useDetailItemChecklist = () => {
     }
   };
 
-  // 체크리스트 항목 추가
+  // 체크리스트 항목 추가 (미완료 목록 하단, 완료된 항목들 상단에 배치)
   const handleAddChecklistItem = (customText?: string) => {
     if (!targetItem) return;
     const trimmed = customText !== undefined ? customText.trim() : newItemText.trim();
@@ -93,15 +93,20 @@ export const useDetailItemChecklist = () => {
     const textToUse = trimmed || '새 체크 항목';
     const newId = `sci-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
-    updateTargetChecklist((prev) => [
-      ...prev,
-      {
+    updateTargetChecklist((prev) => {
+      const newItem: SubCheckItem = {
         id: newId,
         text: textToUse,
         isCompleted: false,
-        order: prev.length,
-      },
-    ]);
+        order: 0,
+      };
+      const incomplete = prev.filter((item) => !item.isCompleted);
+      const completed = prev.filter((item) => item.isCompleted);
+      return [...incomplete, newItem, ...completed].map((item, idx) => ({
+        ...item,
+        order: idx,
+      }));
+    });
 
     if (isDirectButtonAdd) {
       setEditingItemId(newId);
@@ -110,13 +115,20 @@ export const useDetailItemChecklist = () => {
     }
   };
 
-  // 완료 토글
+  // 완료 토글 (완료 표시된 항목은 즉시 리스트 하단으로 이동)
   const handleToggleComplete = (subId: string) => {
-    updateTargetChecklist((prev) =>
-      prev.map((item) =>
+    updateTargetChecklist((prev) => {
+      const toggled = prev.map((item) =>
         item.id === subId ? { ...item, isCompleted: !item.isCompleted } : item
-      )
-    );
+      );
+      const incomplete = toggled.filter((item) => !item.isCompleted);
+      const completed = toggled.filter((item) => item.isCompleted);
+      return [
+        ...incomplete,
+        ...completed.filter((item) => item.id !== subId),
+        ...completed.filter((item) => item.id === subId),
+      ].map((item, idx) => ({ ...item, order: idx }));
+    });
   };
 
   // 내용 수정
@@ -137,14 +149,22 @@ export const useDetailItemChecklist = () => {
     );
   };
 
-  // 드래그 앤 드롭 순서 변경
+  // 드래그 앤 드롭 순서 변경 (미완료 상단 / 완료 하단 구역 유지)
   const handleReorderItems = (reordered: SubCheckItem[]) => {
-    updateTargetChecklist(() =>
-      reordered.map((item, idx) => ({ ...item, order: idx }))
-    );
+    updateTargetChecklist(() => {
+      const incomplete = reordered.filter((item) => !item.isCompleted);
+      const completed = reordered.filter((item) => item.isCompleted);
+      return [...incomplete, ...completed].map((item, idx) => ({
+        ...item,
+        order: idx,
+      }));
+    });
   };
 
-  const checklistItems = targetItem?.checklist || [];
+  const checklistItems = useMemo(() => {
+    const raw = targetItem?.checklist || [];
+    return [...raw].sort((a, b) => Number(a.isCompleted) - Number(b.isCompleted));
+  }, [targetItem?.checklist]);
   const completedCount = checklistItems.filter((i) => i.isCompleted).length;
   const totalCount = checklistItems.length;
 

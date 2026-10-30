@@ -141,36 +141,39 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
                 }
                 onAddItem={(id) =>
                   setChecklistGroups((prev) =>
-                    prev.map((g) =>
-                      g.id === id
-                        ? {
-                            ...g,
-                            items: [
-                              ...g.items,
-                              {
-                                id: `ci-${Date.now()}`,
-                                text: '새 할 일',
-                                isCompleted: false,
-                                order: g.items.length,
-                              },
-                            ],
-                          }
-                        : g
-                    )
+                    prev.map((g) => {
+                      if (g.id !== id) return g;
+                      const newItem = {
+                        id: `ci-${Date.now()}`,
+                        text: '새 할 일',
+                        isCompleted: false,
+                        order: 0,
+                      };
+                      const incomplete = g.items.filter((i) => !i.isCompleted);
+                      const completed = g.items.filter((i) => i.isCompleted);
+                      const nextItems = [...incomplete, newItem, ...completed].map(
+                        (item, idx) => ({ ...item, order: idx })
+                      );
+                      return { ...g, items: nextItems };
+                    })
                   )
                 }
                 onToggleItemComplete={(gId, itemId) =>
                   setChecklistGroups((prev) =>
-                    prev.map((g) =>
-                      g.id === gId
-                        ? {
-                            ...g,
-                            items: g.items.map((i) =>
-                              i.id === itemId ? { ...i, isCompleted: !i.isCompleted } : i
-                            ),
-                          }
-                        : g
-                    )
+                    prev.map((g) => {
+                      if (g.id !== gId) return g;
+                      const toggled = g.items.map((i) =>
+                        i.id === itemId ? { ...i, isCompleted: !i.isCompleted } : i
+                      );
+                      const incomplete = toggled.filter((i) => !i.isCompleted);
+                      const completed = toggled.filter((i) => i.isCompleted);
+                      const nextItems = [
+                        ...incomplete,
+                        ...completed.filter((i) => i.id !== itemId),
+                        ...completed.filter((i) => i.id === itemId),
+                      ].map((item, idx) => ({ ...item, order: idx }));
+                      return { ...g, items: nextItems };
+                    })
                   )
                 }
                 onUpdateItemText={(gId, itemId, text) =>

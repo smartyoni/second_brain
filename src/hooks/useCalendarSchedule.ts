@@ -120,16 +120,20 @@ export const useCalendarSchedule = (
 
   const toggleCheckItemCompleted = (groupId: string, itemId: string) => {
     setChecklistGroups((prev) =>
-      prev.map((g) =>
-        g.id === groupId
-          ? {
-              ...g,
-              items: g.items.map((i) =>
-                i.id === itemId ? { ...i, isCompleted: !i.isCompleted } : i
-              ),
-            }
-          : g
-      )
+      prev.map((g) => {
+        if (g.id !== groupId) return g;
+        const toggled = g.items.map((i) =>
+          i.id === itemId ? { ...i, isCompleted: !i.isCompleted } : i
+        );
+        const incomplete = toggled.filter((i) => !i.isCompleted);
+        const completed = toggled.filter((i) => i.isCompleted);
+        const nextItems = [
+          ...incomplete,
+          ...completed.filter((i) => i.id !== itemId),
+          ...completed.filter((i) => i.id === itemId),
+        ].map((item, idx) => ({ ...item, order: idx }));
+        return { ...g, items: nextItems };
+      })
     );
   };
 

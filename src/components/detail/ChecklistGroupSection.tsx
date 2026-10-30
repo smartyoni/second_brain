@@ -34,6 +34,10 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
 
   const selectedSchedulingItem = group.items.find((i) => i.id === schedulingItemId);
   const completedCount = group.items.filter((i) => i.isCompleted).length;
+  // 미완료 항목 상단, 완료된 항목 하단 배치 (안정 정렬)
+  const sortedItems = [...group.items].sort(
+    (a, b) => Number(a.isCompleted) - Number(b.isCompleted)
+  );
 
   return (
     <div className="w-full border-b border-slate-300 bg-white">
@@ -94,7 +98,7 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
       {/* 하위 항목 목록 */}
       {group.isExpanded && (
         <div className="divide-y divide-slate-100">
-          {group.items.map((item) => (
+          {sortedItems.map((item) => (
             <CheckItemRow
               key={item.id}
               item={item}
