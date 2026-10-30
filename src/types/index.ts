@@ -42,6 +42,7 @@ export interface TextBlock {
   dueTime?: string; // HH:mm
   endDate?: string; // YYYY-MM-DD (마감일)
   memo?: string; // 4번 패널 하단 전속 추가 메모
+  colorId?: string; // 캘린더 커스텀 색상 ID
 }
 
 // 3번 패널: 텍스트 그룹
@@ -64,6 +65,7 @@ export interface CheckItem {
   dueTime?: string; // HH:mm
   endDate?: string; // YYYY-MM-DD (마감일)
   memo?: string; // 4번 패널 하단 전속 추가 메모
+  colorId?: string; // 캘린더 커스텀 색상 ID
 }
 
 // 캘린더 자체 독립 일정 모델

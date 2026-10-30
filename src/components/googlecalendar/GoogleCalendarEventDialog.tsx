@@ -83,7 +83,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                 ...g,
                 items: g.items.map((i) =>
                   i.id === currentItem.id
-                    ? { ...i, text: updates.title, dueDate: updates.dueDate, endDate: updates.endDate, dueTime: updates.dueTime, memo: updates.description }
+                    ? { ...i, text: updates.title, dueDate: updates.dueDate, endDate: updates.endDate, dueTime: updates.dueTime, memo: updates.description, colorId: updates.categoryId }
                     : i
                 ),
               }
@@ -100,7 +100,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                   if (b.id !== currentItem.id) return b;
                   const lines = b.text.split('\n');
                   lines[0] = updates.title;
-                  return { ...b, text: lines.join('\n'), dueDate: updates.dueDate, endDate: updates.endDate, dueTime: updates.dueTime, memo: updates.description };
+                  return { ...b, text: lines.join('\n'), dueDate: updates.dueDate, endDate: updates.endDate, dueTime: updates.dueTime, memo: updates.description, colorId: updates.categoryId };
                 }),
               }
             : g

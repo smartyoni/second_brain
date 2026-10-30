@@ -6,14 +6,8 @@ import { GoogleCalendarSidebar } from './GoogleCalendarSidebar';
 import { GoogleCalendarMonthView } from './GoogleCalendarMonthView';
 import { CalendarSideViewType } from './GoogleCalendarRightPanel';
 import { GoogleCalendarEventDialog } from './GoogleCalendarEventDialog';
-import {
-  GoogleCalendarQuickCreateModal,
-  QuickCreateState,
-} from './GoogleCalendarQuickCreateModal';
-import {
-  GoogleCalendarContextMenu,
-  ContextMenuState,
-} from './GoogleCalendarContextMenu';
+import { GoogleCalendarQuickCreateModal, QuickCreateState } from './GoogleCalendarQuickCreateModal';
+import { GoogleCalendarContextMenu, ContextMenuState } from './GoogleCalendarContextMenu';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { CalendarScheduleItem } from '../../types';
 import { CalendarMobilePanel } from './GoogleCalendarMobileNavBar';
@@ -81,7 +75,7 @@ export const GoogleCalendarLayout: React.FC = () => {
     handleDragEnd,
   } = useCalendarDragDrop();
 
-  const { subItems, updateCalendarEvent, deleteCalendarEvent } = useWorkspace();
+  const { subItems, updateCalendarEvent, deleteCalendarEvent, setChecklistGroups, setTextGroups } = useWorkspace();
 
   const handleContextMenu = (item: CalendarScheduleItem, e: React.MouseEvent) => {
     setContextMenuState({
@@ -95,6 +89,22 @@ export const GoogleCalendarLayout: React.FC = () => {
   const handleContextColorChange = (item: CalendarScheduleItem, colorId: string) => {
     if (item.sourceType === 'calendar') {
       updateCalendarEvent(item.id, { categoryId: colorId });
+    } else if (item.sourceType === 'checklist') {
+      setChecklistGroups((prev) =>
+        prev.map((g) =>
+          g.id === item.groupId
+            ? { ...g, items: g.items.map((i) => (i.id === item.id ? { ...i, colorId } : i)) }
+            : g
+        )
+      );
+    } else if (item.sourceType === 'text') {
+      setTextGroups((prev) =>
+        prev.map((g) =>
+          g.id === item.groupId
+            ? { ...g, blocks: g.blocks.map((b) => (b.id === item.id ? { ...b, colorId } : b)) }
+            : g
+        )
+      );
     }
   };
 
@@ -116,12 +126,14 @@ export const GoogleCalendarLayout: React.FC = () => {
     filteredItems
   );
 
-  const selectedCategory = selectedScheduleItem
-    ? categoryItems.find((c) => c.id === selectedScheduleItem.categoryId)
-    : undefined;
-
   const selectedSubItem = selectedScheduleItem
     ? subItems.find((s) => s.id === selectedScheduleItem.subItemId)
+    : undefined;
+
+  const selectedCategory = selectedSubItem
+    ? categoryItems.find((c) => c.id === selectedSubItem.categoryId)
+    : selectedScheduleItem
+    ? categoryItems.find((c) => c.id === selectedScheduleItem.categoryId)
     : undefined;
 
   const handleOpenQuickCreate = (date: string, time?: string, isAllDay = false) => {

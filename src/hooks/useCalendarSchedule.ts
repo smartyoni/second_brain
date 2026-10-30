@@ -153,7 +153,7 @@ export const useCalendarSchedule = (
             sourceType: 'checklist',
             subItemId: group.subItemId,
             groupId: group.id,
-            categoryId: category?.id || '',
+            categoryId: item.colorId || category?.id || '',
             topCategoryId: category?.topCategoryId || '',
           });
         }
@@ -177,7 +177,7 @@ export const useCalendarSchedule = (
             sourceType: 'text',
             subItemId: group.subItemId,
             groupId: group.id,
-            categoryId: category?.id || '',
+            categoryId: block.colorId || category?.id || '',
             topCategoryId: category?.topCategoryId || '',
           });
         }
@@ -208,11 +208,13 @@ export const useCalendarSchedule = (
 
   const jumpToSourceItem = (item: CalendarScheduleItem) => {
     if (item.sourceType === 'calendar') return;
-    if (item.topCategoryId && item.categoryId && item.subItemId) {
+    const subItem = subItems.find((s) => s.id === item.subItemId);
+    const realCategoryId = subItem?.categoryId || item.categoryId;
+    if (item.topCategoryId && realCategoryId && item.subItemId) {
       updateActivePanelState((prev) => ({
         ...prev,
         topCategoryId: item.topCategoryId,
-        categoryId: item.categoryId,
+        categoryId: realCategoryId,
         subItemId: item.subItemId,
         activeTab: item.sourceType === 'checklist' ? 'check' : 'text',
       }));
