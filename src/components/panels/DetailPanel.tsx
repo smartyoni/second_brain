@@ -5,10 +5,43 @@ import { DetailHeader } from '../detail/DetailHeader';
 import { DetailCommandBar } from '../detail/DetailCommandBar';
 import { TextGroupSection } from '../detail/TextGroupSection';
 import { ChecklistGroupSection } from '../detail/ChecklistGroupSection';
+import { MoveDirection } from '../shared/ThreeDotMenu';
 
 interface DetailPanelProps {
   panelId: ActivePanel;
 }
+
+const reorderSubItemGroups = <T extends { id: string; subItemId: string; order: number }>(
+  allGroups: T[],
+  subItemId: string,
+  groupId: string,
+  direction: MoveDirection
+): T[] => {
+  const subGroups = allGroups.filter((g) => g.subItemId === subItemId);
+  const idx = subGroups.findIndex((g) => g.id === groupId);
+  if (idx === -1) return allGroups;
+
+  let nextSub = [...subGroups];
+  if (direction === 'top') {
+    if (idx === 0) return allGroups;
+    const [target] = nextSub.splice(idx, 1);
+    nextSub.unshift(target);
+  } else if (direction === 'bottom') {
+    if (idx === nextSub.length - 1) return allGroups;
+    const [target] = nextSub.splice(idx, 1);
+    nextSub.push(target);
+  } else if (direction === 'up') {
+    if (idx === 0) return allGroups;
+    [nextSub[idx - 1], nextSub[idx]] = [nextSub[idx], nextSub[idx - 1]];
+  } else if (direction === 'down') {
+    if (idx === nextSub.length - 1) return allGroups;
+    [nextSub[idx], nextSub[idx + 1]] = [nextSub[idx + 1], nextSub[idx]];
+  }
+
+  const orderedSub = nextSub.map((g, i) => ({ ...g, order: i }));
+  let subPtr = 0;
+  return allGroups.map((g) => (g.subItemId === subItemId ? orderedSub[subPtr++] : g));
+};
 
 export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
   const {
@@ -57,10 +90,17 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
       <div className="flex-1 overflow-y-auto p-0 bg-white">
         {currentState.activeTab === 'text' ? (
           <div>
-            {currentTextGroups.map((group) => (
+            {currentTextGroups.map((group, idx) => (
               <TextGroupSection
                 key={group.id}
                 group={group}
+                canMoveUp={idx > 0}
+                canMoveDown={idx < currentTextGroups.length - 1}
+                onMoveGroup={(id, direction) =>
+                  setTextGroups((prev) =>
+                    reorderSubItemGroups(prev, group.subItemId, id, direction)
+                  )
+                }
                 onToggleExpand={(id) =>
                   setTextGroups((prev) =>
                     prev.map((g) => (g.id === id ? { ...g, isExpanded: !g.isExpanded } : g))
@@ -122,10 +162,17 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
           </div>
         ) : (
           <div>
-            {currentChecklistGroups.map((group) => (
+            {currentChecklistGroups.map((group, idx) => (
               <ChecklistGroupSection
                 key={group.id}
                 group={group}
+                canMoveUp={idx > 0}
+                canMoveDown={idx < currentChecklistGroups.length - 1}
+                onMoveGroup={(id, direction) =>
+                  setChecklistGroups((prev) =>
+                    reorderSubItemGroups(prev, group.subItemId, id, direction)
+                  )
+                }
                 onToggleExpand={(id) =>
                   setChecklistGroups((prev) =>
                     prev.map((g) => (g.id === id ? { ...g, isExpanded: !g.isExpanded } : g))

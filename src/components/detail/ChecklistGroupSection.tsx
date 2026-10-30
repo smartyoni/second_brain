@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Folder } from 'lucide-react';
 import { ChecklistGroupData } from '../../types';
 import { InlineEditableText } from '../shared/InlineEditableText';
-import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 import { SchedulePickerPopover } from '../shared/SchedulePickerPopover';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { CheckItemRow } from './CheckItemRow';
 
 interface ChecklistGroupSectionProps {
   group: ChecklistGroupData;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveGroup?: (groupId: string, direction: MoveDirection) => void;
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
@@ -20,6 +23,9 @@ interface ChecklistGroupSectionProps {
 
 export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
   group,
+  canMoveUp = true,
+  canMoveDown = true,
+  onMoveGroup,
   onToggleExpand,
   onUpdateGroupName,
   onDeleteGroup,
@@ -89,9 +95,13 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
         </button>
 
         <ThreeDotMenu
+          onMove={onMoveGroup ? (dir) => onMoveGroup(group.id, dir) : undefined}
+          canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
           onEdit={() => setIsEditingGroupName(true)}
           onDelete={() => onDeleteGroup(group.id)}
           deleteTitle="이 체크리스트 그룹을 삭제하시겠습니까?"
+          buttonClassName="text-white/90 hover:text-white hover:bg-white/20"
         />
       </div>
 

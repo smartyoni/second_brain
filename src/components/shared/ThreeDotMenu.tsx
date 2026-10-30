@@ -1,6 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreVertical } from 'lucide-react';
+import {
+  MoreVertical,
+  ArrowUpToLine,
+  ArrowDownToLine,
+  ArrowUp,
+  ArrowDown,
+} from 'lucide-react';
 import { ConfirmPopover } from './ConfirmPopover';
+
+export type MoveDirection = 'top' | 'bottom' | 'up' | 'down';
 
 export interface MenuItem {
   label: string;
@@ -15,6 +23,9 @@ interface ThreeDotMenuProps {
   deleteTitle?: string;
   customItems?: MenuItem[];
   buttonClassName?: string;
+  onMove?: (direction: MoveDirection) => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
 }
 
 export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
@@ -24,6 +35,9 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
   deleteTitle = '삭제하시겠습니까?',
   customItems,
   buttonClassName,
+  onMove,
+  canMoveUp = true,
+  canMoveDown = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -41,8 +55,18 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
       }
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
     window.addEventListener('mousedown', handleClickOutside);
-    return () => window.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen]);
 
   const handleDeleteClick = () => {
@@ -73,8 +97,80 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
       {isOpen && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute right-0 top-full mt-1 z-40 w-24 bg-white border border-slate-300 rounded shadow-md py-0.5 text-[11px]"
+          className="absolute right-0 top-full mt-1 z-40 w-28 bg-white border border-slate-300 rounded shadow-md py-0.5 text-[11px]"
         >
+          {onMove && (
+            <div className="flex items-center justify-between px-1 py-1 border-b border-slate-100">
+              <button
+                type="button"
+                title="가장 위로"
+                disabled={!canMoveUp}
+                onClick={() => {
+                  if (!canMoveUp) return;
+                  setIsOpen(false);
+                  onMove('top');
+                }}
+                className={`p-1 rounded transition-colors ${
+                  canMoveUp
+                    ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer'
+                    : 'text-slate-300 cursor-not-allowed'
+                }`}
+              >
+                <ArrowUpToLine className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                title="가장 아래로"
+                disabled={!canMoveDown}
+                onClick={() => {
+                  if (!canMoveDown) return;
+                  setIsOpen(false);
+                  onMove('bottom');
+                }}
+                className={`p-1 rounded transition-colors ${
+                  canMoveDown
+                    ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer'
+                    : 'text-slate-300 cursor-not-allowed'
+                }`}
+              >
+                <ArrowDownToLine className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                title="위로"
+                disabled={!canMoveUp}
+                onClick={() => {
+                  if (!canMoveUp) return;
+                  setIsOpen(false);
+                  onMove('up');
+                }}
+                className={`p-1 rounded transition-colors ${
+                  canMoveUp
+                    ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer'
+                    : 'text-slate-300 cursor-not-allowed'
+                }`}
+              >
+                <ArrowUp className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                title="아래로"
+                disabled={!canMoveDown}
+                onClick={() => {
+                  if (!canMoveDown) return;
+                  setIsOpen(false);
+                  onMove('down');
+                }}
+                className={`p-1 rounded transition-colors ${
+                  canMoveDown
+                    ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer'
+                    : 'text-slate-300 cursor-not-allowed'
+                }`}
+              >
+                <ArrowDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
           {onEdit && (
             <button
               type="button"

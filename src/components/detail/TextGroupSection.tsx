@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Folder } from 'lucide-react';
 import { TextGroupData } from '../../types';
 import { InlineEditableText } from '../shared/InlineEditableText';
-import { ThreeDotMenu } from '../shared/ThreeDotMenu';
+import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 import { SchedulePickerPopover } from '../shared/SchedulePickerPopover';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { TextBlockRow } from './TextBlockRow';
 
 interface TextGroupSectionProps {
   group: TextGroupData;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveGroup?: (groupId: string, direction: MoveDirection) => void;
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
@@ -19,6 +22,9 @@ interface TextGroupSectionProps {
 
 export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
   group,
+  canMoveUp = true,
+  canMoveDown = true,
+  onMoveGroup,
   onToggleExpand,
   onUpdateGroupName,
   onDeleteGroup,
@@ -78,9 +84,13 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
         </button>
 
         <ThreeDotMenu
+          onMove={onMoveGroup ? (dir) => onMoveGroup(group.id, dir) : undefined}
+          canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
           onEdit={() => setIsEditingGroupName(true)}
           onDelete={() => onDeleteGroup(group.id)}
           deleteTitle="이 텍스트박스 그룹을 삭제하시겠습니까?"
+          buttonClassName="text-white/90 hover:text-white hover:bg-white/20"
         />
       </div>
 
