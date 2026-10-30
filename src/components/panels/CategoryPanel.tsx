@@ -75,6 +75,14 @@ export const CategoryPanel: React.FC = () => {
     addCategoryItem(currentTopId);
   };
 
+  const groupTargets = currentGroups.map((g) => ({ id: g.id, name: g.name }));
+  const handleMoveCategoryToGroup = (catId: string, groupId: string) =>
+    setCategoryItems((prev) => {
+      const target = prev.find((c) => c.id === catId);
+      if (!target) return prev;
+      return [...prev.filter((c) => c.id !== catId), { ...target, groupId }];
+    });
+
   const unclassifiedItems = currentItems.filter((c) => !c.groupId);
 
   return (
@@ -138,6 +146,8 @@ export const CategoryPanel: React.FC = () => {
                       )
                     )
                   }
+                  groupTargets={groupTargets}
+                  onMoveCategoryToGroup={handleMoveCategoryToGroup}
                   onToggleExpand={(id) =>
                     setCategoryGroups((prev) =>
                       prev.map((g) => (g.id === id ? { ...g, isExpanded: !g.isExpanded } : g))
@@ -197,6 +207,8 @@ export const CategoryPanel: React.FC = () => {
                     )
                   )
                 }
+                groupTargets={groupTargets}
+                onMoveCategoryToGroup={handleMoveCategoryToGroup}
                 onToggleExpand={() => {}}
                 onUpdateGroupName={() => {}}
                 onDeleteGroup={() => {}}

@@ -24,6 +24,8 @@ interface ThreeDotMenuProps {
   customItems?: MenuItem[];
   buttonClassName?: string;
   onMove?: (direction: MoveDirection) => void;
+  groupTargets?: { id: string; name: string }[];
+  onMoveToGroup?: (groupId: string) => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
 }
@@ -35,19 +37,23 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
   deleteTitle = '삭제하시겠습니까?',
   customItems,
   buttonClassName,
-  onMove,
+  onMove,  groupTargets,  onMoveToGroup,
   canMoveUp = true,
   canMoveDown = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isGroupListOpen, setIsGroupListOpen] = useState(false);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setIsGroupListOpen(false);
+      return;
+    }
 
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -97,7 +103,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
       {isOpen && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute right-0 top-full mt-1 z-40 w-28 bg-white border border-slate-300 rounded shadow-md py-0.5 text-[11px]"
+          className="absolute right-0 top-full mt-1 z-40 w-32 bg-white border border-slate-300 rounded shadow-md py-0.5 text-[11px]"
         >
           {onMove && (
             <div className="flex items-center justify-between px-1 py-1 border-b border-slate-100">
@@ -194,6 +200,35 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
             >
               복사
             </button>
+          )}
+          {onMoveToGroup && groupTargets && groupTargets.length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={() => setIsGroupListOpen((prev) => !prev)}
+                className="w-full text-left px-2 py-1 text-slate-700 hover:bg-slate-100"
+              >
+                그룹 이동 {isGroupListOpen ? '▴' : '▾'}
+              </button>
+              {isGroupListOpen && (
+                <div className="max-h-40 overflow-y-auto bg-slate-50 border-y border-slate-100">
+                  {groupTargets.map((g, i) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      autoFocus={i === 0}
+                      onClick={() => {
+                        setIsOpen(false);
+                        onMoveToGroup(g.id);
+                      }}
+                      className="w-full text-left pl-3 pr-2 py-1 truncate text-slate-700 hover:bg-emerald-100"
+                    >
+                      {g.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
           {customItems?.map((item, idx) => (
             <button

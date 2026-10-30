@@ -11,6 +11,8 @@ interface CategoryItemRowProps {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMove?: (direction: MoveDirection) => void;
+  groupTargets?: { id: string; name: string }[];
+  onMoveToGroup?: (groupId: string) => void;
   onSelect: () => void;
   onUpdateName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
@@ -26,7 +28,7 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
   isDragged,
   canMoveUp = true,
   canMoveDown = true,
-  onMove,
+  onMove,  groupTargets,  onMoveToGroup,
   onSelect,
   onUpdateName,
   onDelete,
@@ -82,6 +84,8 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
 
       <ThreeDotMenu
         onMove={onMove}
+        groupTargets={groupTargets}
+        onMoveToGroup={onMoveToGroup}
         canMoveUp={canMoveUp}
         canMoveDown={canMoveDown}
         onEdit={() => setIsEditing(true)}
