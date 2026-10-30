@@ -17,7 +17,7 @@ const defaultPanelState: PanelDetailState = {
   topCategoryId: 'top-1',
   categoryId: null,
   subItemId: null,
-  activeTab: 'text',
+  activeTab: 'check',
 };
 
 const loadPanelState = (key: string): PanelDetailState => {

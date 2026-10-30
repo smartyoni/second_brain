@@ -23,17 +23,6 @@ export const DetailCommandBar: React.FC<DetailCommandBarProps> = ({
       <div className="inline-flex bg-slate-100 p-0.5 rounded border border-slate-300 text-xs">
         <button
           type="button"
-          onClick={() => onTabChange('text')}
-          className={`px-2.5 py-0.5 rounded font-medium transition-all ${
-            activeTab === 'text'
-              ? 'bg-white text-blue-700 shadow-xs font-bold border border-slate-300'
-              : 'text-slate-700 hover:text-slate-900'
-          }`}
-        >
-          텍스트 <span className="text-[10px] font-normal">({textCount})</span>
-        </button>
-        <button
-          type="button"
           onClick={() => onTabChange('check')}
           className={`px-2.5 py-0.5 rounded font-medium transition-all ${
             activeTab === 'check'
@@ -42,6 +31,17 @@ export const DetailCommandBar: React.FC<DetailCommandBarProps> = ({
           }`}
         >
           체크 <span className="text-[10px] font-normal">({checkCount})</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onTabChange('text')}
+          className={`px-2.5 py-0.5 rounded font-medium transition-all ${
+            activeTab === 'text'
+              ? 'bg-white text-blue-700 shadow-xs font-bold border border-slate-300'
+              : 'text-slate-700 hover:text-slate-900'
+          }`}
+        >
+          텍스트 <span className="text-[10px] font-normal">({textCount})</span>
         </button>
       </div>
 
