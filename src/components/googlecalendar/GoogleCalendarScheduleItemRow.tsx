@@ -27,20 +27,20 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
         e.stopPropagation();
         onContextMenu?.(item, e);
       }}
-      className="flex items-center py-2 px-3 rounded-lg hover:bg-[#f1f3f4] transition-colors cursor-pointer group"
+      className="flex items-center py-1.5 px-2 rounded-lg hover:bg-[#f1f3f4] transition-colors cursor-pointer group"
     >
       {/* 캘린더 색상 원형 뱃지 점 */}
       <span
-        className="w-3 h-3 rounded-full shrink-0 mr-3.5"
+        className="w-2.5 h-2.5 rounded-full shrink-0 mr-2"
         style={{ backgroundColor: colorTheme.rawHex }}
       />
       {/* 시간 표기 (종일 또는 HH:mm~HH:mm) */}
-      <span className="w-28 sm:w-32 text-xs text-[#3c4043] font-medium shrink-0">
+      <span className="w-[76px] mr-2 text-xs text-[#3c4043] font-medium shrink-0 whitespace-nowrap">
         {timeText}
       </span>
       {/* 일정 제목 */}
       <span
-        className={`text-sm text-[#3c4043] group-hover:text-black font-normal truncate flex-1 ${
+        className={`text-sm text-[#3c4043] group-hover:text-black font-normal truncate flex-1 min-w-0 ${
           item.isCompleted ? 'line-through text-slate-400' : ''
         }`}
       >
@@ -48,7 +48,7 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
       </span>
       {/* 완료 상태 아이콘 */}
       {item.isCompleted && (
-        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 ml-2" />
+        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 ml-1.5" />
       )}
     </div>
   );

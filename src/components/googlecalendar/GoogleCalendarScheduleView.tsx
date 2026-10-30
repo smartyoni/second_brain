@@ -158,28 +158,28 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
             ref={(el) => {
               dateRefs.current[day.dateStr] = el;
             }}
-            className="flex items-start px-4 sm:px-8 py-3.5 hover:bg-slate-50/40 transition-colors"
+            className="flex items-start px-2.5 sm:px-3 py-3 hover:bg-slate-50/40 transition-colors"
           >
-            {/* 좌측 날짜 컬럼 */}
+            {/* 좌측 날짜 컬럼 (상단: 날짜, 하단: 월·요일 세로 배치로 일정 너비 극대화) */}
             <div
               onClick={() => {
                 onSelectDate(day.dateStr);
                 onCellClick?.(day.dateStr);
               }}
-              className="w-28 sm:w-36 shrink-0 pt-1 flex items-center gap-2 cursor-pointer group"
+              className="w-13 sm:w-14 shrink-0 pt-0.5 flex flex-col items-center justify-center gap-1 cursor-pointer group"
               title="클릭하여 날짜 선택 및 새 일정 추가"
             >
               {day.isToday ? (
-                <div className="w-8 h-8 rounded-full bg-[#1a73e8] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                <div className="w-7 h-7 rounded-full bg-[#1a73e8] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                   {day.dayNum}
                 </div>
               ) : (
-                <div className="text-2xl font-normal text-[#3c4043] group-hover:text-black shrink-0 min-w-7 text-right pr-0.5 leading-none">
+                <div className="text-xl font-medium text-[#3c4043] group-hover:text-black shrink-0 leading-none py-0.5">
                   {day.dayNum}
                 </div>
               )}
               <span
-                className={`text-xs whitespace-nowrap ${
+                className={`text-[11px] leading-tight whitespace-nowrap ${
                   day.isToday
                     ? 'font-bold text-[#1a73e8]'
                     : 'font-normal text-[#5f6368] group-hover:text-[#3c4043]'
@@ -190,7 +190,7 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
             </div>
 
             {/* 우측 일정 목록 컬럼 */}
-            <div className="flex-1 flex flex-col min-w-0 pl-2 sm:pl-4">
+            <div className="flex-1 flex flex-col min-w-0 pl-1.5 sm:pl-2">
               {/* 오늘이고 종일 일정이 없거나 종일 일정 전에 현재 시간 인디케이터가 필요할 때 */}
               {day.isToday &&
                 day.allDayItems.length === 0 &&
