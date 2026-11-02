@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Calendar, FolderKanban, PenLine } from 'lucide-react';
+import { ArrowLeft, Calendar, FolderKanban, PenLine, ArrowRightLeft } from 'lucide-react';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
 import { FourPanelLayout } from './components/layout/FourPanelLayout';
 import { CategoryPanel } from './components/panels/CategoryPanel';
@@ -10,9 +10,22 @@ import { GoogleCalendarLayout } from './components/googlecalendar/GoogleCalendar
 import { QuickMemoModal } from './components/category/QuickMemoModal';
 
 const AppContent: React.FC = () => {
-  const { appMode, setAppMode, mobileStep, setMobileStep, addQuickMemo } = useWorkspace();
+  const {
+    appMode,
+    setAppMode,
+    mobileStep,
+    setMobileStep,
+    addQuickMemo,
+    selectTopCategory,
+  } = useWorkspace();
   const [showExitToast, setShowExitToast] = useState(false);
   const [isQuickMemoOpen, setIsQuickMemoOpen] = useState(false);
+
+  const handleQuickMove = () => {
+    setAppMode('workspace');
+    selectTopCategory('top-1');
+    setMobileStep('category');
+  };
 
   const navStateRef = useRef({ appMode, mobileStep });
   navStateRef.current = { appMode, mobileStep };
@@ -117,17 +130,19 @@ const AppContent: React.FC = () => {
         )}
       </div>
 
-      {/* 모바일 전용 하단 푸터 (폰 내비게이션 바 가림 방지를 위해 dvh + safe-area 하단 여백 적용) */}
-      <footer className="lg:hidden shrink-0 bg-slate-900 border-t border-slate-700 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+10px)] flex items-center gap-2 select-none z-40">
+      {/* 모바일 전용 하단 컨트롤 바 */}
+      <footer className="lg:hidden shrink-0 bg-slate-900 border-t border-slate-700 px-2.5 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+10px)] flex items-center gap-1.5 select-none z-40">
+        {/* 1. 퀵이동 버튼 */}
         <button
           type="button"
-          onClick={() => handleBackNavigation(false)}
-          className="flex-1 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-xs font-semibold flex items-center justify-center gap-1 border border-slate-700 transition-colors cursor-pointer"
+          onClick={handleQuickMove}
+          className="flex-1 h-9 rounded-lg bg-teal-700 hover:bg-teal-600 active:bg-teal-800 text-white text-xs font-semibold flex items-center justify-center gap-1 border border-teal-600 transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-3.5 h-3.5 text-slate-300" />
-          <span>뒤로가기</span>
+          <ArrowRightLeft className="w-3.5 h-3.5 text-teal-100" />
+          <span>퀵이동</span>
         </button>
 
+        {/* 2. 퀵메모 버튼 */}
         <button
           type="button"
           onClick={() => setIsQuickMemoOpen(true)}
@@ -137,6 +152,7 @@ const AppContent: React.FC = () => {
           <span>퀵메모</span>
         </button>
 
+        {/* 3. 지식보관소 / 캘린더 모드 전환 버튼 */}
         <button
           type="button"
           onClick={() => setAppMode(appMode === 'calendar' ? 'workspace' : 'calendar')}
@@ -153,6 +169,16 @@ const AppContent: React.FC = () => {
               <span>캘린더</span>
             </>
           )}
+        </button>
+
+        {/* 4. 뒤로가기 버튼: 가장 우측에 고정, 크기는 약 1/4로 축소, 텍스트 없이 화살표 기호로 표시 */}
+        <button
+          type="button"
+          onClick={() => handleBackNavigation(false)}
+          className="w-10 h-9 shrink-0 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white flex items-center justify-center border border-slate-700 transition-colors cursor-pointer"
+          title="뒤로가기"
+        >
+          <ArrowLeft className="w-4 h-4 text-slate-200" />
         </button>
       </footer>
 
