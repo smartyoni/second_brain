@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Calendar, FolderKanban, PenLine, ArrowRightLeft } from 'lucide-react';
+import { ArrowLeft, Calendar, FolderKanban, PenLine, ArrowRightLeft, Home } from 'lucide-react';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
 import { FourPanelLayout } from './components/layout/FourPanelLayout';
 import { CategoryPanel } from './components/panels/CategoryPanel';
@@ -17,6 +17,7 @@ const AppContent: React.FC = () => {
     setMobileStep,
     addQuickMemo,
     selectTopCategory,
+    setSelectedCalendarDate,
   } = useWorkspace();
   const [showExitToast, setShowExitToast] = useState(false);
   const [isQuickMemoOpen, setIsQuickMemoOpen] = useState(false);
@@ -25,6 +26,17 @@ const AppContent: React.FC = () => {
     setAppMode('workspace');
     selectTopCategory('top-1');
     setMobileStep('category');
+  };
+
+  const handleHomeNavigation = () => {
+    if (appMode === 'workspace') {
+      // 지식보관소 모드: 현재 선택된 카테고리/대분류 유지한 채 1번 패널(카테고리 목록)로 복귀
+      setMobileStep('category');
+    } else {
+      // 캘린더 모드: 당일 일간뷰로 이동
+      setSelectedCalendarDate(new Date().toISOString().slice(0, 10));
+      window.dispatchEvent(new CustomEvent('calendar-go-today-day'));
+    }
   };
 
   const navStateRef = useRef({ appMode, mobileStep });
@@ -171,7 +183,17 @@ const AppContent: React.FC = () => {
           )}
         </button>
 
-        {/* 4. 뒤로가기 버튼: 가장 우측에 고정, 크기는 약 1/4로 축소, 텍스트 없이 화살표 기호로 표시 */}
+        {/* 4. 홈 버튼: 뒤로가기 바로 좌측, 동일 크기(w-10 h-9) */}
+        <button
+          type="button"
+          onClick={handleHomeNavigation}
+          className="w-10 h-9 shrink-0 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white flex items-center justify-center border border-slate-700 transition-colors cursor-pointer"
+          title={appMode === 'workspace' ? '1번 패널(카테고리 목록)로 이동' : '당일 일간뷰로 이동'}
+        >
+          <Home className="w-4 h-4 text-slate-200" />
+        </button>
+
+        {/* 5. 뒤로가기 버튼: 가장 우측에 고정, 크기는 약 1/4로 축소, 텍스트 없이 화살표 기호로 표시 */}
         <button
           type="button"
           onClick={() => handleBackNavigation(false)}

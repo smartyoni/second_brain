@@ -117,6 +117,19 @@ export const GoogleCalendarLayout: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 모바일 하단 홈 버튼 클릭 시 당일 일간뷰로 이동 이벤트 처리
+  useEffect(() => {
+    const handleGoTodayDay = () => {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      setDateByString(todayStr);
+      setSideViewType('day');
+      setViewType('day');
+      setMobilePanel('detail');
+    };
+    window.addEventListener('calendar-go-today-day', handleGoTodayDay);
+    return () => window.removeEventListener('calendar-go-today-day', handleGoTodayDay);
+  }, [setDateByString, setViewType]);
+
   const handleHeaderMenuToggle = () => {
     setIsSidebarOpen((prev) => !prev);
     setMobilePanel((prev) => (prev === 'sidebar' ? 'month' : 'sidebar'));
