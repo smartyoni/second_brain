@@ -178,11 +178,12 @@ export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> =
         )}
       </div>
 
-      {/* 2. 모바일 하단 네비게이션 바 */}
+      {/* 2. 모바일 5개 뷰 전환 바 (월간 / 일 / 3일 / 주 / 일정) */}
       <GoogleCalendarMobileNavBar
         activePanel={mobilePanel}
+        sideViewType={sideViewType}
         onChangePanel={onChangePanel}
-        selectedDate={selectedDate}
+        onSideViewTypeChange={onSideViewTypeChange}
       />
     </div>
   );

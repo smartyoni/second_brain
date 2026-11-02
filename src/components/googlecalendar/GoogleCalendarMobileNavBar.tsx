@@ -1,74 +1,91 @@
 import React from 'react';
-import { CalendarDays, Clock, SlidersHorizontal } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarRange, Clock, List } from 'lucide-react';
+import { CalendarSideViewType } from './GoogleCalendarRightPanel';
 
 export type CalendarMobilePanel = 'month' | 'detail' | 'sidebar';
 
 interface GoogleCalendarMobileNavBarProps {
   activePanel: CalendarMobilePanel;
+  sideViewType: CalendarSideViewType;
   onChangePanel: (panel: CalendarMobilePanel) => void;
-  selectedDate: string;
+  onSideViewTypeChange: (type: CalendarSideViewType) => void;
 }
 
 export const GoogleCalendarMobileNavBar: React.FC<GoogleCalendarMobileNavBarProps> = ({
   activePanel,
+  sideViewType,
   onChangePanel,
-  selectedDate,
+  onSideViewTypeChange,
 }) => {
-  const dateObj = new Date(selectedDate);
-  const dateLabel = !isNaN(dateObj.getTime())
-    ? `${dateObj.getMonth() + 1}.${dateObj.getDate()}`
-    : '';
+  const isMonthActive = activePanel === 'month';
+
+  const handleSelectMonth = () => {
+    onChangePanel('month');
+  };
+
+  const handleSelectSideView = (type: CalendarSideViewType) => {
+    onSideViewTypeChange(type);
+    onChangePanel('detail');
+  };
+
+  const navItems = [
+    {
+      id: 'month' as const,
+      label: '월간',
+      Icon: CalendarDays,
+      isActive: isMonthActive,
+      onClick: handleSelectMonth,
+    },
+    {
+      id: 'day' as const,
+      label: '일',
+      Icon: Clock,
+      isActive: !isMonthActive && sideViewType === 'day',
+      onClick: () => handleSelectSideView('day'),
+    },
+    {
+      id: 'threeDay' as const,
+      label: '3일',
+      Icon: Calendar,
+      isActive: !isMonthActive && sideViewType === 'threeDay',
+      onClick: () => handleSelectSideView('threeDay'),
+    },
+    {
+      id: 'week' as const,
+      label: '주',
+      Icon: CalendarRange,
+      isActive: !isMonthActive && sideViewType === 'week',
+      onClick: () => handleSelectSideView('week'),
+    },
+    {
+      id: 'schedule' as const,
+      label: '일정',
+      Icon: List,
+      isActive: !isMonthActive && sideViewType === 'schedule',
+      onClick: () => handleSelectSideView('schedule'),
+    },
+  ];
 
   return (
-    <nav className="h-14 bg-white border-t border-[#dadce0] flex items-center justify-around px-2 shrink-0 select-none z-20 shadow-md lg:hidden">
-      {/* 1. 메뉴 / 필터 패널 */}
-      <button
-        type="button"
-        onClick={() => onChangePanel('sidebar')}
-        className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors cursor-pointer ${
-          activePanel === 'sidebar'
-            ? 'text-[#1a73e8] font-semibold'
-            : 'text-[#5f6368] hover:text-[#202124]'
-        }`}
-      >
-        <SlidersHorizontal className="w-5 h-5 mb-0.5" />
-        <span className="text-[11px] leading-tight">메뉴·필터</span>
-      </button>
-
-      {/* 2. 월간 달력 패널 */}
-      <button
-        type="button"
-        onClick={() => onChangePanel('month')}
-        className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors cursor-pointer ${
-          activePanel === 'month'
-            ? 'text-[#1a73e8] font-semibold'
-            : 'text-[#5f6368] hover:text-[#202124]'
-        }`}
-      >
-        <CalendarDays className="w-5 h-5 mb-0.5" />
-        <span className="text-[11px] leading-tight">월간 달력</span>
-      </button>
-
-      {/* 3. 상세 일정 패널 */}
-      <button
-        type="button"
-        onClick={() => onChangePanel('detail')}
-        className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors cursor-pointer ${
-          activePanel === 'detail'
-            ? 'text-[#1a73e8] font-semibold'
-            : 'text-[#5f6368] hover:text-[#202124]'
-        }`}
-      >
-        <div className="relative">
-          <Clock className="w-5 h-5 mb-0.5" />
-          {dateLabel && (
-            <span className="absolute -top-1 -right-4 px-1 py-0.2 bg-[#e8f0fe] text-[#1a73e8] text-[9px] font-bold rounded-full border border-[#d2e3fc]">
-              {dateLabel}
-            </span>
+    <nav className="h-12 bg-white border-t border-[#dadce0] flex items-center justify-around px-1 shrink-0 select-none z-20 shadow-xs lg:hidden">
+      {navItems.map(({ id, label, Icon, isActive, onClick }) => (
+        <button
+          key={id}
+          type="button"
+          onClick={onClick}
+          className={`flex-1 h-full flex flex-col items-center justify-center transition-all cursor-pointer relative ${
+            isActive
+              ? 'text-[#1a73e8] font-bold'
+              : 'text-[#5f6368] hover:text-[#202124]'
+          }`}
+        >
+          {isActive && (
+            <span className="absolute top-0 left-2 right-2 h-0.5 bg-[#1a73e8] rounded-full" />
           )}
-        </div>
-        <span className="text-[11px] leading-tight">상세 일정</span>
-      </button>
+          <Icon className={`w-4 h-4 mb-0.5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+          <span className="text-[11px] leading-tight">{label}</span>
+        </button>
+      ))}
     </nav>
   );
 };
