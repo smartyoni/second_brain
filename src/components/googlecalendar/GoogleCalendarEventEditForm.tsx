@@ -114,7 +114,18 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
         )}
       </div>
 
-      {/* 구글 캘린더 색상 라벨 팔레트 */}
+      {/* 메모(설명) 텍스트박스 */}
+      <div>
+        <textarea
+          value={editDescription}
+          onChange={(e) => setEditDescription(e.target.value)}
+          placeholder="설명(메모) 추가..."
+          rows={3}
+          className="w-full px-3 py-2 border border-[#dadce0] rounded-md text-xs outline-none focus:border-[#1a73e8] resize-none text-[#3c4043] placeholder-[#70757a]"
+        />
+      </div>
+
+      {/* 구글 캘린더 색상 라벨 팔레트 (모달 푸터 바로 위) */}
       <div className="space-y-1.5">
         <div className="flex items-center gap-1.5 text-xs text-[#5f6368] font-medium">
           <Palette className="w-3.5 h-3.5 text-[#1a73e8]" />
@@ -140,17 +151,6 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
             );
           })}
         </div>
-      </div>
-
-      {/* 메모(설명) */}
-      <div>
-        <textarea
-          value={editDescription}
-          onChange={(e) => setEditDescription(e.target.value)}
-          placeholder="설명(메모) 추가..."
-          rows={3}
-          className="w-full px-3 py-2 border border-[#dadce0] rounded-md text-xs outline-none focus:border-[#1a73e8] resize-none text-[#3c4043] placeholder-[#70757a]"
-        />
       </div>
 
       {/* 편집 하단 액션 버튼 */}
