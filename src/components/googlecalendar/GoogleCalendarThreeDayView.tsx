@@ -63,48 +63,64 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
-      {/* 1. 상단 고정: GMT 헤더 + 3개 날짜 컬럼 */}
-      <div className="flex border-b border-[#dadce0] bg-white shrink-0">
-        <div className="w-16 shrink-0 flex items-end justify-center pb-2 text-[10px] text-[#70757a] border-r border-[#dadce0]">
+      {/* 1. 상단 고정: GMT 헤더 + 3개 날짜 컬럼 (높이 축소 및 1개 라인화) */}
+      <div className="flex border-b border-[#dadce0] bg-white shrink-0 h-9">
+        <div className="w-16 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
           GMT+9
         </div>
         <div className="flex-1 grid grid-cols-3 divide-x divide-[#dadce0]">
           {threeDays.map((col) => {
             const isToday = col.dateStr === todayStr;
             const isSelected = col.dateStr === selectedDate;
+            const isSunday = col.dayName === '일';
+            const isSaturday = col.dayName === '토';
+            const colItems = items.filter((i) => i.dueDate === col.dateStr);
 
             return (
               <div
                 key={col.dateStr}
                 onClick={() => onSelectDate(col.dateStr)}
-                className={`py-2 text-center cursor-pointer transition-colors ${
-                  isSelected ? 'bg-[#e8f0fe]/30' : 'hover:bg-[#f8f9fa]'
+                className={`h-9 flex items-center justify-center gap-1.5 px-1 cursor-pointer transition-colors ${
+                  isSelected ? 'bg-[#e8f0fe]/40' : 'hover:bg-[#f8f9fa]'
                 }`}
               >
-                <div
-                  className={`text-[11px] font-medium ${
-                    isToday ? 'text-[#1a73e8] font-bold' : 'text-[#70757a]'
-                  }`}
-                >
-                  {col.dayName}요일
-                </div>
-                <div
-                  className={`mt-0.5 inline-flex items-center justify-center rounded-full text-sm transition-colors ${
+                <span
+                  className={`inline-flex items-center justify-center rounded-full text-xs transition-colors shrink-0 ${
                     isToday
-                      ? 'w-7 h-7 bg-[#1a73e8] text-white font-bold'
-                      : 'w-7 h-7 text-[#3c4043] font-normal'
+                      ? 'w-5 h-5 bg-[#1a73e8] text-white font-bold'
+                      : isSunday
+                      ? 'w-5 h-5 text-red-500 font-medium'
+                      : isSaturday
+                      ? 'w-5 h-5 text-blue-500 font-medium'
+                      : 'w-5 h-5 text-[#3c4043] font-medium'
                   }`}
                 >
                   {col.dayNum}
-                </div>
+                </span>
+                <span
+                  className={`text-xs font-medium truncate ${
+                    isToday
+                      ? 'text-[#1a73e8] font-bold'
+                      : isSunday
+                      ? 'text-red-500'
+                      : isSaturday
+                      ? 'text-blue-500'
+                      : 'text-[#70757a]'
+                  }`}
+                >
+                  {col.dayName}요일
+                </span>
+                <span className="text-[10px] text-[#70757a] shrink-0 font-normal">
+                  ({colItems.length})
+                </span>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* 2. 상단 고정 종일(All-day) 일정 슬롯 행 */}
-      <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[38px]">
+      {/* 2. 상단 고정 종일(All-day) 일정 슬롯 행 (높이 확장) */}
+      <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[58px]">
         <div className="w-16 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
           종일
         </div>
@@ -120,7 +136,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
                   e.preventDefault();
                   onDropAllDay(col.dateStr);
                 }}
-                className="p-1 space-y-1 min-h-[36px] hover:bg-blue-50/20 transition-colors cursor-pointer"
+                className="p-1.5 space-y-1 min-h-[58px] hover:bg-blue-50/20 transition-colors cursor-pointer"
                 title="클릭하여 종일 일정 등록 / 드래그하여 이동"
               >
                 {allDayItems.map((schedule) => {

@@ -67,44 +67,40 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
-      {/* 1. 상단 일자 헤더 */}
-      <div className="flex border-b border-[#dadce0] bg-white shrink-0">
-        <div className="w-20 shrink-0 flex items-end justify-center pb-2 text-[10px] text-[#70757a] border-r border-[#dadce0]">
+      {/* 1. 상단 일자 헤더 (높이 축소 및 1개 라인 배치) */}
+      <div className="flex border-b border-[#dadce0] bg-white shrink-0 h-9">
+        <div className="w-16 sm:w-20 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
           GMT+9
         </div>
-        <div className="flex-1 py-3 px-6 flex items-center gap-3">
-          <div
-            className={`w-9 h-9 rounded-full flex items-center justify-center text-base font-bold ${
+        <div className="flex-1 px-3 sm:px-4 flex items-center gap-2 overflow-hidden">
+          <span
+            className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-xs font-bold shrink-0 ${
               isToday
                 ? 'bg-[#1a73e8] text-white shadow-2xs'
                 : isHolidayOrSunday
-                ? 'text-red-500 font-bold'
+                ? 'text-red-500'
                 : isSaturday
-                ? 'text-blue-500 font-bold'
+                ? 'text-blue-500'
                 : 'text-[#3c4043]'
             }`}
           >
             {dayNum}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className={`text-sm font-medium ${isHolidayOrSunday ? 'text-red-500' : isSaturday ? 'text-blue-500' : 'text-[#70757a]'}`}>
-                {dayName}요일
-              </span>
-              {holiday && (
-                <span className="text-xs bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full border border-red-200">
-                  {holiday.name}
-                </span>
-              )}
-            </div>
-            <span className="text-xs text-[#70757a]">일정 {dayItems.length}개</span>
-          </div>
+          </span>
+          <span className={`text-xs font-semibold shrink-0 ${isHolidayOrSunday ? 'text-red-500' : isSaturday ? 'text-blue-500' : 'text-[#3c4043]'}`}>
+            {dayName}요일
+          </span>
+          {holiday && (
+            <span className="text-[10px] bg-red-50 text-red-600 font-semibold px-1.5 py-0.2 rounded-full border border-red-200 shrink-0">
+              {holiday.name}
+            </span>
+          )}
+          <span className="text-xs text-[#70757a] shrink-0">· 일정 {dayItems.length}개</span>
         </div>
       </div>
 
-      {/* 2. 상단 종일 일정 슬롯 */}
-      <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[38px]">
-        <div className="w-20 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
+      {/* 2. 상단 종일 일정 슬롯 (높이 확장: 기존 헤더 높이만큼 넉넉하게 변경) */}
+      <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[58px]">
+        <div className="w-16 sm:w-20 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
           종일
         </div>
         <div
@@ -114,7 +110,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
             e.preventDefault();
             onDropAllDay(selectedDate);
           }}
-          className="flex-1 p-1.5 flex flex-wrap gap-1.5 min-h-[36px] hover:bg-blue-50/20 transition-colors cursor-pointer"
+          className="flex-1 p-1.5 flex flex-wrap gap-1.5 min-h-[58px] hover:bg-blue-50/20 transition-colors cursor-pointer overflow-y-auto"
           title="클릭하여 종일 일정 등록 / 드래그하여 이동"
         >
           {allDayItems.map((schedule) => {
