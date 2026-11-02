@@ -80,33 +80,16 @@ export const GoogleCalendarLayout: React.FC = () => {
   const { subItems, updateCalendarEvent, deleteCalendarEvent, setChecklistGroups, setTextGroups } = useWorkspace();
 
   const handleContextMenu = (item: CalendarScheduleItem, e: React.MouseEvent) => {
-    setContextMenuState({
-      isOpen: true,
-      x: e.clientX,
-      y: e.clientY,
-      item,
-    });
+    setContextMenuState({ isOpen: true, x: e.clientX, y: e.clientY, item });
   };
 
   const handleContextColorChange = (item: CalendarScheduleItem, colorId: string) => {
     if (item.sourceType === 'calendar') {
       updateCalendarEvent(item.id, { categoryId: colorId });
     } else if (item.sourceType === 'checklist') {
-      setChecklistGroups((prev) =>
-        prev.map((g) =>
-          g.id === item.groupId
-            ? { ...g, items: g.items.map((i) => (i.id === item.id ? { ...i, colorId } : i)) }
-            : g
-        )
-      );
+      setChecklistGroups((prev) => prev.map((g) => g.id === item.groupId ? { ...g, items: g.items.map((i) => (i.id === item.id ? { ...i, colorId } : i)) } : g));
     } else if (item.sourceType === 'text') {
-      setTextGroups((prev) =>
-        prev.map((g) =>
-          g.id === item.groupId
-            ? { ...g, blocks: g.blocks.map((b) => (b.id === item.id ? { ...b, colorId } : b)) }
-            : g
-        )
-      );
+      setTextGroups((prev) => prev.map((g) => g.id === item.groupId ? { ...g, blocks: g.blocks.map((b) => (b.id === item.id ? { ...b, colorId } : b)) } : g));
     }
   };
 
@@ -116,35 +99,17 @@ export const GoogleCalendarLayout: React.FC = () => {
   };
 
   const handleContextDelete = (item: CalendarScheduleItem) => {
-    if (item.sourceType === 'calendar') {
-      deleteCalendarEvent(item.id);
-    }
+    if (item.sourceType === 'calendar') deleteCalendarEvent(item.id);
   };
 
-  const headerTitle = getGoogleCalendarHeaderTitle(
-    viewType,
-    currentDateObj,
-    selectedCalendarDate,
-    filteredItems
-  );
-
-  const selectedSubItem = selectedScheduleItem
-    ? subItems.find((s) => s.id === selectedScheduleItem.subItemId)
-    : undefined;
-
+  const headerTitle = getGoogleCalendarHeaderTitle(viewType, currentDateObj, selectedCalendarDate, filteredItems);
+  const selectedSubItem = selectedScheduleItem ? subItems.find((s) => s.id === selectedScheduleItem.subItemId) : undefined;
   const selectedCategory = selectedSubItem
     ? categoryItems.find((c) => c.id === selectedSubItem.categoryId)
-    : selectedScheduleItem
-    ? categoryItems.find((c) => c.id === selectedScheduleItem.categoryId)
-    : undefined;
+    : selectedScheduleItem ? categoryItems.find((c) => c.id === selectedScheduleItem.categoryId) : undefined;
 
   const handleOpenQuickCreate = (date: string, time?: string, isAllDay = false) => {
-    setQuickCreateState({
-      isOpen: true,
-      date,
-      time: time || '10:00',
-      isAllDay,
-    });
+    setQuickCreateState({ isOpen: true, date, time: time || '10:00', isAllDay });
   };
 
   useEffect(() => {
@@ -216,6 +181,8 @@ export const GoogleCalendarLayout: React.FC = () => {
             onDropAllDay={handleDropAllDay}
             onDragEnd={handleDragEnd}
             onContextMenu={handleContextMenu}
+            onPrevMonth={goToPrev}
+            onNextMonth={goToNext}
           />
         </main>
       </div>
@@ -258,6 +225,8 @@ export const GoogleCalendarLayout: React.FC = () => {
           showCompleted={showCompleted}
           onToggleShowCompleted={() => setShowCompleted(!showCompleted)}
           onBackToWorkspace={() => setAppMode('workspace')}
+          onPrevMonth={goToPrev}
+          onNextMonth={goToNext}
         />
       </div>
 

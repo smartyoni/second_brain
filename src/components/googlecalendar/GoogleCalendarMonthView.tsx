@@ -23,6 +23,8 @@ interface GoogleCalendarMonthViewProps {
   onDropAllDay?: (targetDate: string) => void;
   onDragEnd: () => void;
   onContextMenu?: (item: CalendarScheduleItem, e: React.MouseEvent) => void;
+  onPrevMonth?: () => void;
+  onNextMonth?: () => void;
 }
 
 export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = ({
@@ -44,6 +46,8 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
   onDropAllDay,
   onDragEnd,
   onContextMenu,
+  onPrevMonth,
+  onNextMonth,
 }) => {
   const [internalIsOpen, setInternalIsOpen] = useState<boolean>(true);
   const [internalSideViewType, setInternalSideViewType] = useState<CalendarSideViewType>('day');
@@ -85,6 +89,8 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
         onDropOnDate={onDropOnDate}
         onDragEnd={onDragEnd}
         onContextMenu={onContextMenu}
+        onPrevMonth={onPrevMonth}
+        onNextMonth={onNextMonth}
       />
 
       {/* 2. 우측: 일간 / 3일 / 주간 / 일정 뷰 사이드 패널 */}

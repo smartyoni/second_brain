@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { CalendarScheduleItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
+import { getKoreanHoliday } from '../../utils/koreanHolidays';
 import { SmartText } from '../shared/SmartText';
 
 export interface GoogleCalendarMonthGridProps {
@@ -17,6 +18,8 @@ export interface GoogleCalendarMonthGridProps {
   onDragEnd: () => void;
   onContextMenu?: (item: CalendarScheduleItem, e: React.MouseEvent) => void;
   onDateClickMobile?: (dateStr: string) => void;
+  onPrevMonth?: () => void;
+  onNextMonth?: () => void;
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -35,7 +38,32 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
   onDragEnd,
   onContextMenu,
   onDateClickMobile,
+  onPrevMonth,
+  onNextMonth,
 }) => {
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const diffX = e.changedTouches[0].clientX - touchStartX.current;
+    const diffY = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX < 0) {
+        onNextMonth?.();
+      } else {
+        onPrevMonth?.();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   const year = currentDateObj.getFullYear();
   const month = currentDateObj.getMonth();
 
@@ -87,7 +115,11 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-white select-none">
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-white select-none touch-pan-y"
+    >
       {/* 요일 헤더 */}
       <div className="grid grid-cols-7 border-b border-[#dadce0] text-center text-[11px] font-medium text-[#70757a] py-2 shrink-0 bg-[#fafafa]">
         {WEEKDAYS.map((day, idx) => (
@@ -109,6 +141,11 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
           const isToday = item.dateStr === todayStr;
           const dayItems = itemsByDate.get(item.dateStr) || [];
           const isFirstDayOfMonth = item.dayNum === 1;
+          const holiday = getKoreanHoliday(item.dateStr);
+          const colIdx = idx % 7;
+          const isSunday = colIdx === 0;
+          const isSaturday = colIdx === 6;
+          const isHolidayOrSunday = isSunday || !!holiday;
 
           return (
             <div
@@ -131,19 +168,38 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
             >
               {/* 날짜 헤더 */}
               <div className="flex items-center justify-between px-0.5 sm:px-1 mb-1 shrink-0 h-6">
-                <span
-                  className={`inline-flex items-center justify-center rounded-full text-xs transition-colors ${
-                    isToday
-                      ? 'w-6 h-6 bg-[#1a73e8] text-white font-bold'
-                      : isFirstDayOfMonth
-                      ? 'font-medium text-[#3c4043] px-1 sm:px-1.5'
-                      : item.isCurrentMonth
-                      ? 'w-6 h-6 text-[#3c4043] font-normal'
-                      : 'w-6 h-6 text-[#70757a] font-normal'
-                  }`}
-                >
-                  {isFirstDayOfMonth ? `${item.monthNum}월 1일` : item.dayNum}
-                </span>
+                <div className="flex items-center gap-1 min-w-0">
+                  <span
+                    className={`inline-flex items-center justify-center rounded-full text-xs transition-colors ${
+                      isToday
+                        ? 'w-6 h-6 bg-[#1a73e8] text-white font-bold'
+                        : isHolidayOrSunday
+                        ? item.isCurrentMonth
+                          ? 'w-6 h-6 text-red-500 font-bold'
+                          : 'w-6 h-6 text-red-300 font-normal'
+                        : isSaturday
+                        ? item.isCurrentMonth
+                          ? 'w-6 h-6 text-blue-500 font-medium'
+                          : 'w-6 h-6 text-blue-300 font-normal'
+                        : isFirstDayOfMonth
+                        ? 'font-medium text-[#3c4043] px-1 sm:px-1.5'
+                        : item.isCurrentMonth
+                        ? 'w-6 h-6 text-[#3c4043] font-normal'
+                        : 'w-6 h-6 text-[#70757a] font-normal'
+                    }`}
+                  >
+                    {isFirstDayOfMonth ? `${item.monthNum}월 1일` : item.dayNum}
+                  </span>
+
+                  {holiday && item.isCurrentMonth && (
+                    <span
+                      className="text-[10px] text-red-500 font-semibold truncate max-w-[46px] sm:max-w-[70px]"
+                      title={holiday.name}
+                    >
+                      {holiday.name}
+                    </span>
+                  )}
+                </div>
 
                 {dayItems.length > 0 && (
                   <span className="text-[10px] text-[#70757a] font-medium bg-[#f1f3f4] px-1 sm:px-1.5 py-0.2 rounded-full">

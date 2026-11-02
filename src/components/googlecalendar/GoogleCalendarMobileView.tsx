@@ -33,6 +33,8 @@ interface GoogleCalendarMobileViewProps {
   showCompleted: boolean;
   onToggleShowCompleted: () => void;
   onBackToWorkspace?: () => void;
+  onPrevMonth?: () => void;
+  onNextMonth?: () => void;
 }
 
 export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> = ({
@@ -63,6 +65,8 @@ export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> =
   showCompleted,
   onToggleShowCompleted,
   onBackToWorkspace,
+  onPrevMonth,
+  onNextMonth,
 }) => {
   return (
     <div className="flex-1 flex flex-col h-full w-full overflow-hidden bg-white">
@@ -88,6 +92,8 @@ export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> =
                 onSelectDate(dateStr);
                 onChangePanel('detail');
               }}
+              onPrevMonth={onPrevMonth}
+              onNextMonth={onNextMonth}
             />
           </div>
         )}

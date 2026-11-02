@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getKoreanHoliday } from '../../utils/koreanHolidays';
 
 interface GoogleMiniCalendarProps {
   currentDateObj: Date;
@@ -81,13 +82,13 @@ export const GoogleMiniCalendar: React.FC<GoogleMiniCalendarProps> = ({
 
       {/* 요일 헤더 */}
       <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-[#70757a] mb-1">
-        <span>일</span>
+        <span className="text-red-500">일</span>
         <span>월</span>
         <span>화</span>
         <span>수</span>
         <span>목</span>
         <span>금</span>
-        <span>토</span>
+        <span className="text-blue-500">토</span>
       </div>
 
       {/* 일자 그리드 */}
@@ -95,17 +96,31 @@ export const GoogleMiniCalendar: React.FC<GoogleMiniCalendarProps> = ({
         {days.map((item, idx) => {
           const isSelected = item.dateStr === selectedDate;
           const isToday = item.dateStr === todayStr;
+          const holiday = getKoreanHoliday(item.dateStr);
+          const colIdx = idx % 7;
+          const isSunday = colIdx === 0;
+          const isSaturday = colIdx === 6;
+          const isHolidayOrSunday = isSunday || !!holiday;
 
           return (
             <button
               key={idx}
               type="button"
               onClick={() => onSelectDate(item.dateStr)}
+              title={holiday ? `${item.dateStr} (${holiday.name})` : item.dateStr}
               className={`h-7 w-7 mx-auto flex items-center justify-center rounded-full text-[11px] font-normal transition-colors cursor-pointer ${
                 isSelected
                   ? 'bg-[#d2e3fc] text-[#174ea6] font-bold'
                   : isToday
                   ? 'bg-[#1a73e8] text-white font-bold'
+                  : isHolidayOrSunday
+                  ? item.isCurrentMonth
+                    ? 'text-red-500 font-semibold hover:bg-red-50'
+                    : 'text-red-300 hover:bg-[#f1f3f4]'
+                  : isSaturday
+                  ? item.isCurrentMonth
+                    ? 'text-blue-500 font-medium hover:bg-blue-50'
+                    : 'text-blue-300 hover:bg-[#f1f3f4]'
                   : item.isCurrentMonth
                   ? 'text-[#3c4043] hover:bg-[#f1f3f4]'
                   : 'text-[#80868b] hover:bg-[#f1f3f4]'

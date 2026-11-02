@@ -10,6 +10,7 @@ import {
   getSlotRealDate,
   getNowTimelinePosition,
 } from '../../utils/googleCalendarUtils';
+import { getKoreanHoliday } from '../../utils/koreanHolidays';
 import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarDayViewProps {
@@ -47,8 +48,14 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const isToday = selectedDate === todayStr;
+  const holiday = getKoreanHoliday(selectedDate);
 
   const dateObj = new Date(selectedDate);
+  const dayOfWeek = !isNaN(dateObj.getTime()) ? dateObj.getDay() : -1;
+  const isSunday = dayOfWeek === 0;
+  const isSaturday = dayOfWeek === 6;
+  const isHolidayOrSunday = isSunday || !!holiday;
+
   const dayName = !isNaN(dateObj.getTime())
     ? dateObj.toLocaleDateString('ko-KR', { weekday: 'short' })
     : '';
@@ -68,14 +75,29 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
         <div className="flex-1 py-3 px-6 flex items-center gap-3">
           <div
             className={`w-9 h-9 rounded-full flex items-center justify-center text-base font-bold ${
-              isToday ? 'bg-[#1a73e8] text-white shadow-2xs' : 'text-[#3c4043]'
+              isToday
+                ? 'bg-[#1a73e8] text-white shadow-2xs'
+                : isHolidayOrSunday
+                ? 'text-red-500 font-bold'
+                : isSaturday
+                ? 'text-blue-500 font-bold'
+                : 'text-[#3c4043]'
             }`}
           >
             {dayNum}
           </div>
           <div>
-            <span className="text-sm font-medium text-[#70757a]">{dayName}요일</span>
-            <span className="text-xs text-[#70757a] ml-2">일정 {dayItems.length}개</span>
+            <div className="flex items-center gap-2">
+              <span className={`text-sm font-medium ${isHolidayOrSunday ? 'text-red-500' : isSaturday ? 'text-blue-500' : 'text-[#70757a]'}`}>
+                {dayName}요일
+              </span>
+              {holiday && (
+                <span className="text-xs bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full border border-red-200">
+                  {holiday.name}
+                </span>
+              )}
+            </div>
+            <span className="text-xs text-[#70757a]">일정 {dayItems.length}개</span>
           </div>
         </div>
       </div>
