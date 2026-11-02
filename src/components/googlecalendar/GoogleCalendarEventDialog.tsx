@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, CheckCircle, Clock, FileText, Trash2, AlignLeft, Pencil } from 'lucide-react';
+import { X, ExternalLink, CheckCircle, Clock, Trash2, AlignLeft, Pencil } from 'lucide-react';
 import { CalendarScheduleItem, CategoryItem, SubItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
 import { useWorkspace } from '../../context/WorkspaceContext';
@@ -18,7 +18,7 @@ interface GoogleCalendarEventDialogProps {
 
 export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps> = ({
   item,
-  category,
+  category: _category,
   subItem,
   initialEditMode = false,
   onClose,
@@ -112,11 +112,6 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     }
   };
 
-  // 소속 위치 텍스트 계산 (지식보관소 기준 동일 포맷)
-  const locationText = isCalendarOwnEvent
-    ? (category?.name ? `${category.name} > 캘린더 일정` : '지식보관소 > 캘린더 일정')
-    : `${category?.name || '기본 카테고리'}${subItem ? ` > ${subItem.title}` : ''}`;
-
   return (
     <div
       onClick={onClose}
@@ -126,13 +121,22 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
         onClick={(e) => e.stopPropagation()}
         className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md overflow-hidden sm:my-auto"
       >
-        {/* 상단 툴바 (구글 캘린더/지식보관소 공통 스타일: [수정] [삭제] [닫기]) */}
+        {/* 상단 툴바: [헤더 타이틀 + 일정 유형] ... [수정] [삭제] [닫기] */}
         <div className="px-4 py-2.5 bg-[#f8f9fa] flex items-center justify-between border-b border-[#dadce0]">
-          <span className="text-xs font-semibold text-[#5f6368]">
-            {isEditing ? '일정 수정' : '일정 세부정보'}
-          </span>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xs font-semibold text-[#5f6368] shrink-0">
+              {isEditing ? '일정 수정' : '일정 세부정보'}
+            </span>
+            <span className="text-[11px] font-medium text-[#1a73e8] bg-[#e8f0fe] px-2 py-0.5 rounded-full border border-blue-100 shrink-0">
+              {isCalendarOwnEvent
+                ? '캘린더 일정'
+                : currentItem.sourceType === 'checklist'
+                ? '체크리스트 할 일'
+                : '텍스트 메모'}
+            </span>
+          </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {!isEditing && (
               <button
                 type="button"
@@ -184,13 +188,6 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                   >
                     <SmartText text={currentItem.title} />
                   </h3>
-                  <p className="text-xs text-[#70757a] mt-0.5">
-                    {isCalendarOwnEvent
-                      ? '캘린더 일정'
-                      : currentItem.sourceType === 'checklist'
-                      ? '체크리스트 할 일'
-                      : '텍스트 메모'}
-                  </p>
                 </div>
               </div>
 
@@ -202,19 +199,6 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                   {currentItem.endDate ? ` ~ ${currentItem.endDate}` : ''}{' '}
                   {currentItem.dueTime ? `· ${currentItem.dueTime}` : '· 종일'}
                 </span>
-              </div>
-
-              {/* 소속 카테고리 및 문서 (지식보관소 생성 일정 기준으로 동일하게 통일) */}
-              <div className="flex items-center gap-4 text-xs text-[#3c4043]">
-                <FileText className="w-4 h-4 text-[#5f6368] shrink-0" />
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <span className="truncate">{locationText}</span>
-                  {isCalendarOwnEvent && (
-                    <span className="text-[10px] text-[#5f6368] bg-[#f1f3f4] px-1.5 py-0.5 rounded border border-[#dadce0] shrink-0">
-                      {activeColor.name}
-                    </span>
-                  )}
-                </div>
               </div>
 
               {/* 상세 설명(메모) */}
