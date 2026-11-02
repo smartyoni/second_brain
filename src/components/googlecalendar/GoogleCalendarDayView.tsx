@@ -146,13 +146,13 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
 
       {/* 3. 24시간 타임라인 */}
       <div className="flex-1 overflow-y-auto flex relative">
-        {/* 좌측 시간 라벨 */}
-        <div className="w-20 shrink-0 select-none border-r border-[#dadce0]">
+        {/* 좌측 시간 라벨 (상단 종일/GMT 영역과 동일하게 w-16 sm:w-20 적용) */}
+        <div className="w-16 sm:w-20 shrink-0 select-none border-r border-[#dadce0]">
           {TIMELINE_HOURS.map((hour) => (
             <div
               key={hour}
               style={{ height: `${TIMELINE_HOUR_HEIGHT}px` }}
-              className="text-[10px] text-[#70757a] text-right pr-3 relative -top-2"
+              className="text-[10px] text-[#70757a] text-right pr-2 sm:pr-3 relative -top-2"
             >
               {formatGoogleHourLabel(hour)}
             </div>
