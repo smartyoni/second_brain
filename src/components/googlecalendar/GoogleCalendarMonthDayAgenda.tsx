@@ -19,6 +19,7 @@ interface GoogleCalendarMonthDayAgendaProps {
   onSelectItem: (item: CalendarScheduleItem) => void;
   onAddEvent: (dateStr: string) => void;
   onClose?: () => void;
+  className?: string;
 }
 
 export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgendaProps> = ({
@@ -27,6 +28,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
   onSelectItem,
   onAddEvent,
   onClose,
+  className,
 }) => {
   const { toggleCheckItemCompleted, toggleCalendarEventCompleted, subItems } = useWorkspace();
 
@@ -54,9 +56,17 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
   };
 
   return (
-    <aside className="w-[448px] shrink-0 bg-white border-l border-[#dadce0] flex flex-col h-full select-none shadow-sm z-10">
+    <aside
+      className={
+        className
+          ? className
+          : 'w-[448px] shrink-0 bg-white border-l border-[#dadce0] flex flex-col h-full select-none shadow-sm z-10'
+      }
+    >
       {/* 1. 상단 헤더 */}
-      <div className="p-4 border-b border-[#dadce0] bg-[#fafafa]">
+      <div className="p-3 sm:p-4 border-b border-[#dadce0] bg-[#fafafa]">
+        {/* 모바일 시트 핸들 바 */}
+        <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-2 sm:hidden" />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-xs text-[#5f6368] font-medium">
             <CalendarIcon className="w-3.5 h-3.5 text-[#1a73e8]" />

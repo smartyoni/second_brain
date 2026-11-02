@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CalendarScheduleItem, TopCategory } from '../../types';
 import { CalendarMobilePanel, GoogleCalendarMobileNavBar } from './GoogleCalendarMobileNavBar';
 import { GoogleCalendarMonthGrid } from './GoogleCalendarMonthGrid';
+import { GoogleCalendarMonthDayAgenda } from './GoogleCalendarMonthDayAgenda';
 import { GoogleCalendarRightPanel, CalendarSideViewType } from './GoogleCalendarRightPanel';
 import { GoogleCalendarSidebar } from './GoogleCalendarSidebar';
 
@@ -68,33 +69,59 @@ export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> =
   onPrevMonth,
   onNextMonth,
 }) => {
+  const [isAgendaOpen, setIsAgendaOpen] = useState(false);
+
+  const handleDateClickMobile = (dateStr: string) => {
+    onSelectDate(dateStr);
+    setIsAgendaOpen(true);
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full w-full overflow-hidden bg-white">
       {/* 1. 패널 본문 영역 */}
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
-        {/* 패널 A: 월간 달력 */}
+        {/* 패널 A: 월간 달력 (접이식 아젠다 분할 뷰 지원) */}
         {mobilePanel === 'month' && (
           <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
-            <GoogleCalendarMonthGrid
-              currentDateObj={currentDateObj}
-              selectedDate={selectedDate}
-              items={items}
-              draggedItem={draggedItem}
-              onSelectDate={onSelectDate}
-              onSelectItem={onSelectItem}
-              onCellClick={onCellClick}
-              onDragStart={onDragStart}
-              onDragOver={onDragOver}
-              onDropOnDate={onDropOnDate}
-              onDragEnd={onDragEnd}
-              onContextMenu={onContextMenu}
-              onDateClickMobile={(dateStr) => {
-                onSelectDate(dateStr);
-                onChangePanel('detail');
-              }}
-              onPrevMonth={onPrevMonth}
-              onNextMonth={onNextMonth}
-            />
+            {/* 상단 월간 달력 (아젠다 열림 시 위로 접혀 45% 높이, 닫힘 시 100% 전체화면) */}
+            <div
+              className={`w-full overflow-hidden transition-all duration-200 flex flex-col ${
+                isAgendaOpen ? 'h-[46%] border-b border-[#dadce0]' : 'h-full'
+              }`}
+            >
+              <GoogleCalendarMonthGrid
+                currentDateObj={currentDateObj}
+                selectedDate={selectedDate}
+                items={items}
+                draggedItem={draggedItem}
+                onSelectDate={onSelectDate}
+                onSelectItem={onSelectItem}
+                onCellClick={onCellClick}
+                onDragStart={onDragStart}
+                onDragOver={onDragOver}
+                onDropOnDate={onDropOnDate}
+                onDragEnd={onDragEnd}
+                onContextMenu={onContextMenu}
+                onDateClickMobile={handleDateClickMobile}
+                onPrevMonth={onPrevMonth}
+                onNextMonth={onNextMonth}
+                compact={isAgendaOpen}
+              />
+            </div>
+
+            {/* 하단 당일 일정 아젠다 시트 (isAgendaOpen일 때 54% 높이로 펼쳐짐) */}
+            {isAgendaOpen && (
+              <div className="flex-1 h-[54%] w-full overflow-hidden bg-white animate-in slide-in-from-bottom-4 duration-200">
+                <GoogleCalendarMonthDayAgenda
+                  selectedDate={selectedDate}
+                  items={items.filter((i) => i.dueDate === selectedDate)}
+                  onSelectItem={onSelectItem}
+                  onAddEvent={(dateStr) => onCellClick(dateStr)}
+                  onClose={() => setIsAgendaOpen(false)}
+                  className="w-full h-full flex flex-col select-none"
+                />
+              </div>
+            )}
           </div>
         )}
 

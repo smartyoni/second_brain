@@ -20,6 +20,7 @@ export interface GoogleCalendarMonthGridProps {
   onDateClickMobile?: (dateStr: string) => void;
   onPrevMonth?: () => void;
   onNextMonth?: () => void;
+  compact?: boolean;
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -40,6 +41,7 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
   onDateClickMobile,
   onPrevMonth,
   onNextMonth,
+  compact = false,
 }) => {
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -133,7 +135,9 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
       <div
         className="flex-1 grid grid-cols-7 border-l border-[#dadce0] overflow-y-auto"
         style={{
-          gridTemplateRows: `repeat(${totalWeeks}, minmax(90px, 1fr))`,
+          gridTemplateRows: compact
+            ? `repeat(${totalWeeks}, minmax(0, 1fr))`
+            : `repeat(${totalWeeks}, minmax(90px, 1fr))`,
         }}
       >
         {days.map((item, idx) => {
@@ -162,36 +166,44 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
                 e.preventDefault();
                 onDropOnDate(item.dateStr);
               }}
-              className={`flex flex-col border-r border-b border-[#dadce0] p-1 sm:p-1.5 transition-colors cursor-pointer min-h-[90px] overflow-hidden ${
+              className={`flex flex-col border-r border-b border-[#dadce0] transition-colors cursor-pointer overflow-hidden ${
+                compact ? 'p-0.5 min-h-0 h-full' : 'p-1 sm:p-1.5 min-h-[90px]'
+              } ${
                 isSelected ? 'bg-[#e8f0fe]/60 ring-2 ring-inset ring-[#1a73e8]' : 'hover:bg-[#f8f9fa]'
               }`}
             >
               {/* 날짜 헤더 */}
-              <div className="flex items-center justify-between px-0.5 sm:px-1 mb-1 shrink-0 h-6">
+              <div
+                className={`flex items-center justify-between px-0.5 mb-0.5 shrink-0 ${
+                  compact ? 'h-4' : 'h-6'
+                }`}
+              >
                 <div className="flex items-center gap-1 min-w-0">
                   <span
-                    className={`inline-flex items-center justify-center rounded-full text-xs transition-colors ${
+                    className={`inline-flex items-center justify-center rounded-full transition-colors ${
+                      compact ? 'w-5 h-5 text-[11px]' : 'w-6 h-6 text-xs'
+                    } ${
                       isToday
-                        ? 'w-6 h-6 bg-[#1a73e8] text-white font-bold'
+                        ? 'bg-[#1a73e8] text-white font-bold'
                         : isHolidayOrSunday
                         ? item.isCurrentMonth
-                          ? 'w-6 h-6 text-red-500 font-bold'
-                          : 'w-6 h-6 text-red-300 font-normal'
+                          ? 'text-red-500 font-bold'
+                          : 'text-red-300 font-normal'
                         : isSaturday
                         ? item.isCurrentMonth
-                          ? 'w-6 h-6 text-blue-500 font-medium'
-                          : 'w-6 h-6 text-blue-300 font-normal'
-                        : isFirstDayOfMonth
-                        ? 'font-medium text-[#3c4043] px-1 sm:px-1.5'
+                          ? 'text-blue-500 font-medium'
+                          : 'text-blue-300 font-normal'
+                        : isFirstDayOfMonth && !compact
+                        ? 'font-medium text-[#3c4043] px-1'
                         : item.isCurrentMonth
-                        ? 'w-6 h-6 text-[#3c4043] font-normal'
-                        : 'w-6 h-6 text-[#70757a] font-normal'
+                        ? 'text-[#3c4043] font-normal'
+                        : 'text-[#70757a] font-normal'
                     }`}
                   >
-                    {isFirstDayOfMonth ? `${item.monthNum}월 1일` : item.dayNum}
+                    {isFirstDayOfMonth && !compact ? `${item.monthNum}월 1일` : item.dayNum}
                   </span>
 
-                  {holiday && item.isCurrentMonth && (
+                  {holiday && item.isCurrentMonth && !compact && (
                     <span
                       className="text-[10px] text-red-500 font-semibold truncate max-w-[46px] sm:max-w-[70px]"
                       title={holiday.name}
@@ -201,54 +213,72 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
                   )}
                 </div>
 
-                {dayItems.length > 0 && (
+                {dayItems.length > 0 && !compact && (
                   <span className="text-[10px] text-[#70757a] font-medium bg-[#f1f3f4] px-1 sm:px-1.5 py-0.2 rounded-full">
                     {dayItems.length}
                   </span>
                 )}
               </div>
 
-              {/* 일정 목록 */}
-              <div className="flex-1 space-y-0.5 overflow-hidden">
-                {dayItems.slice(0, 3).map((schedule) => {
-                  const color = getGoogleCategoryColor(schedule.categoryId);
-                  const isBeingDragged = draggedItem?.id === schedule.id;
-
-                  return (
-                    <div
-                      key={schedule.id}
-                      draggable
-                      onDragStart={(e) => onDragStart(schedule, e)}
-                      onDragEnd={onDragEnd}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectItem(schedule);
-                      }}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onContextMenu?.(schedule, e);
-                      }}
-                      className={`w-full rounded-xs px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] font-semibold flex items-center transition-all cursor-grab active:cursor-grabbing truncate border border-slate-200/80 border-l-[3px] ${color.border} ${color.lightBg} text-slate-900 hover:brightness-95 hover:shadow-2xs ${
-                        schedule.isCompleted ? 'line-through opacity-50 text-slate-500' : ''
-                      } ${
-                        isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
+              {/* 일정 목록 (컴팩트 모드: 컬러 점(Dot) / 일반 모드: 일정 바) */}
+              {compact ? (
+                <div className="flex-1 flex items-center justify-center gap-0.5 flex-wrap px-0.5 overflow-hidden">
+                  {dayItems.slice(0, 3).map((s) => (
+                    <span
+                      key={s.id}
+                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                        getGoogleCategoryColor(s.categoryId).bg
                       }`}
-                      title={`${schedule.title} (${schedule.dueTime || '종일'})`}
-                    >
-                      <span className="truncate">
-                        <SmartText text={schedule.title} />
-                      </span>
-                    </div>
-                  );
-                })}
+                    />
+                  ))}
+                  {dayItems.length > 3 && (
+                    <span className="text-[8px] text-[#70757a] font-bold">
+                      +{dayItems.length - 3}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div className="flex-1 space-y-0.5 overflow-hidden">
+                  {dayItems.slice(0, 3).map((schedule) => {
+                    const color = getGoogleCategoryColor(schedule.categoryId);
+                    const isBeingDragged = draggedItem?.id === schedule.id;
 
-                {dayItems.length > 3 && (
-                  <div className="px-1 text-[9px] sm:text-[10px] font-medium text-[#70757a] hover:bg-[#f1f3f4] rounded-xs cursor-pointer truncate mt-0.5">
-                    +{dayItems.length - 3}개 더보기
-                  </div>
-                )}
-              </div>
+                    return (
+                      <div
+                        key={schedule.id}
+                        draggable
+                        onDragStart={(e) => onDragStart(schedule, e)}
+                        onDragEnd={onDragEnd}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectItem(schedule);
+                        }}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onContextMenu?.(schedule, e);
+                        }}
+                        className={`w-full rounded-xs px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-[11px] font-semibold flex items-center transition-all cursor-grab active:cursor-grabbing truncate border border-slate-200/80 border-l-[3px] ${color.border} ${color.lightBg} text-slate-900 hover:brightness-95 hover:shadow-2xs ${
+                          schedule.isCompleted ? 'line-through opacity-50 text-slate-500' : ''
+                        } ${
+                          isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
+                        }`}
+                        title={`${schedule.title} (${schedule.dueTime || '종일'})`}
+                      >
+                        <span className="truncate">
+                          <SmartText text={schedule.title} />
+                        </span>
+                      </div>
+                    );
+                  })}
+
+                  {dayItems.length > 3 && (
+                    <div className="px-1 text-[9px] sm:text-[10px] font-medium text-[#70757a] hover:bg-[#f1f3f4] rounded-xs cursor-pointer truncate mt-0.5">
+                      +{dayItems.length - 3}개 더보기
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
