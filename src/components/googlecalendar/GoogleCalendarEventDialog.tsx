@@ -4,6 +4,7 @@ import { CalendarScheduleItem, CategoryItem, SubItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { GoogleCalendarEventEditForm } from './GoogleCalendarEventEditForm';
+import { GoogleCalendarSubChecklist } from './GoogleCalendarSubChecklist';
 import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarEventDialogProps {
@@ -35,6 +36,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     updateTextBlockDueDate,
     getAllScheduleItems,
     setAppMode,
+    updateItemChecklist,
   } = useWorkspace();
 
   const currentItem =
@@ -119,7 +121,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md overflow-hidden sm:my-auto"
+        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-hidden sm:my-auto"
       >
         {/* 상단 툴바: [헤더 타이틀 + 일정 유형] ... [수정] [삭제] [닫기] */}
         <div className="px-4 py-2.5 bg-[#f8f9fa] flex items-center justify-between border-b border-[#dadce0]">
@@ -168,7 +170,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           </div>
         </div>
 
-        {/* 본문 (수정 폼 vs 조회 뷰) */}
+        {/* 본문 (수정 폼 vs 2컬럼 조회 뷰) */}
         {isEditing ? (
           <GoogleCalendarEventEditForm
             item={currentItem}
@@ -177,39 +179,51 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           />
         ) : (
           <>
-            <div className="p-6 space-y-4">
-              <div className="flex items-start gap-4">
-                <div className={`w-3.5 h-3.5 rounded-xs mt-1 shrink-0 ${activeColor.bg}`} />
-                <div className="flex-1 min-w-0">
-                  <h3
-                    className={`text-lg font-normal text-[#3c4043] leading-snug break-words ${
-                      currentItem.isCompleted ? 'line-through text-[#70757a]' : ''
-                    }`}
-                  >
-                    <SmartText text={currentItem.title} />
-                  </h3>
-                </div>
-              </div>
-
-              {/* 일시 */}
-              <div className="flex items-center gap-4 text-xs text-[#3c4043]">
-                <Clock className="w-4 h-4 text-[#5f6368] shrink-0" />
-                <span>
-                  {currentItem.dueDate}
-                  {currentItem.endDate ? ` ~ ${currentItem.endDate}` : ''}{' '}
-                  {currentItem.dueTime ? `· ${currentItem.dueTime}` : '· 종일'}
-                </span>
-              </div>
-
-              {/* 상세 설명(메모) */}
-              {(currentItem.description || currentItem.memo) && (
-                <div className="flex items-start gap-4 text-xs text-[#3c4043]">
-                  <AlignLeft className="w-4 h-4 text-[#5f6368] shrink-0 mt-0.5" />
-                  <div className="flex-1 whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-100">
-                    <SmartText text={currentItem.description || currentItem.memo || ''} />
+            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#dadce0]">
+              {/* 좌측 컬럼: 일정 기본 정보 (제목, 일시, 메모) */}
+              <div className="p-5 sm:p-6 space-y-4 overflow-y-auto">
+                <div className="flex items-start gap-4">
+                  <div className={`w-3.5 h-3.5 rounded-xs mt-1 shrink-0 ${activeColor.bg}`} />
+                  <div className="flex-1 min-w-0">
+                    <h3
+                      className={`text-lg font-normal text-[#3c4043] leading-snug break-words ${
+                        currentItem.isCompleted ? 'line-through text-[#70757a]' : ''
+                      }`}
+                    >
+                      <SmartText text={currentItem.title} />
+                    </h3>
                   </div>
                 </div>
-              )}
+
+                {/* 일시 */}
+                <div className="flex items-center gap-4 text-xs text-[#3c4043]">
+                  <Clock className="w-4 h-4 text-[#5f6368] shrink-0" />
+                  <span>
+                    {currentItem.dueDate}
+                    {currentItem.endDate ? ` ~ ${currentItem.endDate}` : ''}{' '}
+                    {currentItem.dueTime ? `· ${currentItem.dueTime}` : '· 종일'}
+                  </span>
+                </div>
+
+                {/* 상세 설명(메모) */}
+                {(currentItem.description || currentItem.memo) && (
+                  <div className="flex items-start gap-4 text-xs text-[#3c4043]">
+                    <AlignLeft className="w-4 h-4 text-[#5f6368] shrink-0 mt-0.5" />
+                    <div className="flex-1 whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-100">
+                      <SmartText text={currentItem.description || currentItem.memo || ''} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 우측 컬럼: 하위할일(체크리스트) 전용 패널 */}
+              <div className="flex flex-col min-h-[220px]">
+                <GoogleCalendarSubChecklist
+                  item={currentItem}
+                  checklist={currentItem.checklist || []}
+                  onUpdateChecklist={(updater) => updateItemChecklist(currentItem, updater)}
+                />
+              </div>
             </div>
 
             {/* 하단 액션 바 (지식보관소 생성 일정 기준 동일 버튼 구성으로 통일) */}

@@ -8,6 +8,7 @@ import {
   PanelDetailState,
   CalendarEvent,
   SelectedDetailItemInfo,
+  SubCheckItem,
 } from '../types';
 
 export const useCalendarSchedule = (
@@ -159,6 +160,7 @@ export const useCalendarSchedule = (
             groupId: group.id,
             categoryId: item.colorId || category?.id || '',
             topCategoryId: category?.topCategoryId || '',
+            checklist: item.checklist || [],
           });
         }
       });
@@ -183,6 +185,7 @@ export const useCalendarSchedule = (
             groupId: group.id,
             categoryId: block.colorId || category?.id || '',
             topCategoryId: category?.topCategoryId || '',
+            checklist: block.checklist || [],
           });
         }
       });
@@ -204,6 +207,7 @@ export const useCalendarSchedule = (
         categoryId: evt.categoryId || categoryItems[0]?.id || '',
         topCategoryId: category?.topCategoryId || '',
         description: evt.description,
+        checklist: evt.checklist || [],
       });
     });
 
@@ -225,6 +229,46 @@ export const useCalendarSchedule = (
     }
   };
 
+  // 일정 항목 전속 하위할일(체크리스트) 업데이트 헬퍼
+  const updateItemChecklist = (
+    item: CalendarScheduleItem,
+    updater: (prev: SubCheckItem[]) => SubCheckItem[]
+  ) => {
+    if (item.sourceType === 'calendar') {
+      setCalendarEvents((prev) =>
+        prev.map((evt) =>
+          evt.id === item.id ? { ...evt, checklist: updater(evt.checklist || []) } : evt
+        )
+      );
+    } else if (item.sourceType === 'checklist') {
+      setChecklistGroups((prev) =>
+        prev.map((g) =>
+          g.id === item.groupId
+            ? {
+                ...g,
+                items: g.items.map((i) =>
+                  i.id === item.id ? { ...i, checklist: updater(i.checklist || []) } : i
+                ),
+              }
+            : g
+        )
+      );
+    } else if (item.sourceType === 'text') {
+      setTextGroups((prev) =>
+        prev.map((g) =>
+          g.id === item.groupId
+            ? {
+                ...g,
+                blocks: g.blocks.map((b) =>
+                  b.id === item.id ? { ...b, checklist: updater(b.checklist || []) } : b
+                ),
+              }
+            : g
+        )
+      );
+    }
+  };
+
   return {
     selectedDetailItem,
     setSelectedDetailItem,
@@ -243,5 +287,6 @@ export const useCalendarSchedule = (
     toggleCheckItemCompleted,
     getAllScheduleItems,
     jumpToSourceItem,
+    updateItemChecklist,
   };
 };

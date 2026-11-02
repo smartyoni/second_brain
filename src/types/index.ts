@@ -91,6 +91,7 @@ export interface CalendarEvent {
   categoryId?: string; // 소속 카테고리 (색상/분류)
   description?: string;
   eventType?: 'event' | 'task';
+  checklist?: SubCheckItem[]; // 4번 패널 하위할일(체크리스트)
 }
 
 // 4번 패널 및 통합 캘린더에서 집계하는 전체 일정 모델
@@ -109,6 +110,7 @@ export interface CalendarScheduleItem {
   categoryId: string;
   topCategoryId: string;
   description?: string;
+  checklist?: SubCheckItem[]; // 4번 패널 하위할일(체크리스트)
 }
 
 // 4번 패널 하단 메모 연동용 선택 아이템 정보
@@ -213,6 +215,7 @@ export interface WorkspaceContextType {
   toggleCalendarEventCompleted: (id: string) => void;
   getAllScheduleItems: () => CalendarScheduleItem[];
   jumpToSourceItem: (item: CalendarScheduleItem) => void;
+  updateItemChecklist: (item: CalendarScheduleItem, updater: (prev: SubCheckItem[]) => SubCheckItem[]) => void;
 
   // 동기화 상태
   isLoaded?: boolean;

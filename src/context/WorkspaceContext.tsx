@@ -156,6 +156,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     toggleCheckItemCompleted,
     getAllScheduleItems,
     jumpToSourceItem: baseJumpToSourceItem,
+    updateItemChecklist,
   } = useCalendarSchedule(
     checklistGroups,
     setChecklistGroups,
@@ -253,6 +254,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         toggleCheckItemCompleted,
         getAllScheduleItems,
         jumpToSourceItem,
+        updateItemChecklist,
         addQuickMemo,
         deleteQuickMemo,
         updateTopCategoryName,
