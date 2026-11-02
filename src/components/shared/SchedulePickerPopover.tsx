@@ -46,11 +46,11 @@ export const SchedulePickerPopover: React.FC<SchedulePickerPopoverProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-10 sm:pt-0 sm:items-center p-3 sm:p-4 bg-black/20 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-xl border border-slate-300 p-3.5 w-64 flex flex-col gap-2.5 select-none animate-in fade-in zoom-in-95 duration-100"
+        className="bg-white rounded-xl shadow-xl border border-slate-300 p-3.5 w-64 flex flex-col gap-2.5 select-none sm:my-auto animate-in fade-in zoom-in-95 duration-100"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">

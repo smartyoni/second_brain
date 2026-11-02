@@ -120,11 +120,11 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 select-none p-4 animate-in fade-in duration-100"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-6 sm:pt-0 sm:items-center bg-black/25 select-none p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-100"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md overflow-hidden"
+        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md overflow-hidden sm:my-auto"
       >
         {/* 상단 툴바 (구글 캘린더/지식보관소 공통 스타일: [수정] [삭제] [닫기]) */}
         <div className="px-4 py-2.5 bg-[#f8f9fa] flex items-center justify-between border-b border-[#dadce0]">

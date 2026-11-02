@@ -72,11 +72,11 @@ export const GoogleCalendarCreateModal: React.FC<GoogleCalendarCreateModalProps>
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 select-none p-4 animate-in fade-in duration-100"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-6 sm:pt-0 sm:items-center bg-black/25 select-none p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-100"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md overflow-hidden"
+        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md overflow-hidden sm:my-auto"
       >
         {/* 헤더 */}
         <div className="px-6 py-3 bg-[#f8f9fa] border-b border-[#dadce0] flex items-center justify-between">

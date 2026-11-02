@@ -53,11 +53,11 @@ export const QuickMemoModal: React.FC<QuickMemoModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-6 sm:pt-0 sm:items-center p-3 sm:p-4 bg-black/40 backdrop-blur-[2px] overflow-y-auto animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl p-6 w-[520px] max-w-[92vw] min-h-[260px] flex flex-col justify-between border border-slate-300 transform transition-all select-none"
+        className="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 w-[520px] max-w-[95vw] min-h-[240px] flex flex-col justify-between border border-slate-300 transform transition-all select-none sm:my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 본문 입력 영역 */}
