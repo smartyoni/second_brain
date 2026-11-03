@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, LayoutGrid } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { GoogleMiniCalendar } from './GoogleMiniCalendar';
 import { GoogleCalendarCategoryGrid } from './GoogleCalendarCategoryGrid';
 import { QuickMemoBar } from '../category/QuickMemoBar';
@@ -37,7 +37,6 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
   onClearAll,
   showCompleted,
   onToggleShowCompleted,
-  onBackToWorkspace,
 }) => {
   const { quickMemos, addQuickMemo } = useWorkspace();
   const [activeSegment, setActiveSegment] = useState<QuickMemoSegment>('memo');
@@ -55,22 +54,7 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
 
   return (
     <aside className="w-full lg:w-64 shrink-0 h-full bg-white border-r border-[#dadce0] flex flex-col select-none overflow-y-auto px-3 py-3 space-y-3">
-      {/* 1. 지식보관소 바로가기 버튼 */}
-      {onBackToWorkspace && (
-        <div>
-          <button
-            type="button"
-            onClick={onBackToWorkspace}
-            className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 bg-white hover:bg-[#f8fafd] text-[#1a73e8] border border-[#d2e3fc] hover:border-[#1a73e8] rounded-full text-sm font-semibold transition-all cursor-pointer shadow-xs hover:shadow-md active:bg-[#e8f0fe]"
-            title="지식보관소로 이동"
-          >
-            <LayoutGrid className="w-4 h-4 text-[#1a73e8]" />
-            <span className="tracking-wide">지식보관소</span>
-          </button>
-        </div>
-      )}
-
-      {/* 2. 구글 미니 달력 */}
+      {/* 1. 구글 미니 달력 */}
       <div className="pb-1">
         <GoogleMiniCalendar
           currentDateObj={currentDateObj}
@@ -79,7 +63,7 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
         />
       </div>
 
-      {/* 2-1. 미니달력 하단: 지식보관소 모드의 [ 퀵메모이동 | 퀵메모 | 캘린더 ] 버튼바 */}
+      {/* 2. 미니달력 하단: 지식보관소 모드의 [ 퀵메모이동 | 퀵메모 | 모드전환 ] 버튼바 */}
       <div className="rounded-md overflow-hidden border border-slate-300 shadow-xs">
         <QuickMemoBar
           activeSegment={activeSegment}
