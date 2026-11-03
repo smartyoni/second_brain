@@ -37,20 +37,20 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
     setAppMode(appMode === 'calendar' ? 'workspace' : 'calendar');
   };
 
-  const isMoveActive = appMode === 'workspace' && isQuickMemoTab && activeSegment === 'move';
+  const isMoveActive = appMode === 'workspace' && isQuickMemoTab && activeSegment === 'memo';
   const isMemoActive = activeSegment === 'memo';
 
   return (
-    <div className="flex items-center px-2 py-1.5 bg-slate-100 border-b border-slate-300 shrink-0 select-none">
-      {/* 3등분 세그먼트: [ 퀵메모이동 | 퀵메모 | 캘린더/지식보관소 전환 ] */}
-      <div className="w-full flex items-center bg-slate-200 border border-slate-300 p-0.5 rounded-md text-[11px] font-medium whitespace-nowrap">
+    <div className="w-full flex items-center px-0 shrink-0 select-none">
+      {/* 3등분 사각형 각진 세그먼트: [ 퀵메모이동 | 퀵메모 | 캘린더/지식보관소 전환 ] */}
+      <div className="w-full grid grid-cols-3 border border-slate-300 rounded-none text-[11px] font-medium whitespace-nowrap">
         <button
           type="button"
           onClick={handleSelectMove}
-          className={`flex-1 py-1 px-1.5 text-center rounded transition-all cursor-pointer ${
+          className={`py-1.5 px-1 text-center rounded-none transition-all cursor-pointer border-r border-slate-300 ${
             isMoveActive
-              ? 'bg-white text-blue-700 font-bold shadow-xs border border-slate-300'
-              : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60'
+              ? 'bg-white text-blue-700 font-bold'
+              : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200/80'
           }`}
           title="퀵메모를 다른 카테고리로 분류 및 이동"
         >
@@ -60,10 +60,10 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
         <button
           type="button"
           onClick={handleSelectMemo}
-          className={`flex-1 py-1 px-1.5 text-center rounded transition-all cursor-pointer ${
+          className={`py-1.5 px-1 text-center rounded-none transition-all cursor-pointer border-r border-slate-300 ${
             isMemoActive
-              ? 'bg-white text-blue-700 font-bold shadow-xs border border-slate-300'
-              : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60'
+              ? 'bg-white text-blue-700 font-bold'
+              : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200/80'
           }`}
           title="클릭하여 퀵메모 작성 모달 열기"
         >
@@ -74,10 +74,10 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
         <button
           type="button"
           onClick={handleToggleMode}
-          className={`flex-1 py-1 px-1.5 text-center rounded transition-all cursor-pointer ${
+          className={`py-1.5 px-1 text-center rounded-none transition-all cursor-pointer ${
             appMode === 'calendar'
-              ? 'bg-blue-600 text-white font-bold shadow-xs hover:bg-blue-700'
-              : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60'
+              ? 'bg-blue-600 text-white font-bold hover:bg-blue-700'
+              : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200/80'
           }`}
           title={appMode === 'calendar' ? '지식보관소 모드로 전환' : '캘린더 모드로 전환'}
         >

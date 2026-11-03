@@ -63,8 +63,8 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
         />
       </div>
 
-      {/* 2. 미니달력 하단: 지식보관소 모드의 [ 퀵메모이동 | 퀵메모 | 모드전환 ] 버튼바 */}
-      <div className="rounded-md overflow-hidden border border-slate-300 shadow-xs">
+      {/* 2. 미니달력 하단: [ 퀵메모이동 | 퀵메모 | 모드전환 ] 각진 사각 세그먼트바 */}
+      <div className="w-full">
         <QuickMemoBar
           activeSegment={activeSegment}
           onSelectSegment={setActiveSegment}
