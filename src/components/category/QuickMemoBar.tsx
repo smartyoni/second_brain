@@ -31,17 +31,16 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
     onOpenModal();
   };
 
-  const handleSelectCalendar = () => {
-    setAppMode('calendar');
+  const handleToggleMode = () => {
+    setAppMode(appMode === 'calendar' ? 'workspace' : 'calendar');
   };
 
   const isMoveActive = appMode === 'workspace' && isQuickMemoTab && activeSegment === 'move';
   const isMemoActive = appMode === 'workspace' && isQuickMemoTab && activeSegment === 'memo';
-  const isCalendarActive = appMode === 'calendar';
 
   return (
     <div className="flex items-center px-2 py-1.5 bg-slate-100 border-b border-slate-300 shrink-0 select-none">
-      {/* 3등분 세그먼트: [ 퀵메모이동 | 퀵메모 | 캘린더 ] 통합 */}
+      {/* 3등분 세그먼트: [ 퀵메모이동 | 퀵메모 | 캘린더/지식보관소 전환 ] */}
       <div className="w-full flex items-center bg-slate-200 border border-slate-300 p-0.5 rounded-md text-[11px] font-medium whitespace-nowrap">
         <button
           type="button"
@@ -69,17 +68,18 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
           <span>퀵메모</span>
         </button>
 
+        {/* 지식보관소 ↔ 캘린더 모드 전환 버튼 */}
         <button
           type="button"
-          onClick={handleSelectCalendar}
+          onClick={handleToggleMode}
           className={`flex-1 py-1 px-1.5 text-center rounded transition-all cursor-pointer ${
-            isCalendarActive
-              ? 'bg-white text-blue-700 font-bold shadow-xs border border-slate-300'
+            appMode === 'calendar'
+              ? 'bg-blue-600 text-white font-bold shadow-xs hover:bg-blue-700'
               : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60'
           }`}
-          title="독립 캘린더 화면으로 전환"
+          title={appMode === 'calendar' ? '지식보관소 모드로 전환' : '캘린더 모드로 전환'}
         >
-          <span>캘린더</span>
+          <span>{appMode === 'calendar' ? '지식보관소' : '캘린더'}</span>
         </button>
       </div>
     </div>
