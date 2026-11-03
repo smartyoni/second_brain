@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { CalendarScheduleItem } from '../../types';
 import {
   getGoogleCategoryColor,
@@ -66,6 +66,20 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
   const nowPos = getNowTimelinePosition(TIMELINE_HOUR_HEIGHT);
   const redLineTop = nowPos.top;
   const isNowColumn = selectedDate === nowPos.dateStr;
+
+  const timelineScrollRef = useRef<HTMLDivElement>(null);
+
+  // 07:00가 화면 최상단에 고정되어 보여지도록 자동 스크롤
+  useEffect(() => {
+    const scrollTo7AM = () => {
+      if (timelineScrollRef.current) {
+        timelineScrollRef.current.scrollTop = 7 * TIMELINE_HOUR_HEIGHT;
+      }
+    };
+    scrollTo7AM();
+    const rafId = requestAnimationFrame(scrollTo7AM);
+    return () => cancelAnimationFrame(rafId);
+  }, [selectedDate]);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
@@ -147,7 +161,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
       </div>
 
       {/* 3. 24시간 타임라인 */}
-      <div className="flex-1 overflow-y-auto flex relative">
+      <div ref={timelineScrollRef} className="flex-1 overflow-y-auto flex relative">
         {/* 좌측 시간 라벨 (상단 종일/GMT 영역과 동일하게 w-16 sm:w-20 적용) */}
         <div className="w-16 sm:w-20 shrink-0 select-none border-r border-[#dadce0]">
           {TIMELINE_HOURS.map((hour) => (

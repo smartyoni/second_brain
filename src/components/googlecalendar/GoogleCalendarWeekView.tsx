@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { CalendarScheduleItem } from '../../types';
 import {
   getGoogleCategoryColor,
@@ -66,6 +66,20 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
   const todayStr = getTodayDateStr();
   const nowPos = getNowTimelinePosition(TIMELINE_HOUR_HEIGHT);
   const redLineTop = nowPos.top;
+
+  const timelineScrollRef = useRef<HTMLDivElement>(null);
+
+  // 07:00가 화면 최상단에 고정되어 보여지도록 자동 스크롤
+  useEffect(() => {
+    const scrollTo7AM = () => {
+      if (timelineScrollRef.current) {
+        timelineScrollRef.current.scrollTop = 7 * TIMELINE_HOUR_HEIGHT;
+      }
+    };
+    scrollTo7AM();
+    const rafId = requestAnimationFrame(scrollTo7AM);
+    return () => cancelAnimationFrame(rafId);
+  }, [currentDateObj, selectedDate]);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
@@ -138,10 +152,7 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
                 key={col.dateStr}
                 onClick={() => onCellClick(col.dateStr, undefined, true)}
                 onDragOver={onDragOver}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  onDropAllDay(col.dateStr);
-                }}
+                onDrop={(e) => { e.preventDefault(); onDropAllDay(col.dateStr); }}
                 className="p-1 space-y-1 min-h-[58px] hover:bg-blue-50/20 transition-colors cursor-pointer"
                 title="클릭하여 종일 일정 등록 / 드래그하여 이동"
               >
@@ -154,15 +165,8 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
                       draggable
                       onDragStart={(e) => onDragStart(schedule, e)}
                       onDragEnd={onDragEnd}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectItem(schedule);
-                      }}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onContextMenu?.(schedule, e);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); onSelectItem(schedule); }}
+                      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onContextMenu?.(schedule, e); }}
                       className={`px-1.5 py-0.5 rounded-xs text-[11px] font-medium text-white truncate shadow-2xs cursor-grab active:cursor-grabbing ${
                         color.bg
                       } ${schedule.isCompleted ? 'line-through opacity-50' : 'hover:opacity-90'} ${
@@ -180,7 +184,7 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
       </div>
 
       {/* 3. 스크롤 24시간 타임라인 그리드 */}
-      <div className="flex-1 overflow-y-auto flex relative">
+      <div ref={timelineScrollRef} className="flex-1 overflow-y-auto flex relative">
         {/* 좌측 시간 라벨 */}
         <div className="w-12 sm:w-16 shrink-0 select-none border-r border-[#dadce0]">
           {TIMELINE_HOURS.map((hour) => (
