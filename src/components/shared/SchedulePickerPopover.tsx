@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar as CalendarIcon, Clock, Check, X, Trash2 } from 'lucide-react';
+import { getTodayDateStr } from '../../utils/calendarUtils';
 
 interface SchedulePickerPopoverProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ export const SchedulePickerPopover: React.FC<SchedulePickerPopoverProps> = ({
   onRemove,
   onClose,
 }) => {
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const [date, setDate] = useState<string>(initialDate || todayStr);
   const [time, setTime] = useState<string>(initialTime || '');
   const [endDate, setEndDate] = useState<string>(initialEndDate || '');

@@ -2,6 +2,56 @@
 export const HOURS = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
 export const HOUR_HEIGHT = 52; // 1시간당 픽셀 높이
 
+/**
+ * 오늘 날짜를 사용자의 로컬 시간대 기준 'YYYY-MM-DD' 형식으로 반환합니다.
+ * (UTC 기준 toISOString()을 쓰면 한국 시간 오전 9시 이전/새벽에 전날로 판정되는 버그 원천 차단)
+ */
+export const getTodayDateStr = (): string => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+/**
+ * Date 객체를 사용자의 로컬 시간대 기준 'YYYY-MM-DD' 형식의 문자열로 변환합니다.
+ */
+export const formatLocalDateStr = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+/**
+ * 'YYYY-MM-DD' 문자열을 로컬 시간대 기준 Date 객체(00:00:00)로 파싱합니다.
+ * (new Date('YYYY-MM-DD')는 브라우저 엔진에 따라 UTC 자정으로 해석되어 시간대 왜곡 발생 가능)
+ */
+export const parseLocalDate = (dateStr: string): Date => {
+  if (!dateStr) return new Date();
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+      return new Date(y, m, d);
+    }
+  }
+  const fallback = new Date(dateStr);
+  return isNaN(fallback.getTime()) ? new Date() : fallback;
+};
+
+/**
+ * 특정 'YYYY-MM-DD' 날짜를 로컬 일 단위로 이동합니다.
+ */
+export const shiftDateStr = (dateStr: string, days: number): string => {
+  const d = parseLocalDate(dateStr);
+  d.setDate(d.getDate() + days);
+  return formatLocalDateStr(d);
+};
+
 export const formatHourLabel = (hour: number): string => {
   if (hour === 0) return '오전 12시';
   if (hour < 12) return `오전 ${hour}시`;

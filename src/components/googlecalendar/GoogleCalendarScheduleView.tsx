@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { CalendarScheduleItem } from '../../types';
-import { parseTimeToMinutes } from '../../utils/calendarUtils';
+import { parseTimeToMinutes, getTodayDateStr } from '../../utils/calendarUtils';
 import { GoogleCalendarScheduleItemRow } from './GoogleCalendarScheduleItemRow';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
@@ -33,7 +33,7 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
   const containerRef = useRef<HTMLDivElement>(null);
   const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const todayStr = useMemo(() => getTodayDateStr(), []);
 
   // 1. 날짜별로 그룹화 및 정렬
   const groupedDays = useMemo<GroupedDay[]>(() => {

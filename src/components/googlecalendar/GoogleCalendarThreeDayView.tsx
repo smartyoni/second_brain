@@ -9,6 +9,8 @@ import {
   getTimelineColumnDate,
   getSlotRealDate,
   getNowTimelinePosition,
+  getTodayDateStr,
+  formatLocalDateStr,
 } from '../../utils/googleCalendarUtils';
 import { SmartText } from '../shared/SmartText';
 
@@ -49,7 +51,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
   for (let i = 0; i < 3; i++) {
     const d = new Date(currentDateObj);
     d.setDate(d.getDate() + i);
-    const dateStr = d.toISOString().slice(0, 10);
+    const dateStr = formatLocalDateStr(d);
     threeDays.push({
       dateStr,
       dayNum: d.getDate(),
@@ -57,7 +59,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
     });
   }
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const nowPos = getNowTimelinePosition(TIMELINE_HOUR_HEIGHT);
   const redLineTop = nowPos.top;
 

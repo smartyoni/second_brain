@@ -1,5 +1,6 @@
 import React from 'react';
 import { GanttBarData } from '../../hooks/useGanttChart';
+import { getTodayDateStr, formatLocalDateStr } from '../../utils/calendarUtils';
 import { GanttBarItem } from './GanttBarItem';
 import { CalendarScheduleItem } from '../../types';
 
@@ -18,7 +19,7 @@ export const GanttTimeline: React.FC<GanttTimelineProps> = ({
   selectedDetailItemId,
   onSelect,
 }) => {
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
 
   if (ganttBars.length === 0) {
@@ -44,7 +45,7 @@ export const GanttTimeline: React.FC<GanttTimelineProps> = ({
           </div>
           <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}>
             {days.map((d, idx) => {
-              const dStr = d.toISOString().slice(0, 10);
+              const dStr = formatLocalDateStr(d);
               const isToday = dStr === todayStr;
               const dayOfWeek = d.getDay();
               const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
@@ -103,7 +104,7 @@ export const GanttTimeline: React.FC<GanttTimelineProps> = ({
                   {/* 배경 그리드 세로선 */}
                   <div className="absolute inset-0 grid pointer-events-none" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))` }}>
                     {days.map((d, idx) => {
-                      const dStr = d.toISOString().slice(0, 10);
+                      const dStr = formatLocalDateStr(d);
                       const isToday = dStr === todayStr;
                       return (
                         <div

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getTodayDateStr } from '../utils/calendarUtils';
 import {
   CalendarScheduleItem,
   ChecklistGroupData,
@@ -21,7 +22,7 @@ export const useCalendarSchedule = (
   updateActivePanelState: (updater: (prev: PanelDetailState) => PanelDetailState) => void
 ) => {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string>(
-    new Date().toISOString().slice(0, 10)
+    getTodayDateStr()
   );
 
   // 4번 패널 하단 메모 연동용 선택 아이템

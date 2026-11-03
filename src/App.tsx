@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Calendar, FolderKanban, PenLine, ArrowRightLeft, Home } from 'lucide-react';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
+import { getTodayDateStr } from './utils/calendarUtils';
 import { FourPanelLayout } from './components/layout/FourPanelLayout';
 import { CategoryPanel } from './components/panels/CategoryPanel';
 import { SubItemPanel } from './components/panels/SubItemPanel';
@@ -34,7 +35,7 @@ const AppContent: React.FC = () => {
       setMobileStep('category');
     } else {
       // 캘린더 모드: 당일 일간뷰로 이동
-      setSelectedCalendarDate(new Date().toISOString().slice(0, 10));
+      setSelectedCalendarDate(getTodayDateStr());
       window.dispatchEvent(new CustomEvent('calendar-go-today-day'));
     }
   };

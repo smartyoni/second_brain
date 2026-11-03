@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getKoreanHoliday } from '../../utils/koreanHolidays';
+import { getTodayDateStr } from '../../utils/calendarUtils';
 
 interface GoogleMiniCalendarProps {
   currentDateObj: Date;
@@ -53,7 +54,7 @@ export const GoogleMiniCalendar: React.FC<GoogleMiniCalendarProps> = ({
     days.push({ dateStr, dayNum: d, isCurrentMonth: false });
   }
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
 
   return (
     <div className="w-full select-none text-xs px-1">

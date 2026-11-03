@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { CalendarScheduleItem } from '../../types';
-import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
+import { getGoogleCategoryColor, getTodayDateStr } from '../../utils/googleCalendarUtils';
 import { getKoreanHoliday } from '../../utils/koreanHolidays';
 import { SmartText } from '../shared/SmartText';
 
@@ -106,7 +106,7 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
     days.push({ dateStr, dayNum: d, isCurrentMonth: false, monthNum: m });
   }
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const totalWeeks = Math.ceil(days.length / 7);
 
   const handleCellSelect = (dateStr: string) => {

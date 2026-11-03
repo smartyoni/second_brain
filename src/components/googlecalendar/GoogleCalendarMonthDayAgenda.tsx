@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
+import { getGoogleCategoryColor, getTodayDateStr, parseLocalDate } from '../../utils/googleCalendarUtils';
 import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarMonthDayAgendaProps {
@@ -32,7 +32,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
 }) => {
   const { toggleCheckItemCompleted, toggleCalendarEventCompleted, subItems } = useWorkspace();
 
-  const dateObj = new Date(selectedDate);
+  const dateObj = parseLocalDate(selectedDate);
   const isValid = !isNaN(dateObj.getTime());
   const formattedDate = isValid
     ? dateObj.toLocaleDateString('ko-KR', {
@@ -43,7 +43,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
     : selectedDate;
   const yearText = isValid ? `${dateObj.getFullYear()}년` : '';
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const isToday = selectedDate === todayStr;
 
   const handleToggleComplete = (item: CalendarScheduleItem, e: React.MouseEvent) => {

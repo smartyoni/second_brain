@@ -1,5 +1,13 @@
 import { CalendarScheduleItem } from '../types';
-import { parseTimeToMinutes } from './calendarUtils';
+import {
+  parseTimeToMinutes,
+  getTodayDateStr,
+  formatLocalDateStr,
+  parseLocalDate,
+  shiftDateStr,
+} from './calendarUtils';
+
+export { getTodayDateStr, formatLocalDateStr, parseLocalDate, shiftDateStr };
 
 // 구글 캘린더 공식 머티리얼 컬러 팔레트
 export interface GoogleColorTheme {
@@ -42,40 +50,26 @@ export const getGoogleCategoryColor = (categoryId?: string): GoogleColorTheme =>
 };
 
 // 24시간 타임라인 (0시 ~ 23시)
-// 시간 체계: 당일 07:00 시작 ~ 다음날 06:59 종료 (24시간제)
-export const TIMELINE_START_HOUR = 7;
-export const TIMELINE_HOURS = Array.from({ length: 24 }, (_, i) => (TIMELINE_START_HOUR + i) % 24);
+// 시간 체계: 순수 날짜 기준 (00:00 ~ 23:59)
+export const TIMELINE_START_HOUR = 0;
+export const TIMELINE_HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-// 날짜 문자열(YYYY-MM-DD)을 일 단위로 이동
-export const shiftDateStr = (dateStr: string, days: number): string => {
-  const d = new Date(`${dateStr}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-};
+// 분(0~1439)을 타임라인 시작(00:00) 기준 오프셋 분으로 변환
+export const toTimelineOffsetMinutes = (minutes: number): number => minutes;
 
-// 분(0~1439)을 타임라인 시작(07:00) 기준 오프셋 분으로 변환
-export const toTimelineOffsetMinutes = (minutes: number): number =>
-  (minutes - TIMELINE_START_HOUR * 60 + 1440) % 1440;
+// 일정이 표시될 타임라인 컬럼 날짜 (시간과 무관하게 날짜 기준 그대로 반환)
+export const getTimelineColumnDate = (dueDate: string, _dueTime?: string): string => dueDate;
 
-// 일정이 표시될 타임라인 컬럼 날짜 (07:00 이전 시각은 전날 컬럼에 표시)
-export const getTimelineColumnDate = (dueDate: string, dueTime?: string): string => {
-  const m = parseTimeToMinutes(dueTime);
-  return m !== null && m !== undefined && m < TIMELINE_START_HOUR * 60 ? shiftDateStr(dueDate, -1) : dueDate;
-};
+// 컬럼 날짜 + 슬롯 시각 → 실제 날짜 (날짜 기준이므로 컬럼 날짜 그대로 반환)
+export const getSlotRealDate = (columnDate: string, _hour: number): string => columnDate;
 
-// 컬럼 날짜 + 슬롯 시각 → 실제 날짜 (07시 이전 슬롯은 다음날)
-export const getSlotRealDate = (columnDate: string, hour: number): string =>
-  hour < TIMELINE_START_HOUR ? shiftDateStr(columnDate, 1) : columnDate;
-
-// 현재 시각의 타임라인 컬럼 날짜와 세로 위치
+// 현재 시각의 타임라인 컬럼 날짜와 세로 위치 (시간이 아닌 로컬 날짜 기준)
 export const getNowTimelinePosition = (hourHeight: number = 48) => {
   const now = new Date();
   const mins = now.getHours() * 60 + now.getMinutes();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const local = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   return {
-    dateStr: mins < TIMELINE_START_HOUR * 60 ? shiftDateStr(local, -1) : local,
-    top: (toTimelineOffsetMinutes(mins) / 60) * hourHeight,
+    dateStr: getTodayDateStr(),
+    top: (mins / 60) * hourHeight,
   };
 };
 export const TIMELINE_HOUR_HEIGHT = 48; // 구글 캘린더 1시간당 48px
@@ -237,8 +231,7 @@ export function shiftDateBySideView(
   sideViewType: string,
   direction: 'prev' | 'next'
 ): string {
-  const d = new Date(selectedDate);
-  const base = isNaN(d.getTime()) ? new Date() : d;
+  const base = parseLocalDate(selectedDate);
   const delta = direction === 'prev' ? -1 : 1;
 
   if (sideViewType === 'week') {
@@ -248,7 +241,7 @@ export function shiftDateBySideView(
   } else {
     base.setDate(base.getDate() + delta * 1);
   }
-  return base.toISOString().slice(0, 10);
+  return formatLocalDateStr(base);
 }
 
 export function getSidePanelDateLabel(

@@ -12,7 +12,7 @@ import { useWorkspace } from '../../context/WorkspaceContext';
 import { CalendarScheduleItem } from '../../types';
 import { CalendarMobilePanel } from './GoogleCalendarMobileNavBar';
 import { GoogleCalendarMobileView } from './GoogleCalendarMobileView';
-import { getGoogleCalendarHeaderTitle } from '../../utils/googleCalendarUtils';
+import { getGoogleCalendarHeaderTitle, getTodayDateStr } from '../../utils/googleCalendarUtils';
 
 export const GoogleCalendarLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -34,7 +34,7 @@ export const GoogleCalendarLayout: React.FC = () => {
   // 구글 캘린더 빠른 일정 생성 팝오버 상태
   const [quickCreateState, setQuickCreateState] = useState<QuickCreateState>({
     isOpen: false,
-    date: new Date().toISOString().slice(0, 10),
+    date: getTodayDateStr(),
     time: '10:00',
     isAllDay: false,
   });
@@ -120,7 +120,7 @@ export const GoogleCalendarLayout: React.FC = () => {
   // 모바일 하단 홈 버튼 클릭 시 당일 일간뷰로 이동 이벤트 처리
   useEffect(() => {
     const handleGoTodayDay = () => {
-      const todayStr = new Date().toISOString().slice(0, 10);
+      const todayStr = getTodayDateStr();
       setDateByString(todayStr);
       setSideViewType('day');
       setViewType('day');

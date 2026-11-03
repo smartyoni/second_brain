@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { CalendarScheduleItem } from '../types';
+import { formatLocalDateStr } from '../utils/calendarUtils';
 
 export interface GanttBarData {
   item: CalendarScheduleItem;
@@ -49,8 +50,8 @@ export const useGanttChart = () => {
     return result;
   }, [baseDate, totalDays]);
 
-  const startDateStr = days[0]?.toISOString().slice(0, 10) || '';
-  const endDateStr = days[days.length - 1]?.toISOString().slice(0, 10) || '';
+  const startDateStr = days[0] ? formatLocalDateStr(days[0]) : '';
+  const endDateStr = days[days.length - 1] ? formatLocalDateStr(days[days.length - 1]) : '';
 
   // 해당 중분류에 속한 일정들 필터링
   const subItemSchedules = useMemo(() => {

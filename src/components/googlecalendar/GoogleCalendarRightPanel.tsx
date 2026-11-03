@@ -18,6 +18,7 @@ import { GoogleCalendarScheduleView } from './GoogleCalendarScheduleView';
 import {
   shiftDateBySideView,
   getSidePanelDateLabel,
+  getTodayDateStr,
 } from '../../utils/googleCalendarUtils';
 
 export type CalendarSideViewType = 'day' | 'threeDay' | 'week' | 'schedule';
@@ -63,7 +64,7 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   const formattedDate = getSidePanelDateLabel(sideViewType, currentDateObj, selectedDate);
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const isToday = selectedDate === todayStr;
 
   const handlePrev = () => {

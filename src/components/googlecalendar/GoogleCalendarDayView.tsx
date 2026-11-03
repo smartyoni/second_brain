@@ -9,6 +9,8 @@ import {
   getTimelineColumnDate,
   getSlotRealDate,
   getNowTimelinePosition,
+  getTodayDateStr,
+  parseLocalDate,
 } from '../../utils/googleCalendarUtils';
 import { getKoreanHoliday } from '../../utils/koreanHolidays';
 import { SmartText } from '../shared/SmartText';
@@ -46,11 +48,11 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
   );
   const dayItems = [...allDayItems, ...timedItems];
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const isToday = selectedDate === todayStr;
   const holiday = getKoreanHoliday(selectedDate);
 
-  const dateObj = new Date(selectedDate);
+  const dateObj = parseLocalDate(selectedDate);
   const dayOfWeek = !isNaN(dateObj.getTime()) ? dateObj.getDay() : -1;
   const isSunday = dayOfWeek === 0;
   const isSaturday = dayOfWeek === 6;

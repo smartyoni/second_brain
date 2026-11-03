@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { CalendarScheduleItem } from '../types';
+import { getTodayDateStr, formatLocalDateStr, parseLocalDate } from '../utils/calendarUtils';
 
 export type FullCalendarViewType = 'month' | 'week' | 'threeDay' | 'day' | 'schedule';
 
@@ -23,10 +24,9 @@ export const useFullCalendar = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedScheduleItem, setSelectedScheduleItem] = useState<CalendarScheduleItem | null>(null);
 
-  // 날짜 객체
+  // 날짜 객체 (시간 왜곡 방지를 위해 로컬 파싱)
   const currentDateObj = useMemo(() => {
-    const d = new Date(selectedCalendarDate);
-    return isNaN(d.getTime()) ? new Date() : d;
+    return parseLocalDate(selectedCalendarDate);
   }, [selectedCalendarDate]);
 
   const currentYear = currentDateObj.getFullYear();
@@ -93,7 +93,7 @@ export const useFullCalendar = () => {
     } else {
       d.setDate(d.getDate() - 1);
     }
-    setSelectedCalendarDate(d.toISOString().slice(0, 10));
+    setSelectedCalendarDate(formatLocalDateStr(d));
   };
 
   const goToNext = () => {
@@ -107,11 +107,11 @@ export const useFullCalendar = () => {
     } else {
       d.setDate(d.getDate() + 1);
     }
-    setSelectedCalendarDate(d.toISOString().slice(0, 10));
+    setSelectedCalendarDate(formatLocalDateStr(d));
   };
 
   const goToToday = () => {
-    setSelectedCalendarDate(new Date().toISOString().slice(0, 10));
+    setSelectedCalendarDate(getTodayDateStr());
   };
 
   const setDateByString = (dateStr: string) => {
