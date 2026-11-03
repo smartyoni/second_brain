@@ -121,7 +121,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-hidden sm:my-auto"
+        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-hidden sm:my-auto flex flex-col min-h-[440px]"
       >
         {/* 상단 툴바: [헤더 타이틀 + 일정 유형] ... [수정] [삭제] [닫기] */}
         <div className="px-4 py-2.5 bg-[#f8f9fa] flex items-center justify-between border-b border-[#dadce0]">
@@ -172,14 +172,16 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
 
         {/* 본문 (수정 폼 vs 2컬럼 조회 뷰) */}
         {isEditing ? (
-          <GoogleCalendarEventEditForm
-            item={currentItem}
-            onSave={handleSaveForm}
-            onCancel={() => setIsEditing(false)}
-          />
+          <div className="flex-1 overflow-y-auto">
+            <GoogleCalendarEventEditForm
+              item={currentItem}
+              onSave={handleSaveForm}
+              onCancel={() => setIsEditing(false)}
+            />
+          </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#dadce0]">
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#dadce0]">
               {/* 좌측 컬럼: 일정 기본 정보 (제목, 일시, 메모) */}
               <div className="p-5 sm:p-6 space-y-4 overflow-y-auto">
                 <div className="flex items-start gap-4">
@@ -217,7 +219,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
               </div>
 
               {/* 우측 컬럼: 하위할일(체크리스트) 전용 패널 */}
-              <div className="flex flex-col min-h-[220px]">
+              <div className="flex flex-col h-full min-h-[280px]">
                 <GoogleCalendarSubChecklist
                   item={currentItem}
                   checklist={currentItem.checklist || []}

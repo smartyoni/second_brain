@@ -15,9 +15,6 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
 }) => {
   const [newText, setNewText] = useState('');
 
-  const completedCount = checklist.filter((i) => i.isCompleted).length;
-  const totalCount = checklist.length;
-
   const handleAdd = (e?: React.FormEvent) => {
     e?.preventDefault();
     const trimmed = newText.trim();
@@ -58,18 +55,7 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
 
   return (
     <div className="flex flex-col h-full bg-white select-none">
-      {/* 1. 상단 헤더: 하위할일 타이틀 + 완료율 뱃지 */}
-      <div className="px-4 py-2.5 bg-[#f8f9fa] border-b border-[#dadce0] flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <ListChecks className="w-4 h-4 text-[#1a73e8]" />
-          <span className="text-xs font-semibold text-[#3c4043]">하위할일</span>
-          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-[#1a73e8] border border-blue-100">
-            {completedCount}/{totalCount}
-          </span>
-        </div>
-      </div>
-
-      {/* 2. 빠른 입력 바 */}
+      {/* 1. 빠른 입력 바 */}
       <form onSubmit={handleAdd} className="p-3 border-b border-[#dadce0] bg-[#fafafa] flex items-center gap-1.5 shrink-0">
         <input
           type="text"
@@ -88,8 +74,8 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
         </button>
       </form>
 
-      {/* 3. 체크리스트 목록 영역 */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-1 min-h-[160px] max-h-[300px] md:max-h-[360px]">
+      {/* 2. 체크리스트 목록 영역 */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-1 min-h-[210px] max-h-[420px] md:max-h-[480px]">
         {checklist.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center py-8 text-center text-[#70757a]">
             <ListChecks className="w-8 h-8 text-slate-300 mb-2 stroke-[1.5]" />
