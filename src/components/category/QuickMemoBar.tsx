@@ -25,8 +25,10 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
   };
 
   const handleSelectMemo = () => {
-    setAppMode('workspace');
-    selectTopCategory('top-1');
+    // 캘린더 모드에서는 지식보관소로 튕기지 않고 현재 캘린더 모드를 유지한 채 퀵메모 모달 열기
+    if (appMode === 'workspace') {
+      selectTopCategory('top-1');
+    }
     onSelectSegment('memo');
     onOpenModal();
   };
@@ -36,7 +38,7 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
   };
 
   const isMoveActive = appMode === 'workspace' && isQuickMemoTab && activeSegment === 'move';
-  const isMemoActive = appMode === 'workspace' && isQuickMemoTab && activeSegment === 'memo';
+  const isMemoActive = activeSegment === 'memo';
 
   return (
     <div className="flex items-center px-2 py-1.5 bg-slate-100 border-b border-slate-300 shrink-0 select-none">
