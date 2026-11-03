@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar as CalendarIcon, Clock, Check, X, Trash2 } from 'lucide-react';
 import { getTodayDateStr } from '../../utils/calendarUtils';
+import { TimePicker24h } from './TimePicker24h';
 
 interface SchedulePickerPopoverProps {
   isOpen: boolean;
@@ -123,11 +124,10 @@ export const SchedulePickerPopover: React.FC<SchedulePickerPopoverProps> = ({
             <Clock className="w-3 h-3 text-slate-400" />
             시간 지정 (선택)
           </label>
-          <input
-            type="time"
+          <TimePicker24h
             value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500 font-sans"
+            onChange={setTime}
+            className="w-full text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500 font-sans bg-white text-slate-800"
           />
         </div>
 

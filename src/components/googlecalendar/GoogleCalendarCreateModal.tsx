@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Clock, Folder, Check } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
+import { TimePicker24h } from '../shared/TimePicker24h';
 
 interface GoogleCalendarCreateModalProps {
   isOpen: boolean;
@@ -115,10 +116,9 @@ export const GoogleCalendarCreateModal: React.FC<GoogleCalendarCreateModalProps>
               />
 
               {!isAllDay && (
-                <input
-                  type="time"
+                <TimePicker24h
                   value={dueTime}
-                  onChange={(e) => setDueTime(e.target.value)}
+                  onChange={setDueTime}
                   className="px-2.5 py-1.5 bg-[#f1f3f4] rounded text-xs text-[#3c4043] outline-none border border-transparent focus:border-[#1a73e8]"
                 />
               )}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Clock, Calendar as CalendarIcon, Check, Palette } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
 import { GOOGLE_COLORS, getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
+import { TimePicker24h } from '../shared/TimePicker24h';
 
 interface GoogleCalendarEventEditFormProps {
   item: CalendarScheduleItem;
@@ -104,10 +105,9 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
         {!editIsAllDay && (
           <div className="flex items-center gap-2 pl-6">
             <Clock className="w-3.5 h-3.5 text-[#5f6368] shrink-0" />
-            <input
-              type="time"
+            <TimePicker24h
               value={editTime}
-              onChange={(e) => setEditTime(e.target.value)}
+              onChange={setEditTime}
               className="px-2.5 py-1.5 border border-[#dadce0] rounded-md text-xs bg-white text-[#3c4043] outline-none focus:border-[#1a73e8]"
             />
           </div>

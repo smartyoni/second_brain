@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Clock, AlignLeft, Check, Palette } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { getGoogleCategoryColor, GOOGLE_COLORS } from '../../utils/googleCalendarUtils';
+import { TimePicker24h } from '../shared/TimePicker24h';
 
 export interface QuickCreateState {
   isOpen: boolean;
@@ -139,10 +140,9 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
               />
 
               {!isAllDay && (
-                <input
-                  type="time"
+                <TimePicker24h
                   value={time}
-                  onChange={(e) => setTime(e.target.value)}
+                  onChange={setTime}
                   className="px-2.5 py-1.5 bg-[#f1f3f4] rounded text-xs text-[#3c4043] outline-none border border-transparent focus:border-[#1a73e8]"
                 />
               )}
