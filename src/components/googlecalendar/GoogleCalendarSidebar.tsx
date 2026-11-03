@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, LayoutGrid } from 'lucide-react';
 import { GoogleMiniCalendar } from './GoogleMiniCalendar';
 import { GoogleCalendarCategoryGrid } from './GoogleCalendarCategoryGrid';
-import { TopCategory, CalendarScheduleItem } from '../../types';
+import { QuickMemoBar } from '../category/QuickMemoBar';
+import { QuickMemoModal } from '../category/QuickMemoModal';
+import { useWorkspace } from '../../context/WorkspaceContext';
+import { TopCategory, CalendarScheduleItem, QuickMemoSegment } from '../../types';
 
 interface GoogleCalendarSidebarProps {
   isOpen: boolean;
@@ -36,6 +39,10 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
   onToggleShowCompleted,
   onBackToWorkspace,
 }) => {
+  const { quickMemos, addQuickMemo } = useWorkspace();
+  const [activeSegment, setActiveSegment] = useState<QuickMemoSegment>('memo');
+  const [isQuickMemoOpen, setIsQuickMemoOpen] = useState(false);
+
   if (!isOpen) return null;
 
   const isAllSelected = selectedFilterKeys.length === 0;
@@ -69,6 +76,17 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
           currentDateObj={currentDateObj}
           selectedDate={selectedDate}
           onSelectDate={onSelectDate}
+        />
+      </div>
+
+      {/* 2-1. 미니달력 하단: 지식보관소 모드의 [ 퀵메모이동 | 퀵메모 | 캘린더 ] 버튼바 */}
+      <div className="rounded-md overflow-hidden border border-slate-300 shadow-xs">
+        <QuickMemoBar
+          activeSegment={activeSegment}
+          onSelectSegment={setActiveSegment}
+          onOpenModal={() => setIsQuickMemoOpen(true)}
+          memoCount={quickMemos.length}
+          isQuickMemoTab={false}
         />
       </div>
 
@@ -150,9 +168,16 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
           >
             {showCompleted && <Check className="w-3 h-3 stroke-[3]" />}
           </div>
-          <span className="text-xs text-[#3c4043] font-medium">완료된 일정 표시</span>
+          <span className="text-xs text-[#3c4043] font-medium">완료된 할 일 보기</span>
         </div>
       </div>
+
+      {/* 퀵메모 작성 모달 */}
+      <QuickMemoModal
+        isOpen={isQuickMemoOpen}
+        onClose={() => setIsQuickMemoOpen(false)}
+        onSave={addQuickMemo}
+      />
     </aside>
   );
 };
