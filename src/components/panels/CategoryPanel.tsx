@@ -89,12 +89,7 @@ export const CategoryPanel: React.FC = () => {
     <div className="flex flex-col h-full bg-white select-none relative">
       <AccountBar />
 
-      {/* 데스크탑(lg 이상): 1번 패널 상단 배치 유지 */}
-      <div className="hidden lg:block shrink-0">
-        <TopCategoryGrid />
-      </div>
-
-      {/* 어떤 탭을 선택해도 상시 나타나는 퀵메모 바 */}
+      {/* 어떤 탭을 선택해도 상시 나타나는 퀵메모 바 (기능탭 상단 배치) */}
       <QuickMemoBar
         activeSegment={activeSegment}
         isQuickMemoTab={isQuickMemoTab}
@@ -107,6 +102,11 @@ export const CategoryPanel: React.FC = () => {
         onOpenModal={() => setIsModalOpen(true)}
         memoCount={quickMemos.length}
       />
+
+      {/* 데스크탑(lg 이상): 1번 패널 상단 배치 유지 */}
+      <div className="hidden lg:block shrink-0">
+        <TopCategoryGrid />
+      </div>
 
       {isQuickMemoTab ? (
         <QuickMemoMonthList
