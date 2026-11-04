@@ -66,6 +66,18 @@ const LEGACY_KEYS = [
 const sanitizePayload = (payload: WorkspacePayload): WorkspacePayload =>
   JSON.parse(JSON.stringify(payload));
 
+const ensureFixedTopCategories = (list: TopCategory[]): TopCategory[] => {
+  if (!Array.isArray(list) || list.length === 0) return initialTopCategories;
+  const top1 = list.find((t) => t.id === 'top-1') || { id: 'top-1', name: '퀵메모', index: 0 };
+  const top2 = list.find((t) => t.id === 'top-2') || { id: 'top-2', name: '할일관리', index: 1 };
+  const others = list.filter((t) => t.id !== 'top-1' && t.id !== 'top-2');
+  return [
+    { ...top1, name: '퀵메모', index: 0 },
+    { ...top2, name: '할일관리', index: 1 },
+    ...others.map((item, idx) => ({ ...item, index: idx + 2 })),
+  ];
+};
+
 export const useFirebaseSync = ({
   topCategories,
   setTopCategories,
@@ -91,7 +103,7 @@ export const useFirebaseSync = ({
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const applyPayloadToState = (payload: WorkspacePayload) => {
-    setTopCategories(payload.topCategories);
+    setTopCategories(ensureFixedTopCategories(payload.topCategories));
     setCategoryGroups(payload.categoryGroups);
     setCategoryItems(payload.categoryItems);
     setSubItems(payload.subItems);
@@ -132,10 +144,11 @@ export const useFirebaseSync = ({
         const data = snapshot.data();
         if (data) {
           const remotePayload = sanitizePayload({
-            topCategories:
+            topCategories: ensureFixedTopCategories(
               Array.isArray(data.topCategories) && data.topCategories.length > 0
                 ? data.topCategories
-                : initialTopCategories,
+                : initialTopCategories
+            ),
             categoryGroups: Array.isArray(data.categoryGroups) ? data.categoryGroups : [],
             categoryItems: Array.isArray(data.categoryItems) ? data.categoryItems : [],
             subItems: Array.isArray(data.subItems) ? data.subItems : [],

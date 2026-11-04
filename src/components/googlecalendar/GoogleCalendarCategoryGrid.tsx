@@ -22,6 +22,7 @@ export const GoogleCalendarCategoryGrid: React.FC<GoogleCalendarCategoryGridProp
       <div className="grid grid-cols-5 gap-0 text-[11px] w-full">
         {topCategories.slice(0, 15).map((cat, index) => {
           const isQuickMemo = cat.id === 'top-1' || index === 0;
+          const isTodoTab = cat.id === 'top-2' || (index === 1 && cat.name === '할일관리');
           const isKeyIncluded = !isNoneSelected && selectedFilterKeys.includes(cat.id);
           // 전체 선택 상태이거나, 개별 선택된 경우 활성 상태
           const isFilterActive = isAllSelected || isKeyIncluded;
@@ -30,6 +31,8 @@ export const GoogleCalendarCategoryGrid: React.FC<GoogleCalendarCategoryGridProp
           // 지식보관소와 동일한 행별 배경 톤
           const rowToneClass = isQuickMemo
             ? 'bg-blue-100 hover:bg-blue-200/90 text-blue-950 font-bold'
+            : isTodoTab
+            ? 'bg-amber-100/90 hover:bg-amber-200/90 text-amber-950 font-bold'
             : index < 5
             ? 'bg-slate-100/90 hover:bg-slate-200/90 text-slate-800 font-semibold'
             : index < 10
@@ -57,13 +60,13 @@ export const GoogleCalendarCategoryGrid: React.FC<GoogleCalendarCategoryGridProp
               key={cat.id}
               type="button"
               onClick={() => onToggleFilterKey(cat.id)}
-              title={`${cat.name}${count > 0 ? ` (${count}개)` : ''}`}
+              title={`${isQuickMemo ? '퀵메모' : isTodoTab ? '할일관리' : cat.name}${count > 0 ? ` (${count}개)` : ''}`}
               className={`h-7 px-0.5 relative flex items-center justify-center text-center cursor-pointer transition-all truncate ${activeClass} ${
                 !isRightEdge ? 'border-r border-slate-300' : ''
               } ${!isBottomEdge ? 'border-b border-slate-300' : ''}`}
             >
               <span className="truncate text-[10.5px] px-0.5 leading-none">
-                {cat.name}
+                {isQuickMemo ? '퀵메모' : isTodoTab ? '할일관리' : cat.name}
               </span>
               {count > 0 && (
                 <span

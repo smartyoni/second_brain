@@ -8,7 +8,7 @@ import {
   QuickMemo,
 } from '../types';
 
-// 초기 5x3 대분류 15개 (1*1은 '퀵메모'로 고정)
+// 초기 5x3 대분류 15개 (1*1은 '퀵메모', 1*2는 '할일관리'로 고정)
 export const initialTopCategories: TopCategory[] = [
   { id: 'top-1', name: '퀵메모', index: 0 },
   { id: 'top-2', name: '할일관리', index: 1 },

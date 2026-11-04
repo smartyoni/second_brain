@@ -23,10 +23,15 @@ export const TopCategoryGrid: React.FC = () => {
     handleDrop,
     handleDragEnd,
   } = useDragSort(topCategories, (newItems: TopCategory[]) => {
-    // 1*1 퀵메모(top-1)는 항상 index 0 자리에 고정
+    // 1*1 퀵메모(top-1)는 index 0, 1*2 할일관리(top-2)는 index 1 자리에 항상 고정
     const top1 = topCategories.find((t) => t.id === 'top-1') || { id: 'top-1', name: '퀵메모', index: 0 };
-    const others = newItems.filter((t) => t.id !== 'top-1');
-    const reindexed = [{ ...top1, name: '퀵메모', index: 0 }, ...others.map((item, idx) => ({ ...item, index: idx + 1 }))];
+    const top2 = topCategories.find((t) => t.id === 'top-2') || { id: 'top-2', name: '할일관리', index: 1 };
+    const others = newItems.filter((t) => t.id !== 'top-1' && t.id !== 'top-2');
+    const reindexed = [
+      { ...top1, name: '퀵메모', index: 0 },
+      { ...top2, name: '할일관리', index: 1 },
+      ...others.map((item, idx) => ({ ...item, index: idx + 2 })),
+    ];
     setTopCategories(reindexed);
   });
 
@@ -36,6 +41,8 @@ export const TopCategoryGrid: React.FC = () => {
       <div className="grid grid-cols-5 gap-0 text-[11px] w-full">
         {topCategories.slice(0, 15).map((cat, index) => {
           const isQuickMemo = cat.id === 'top-1' || index === 0;
+          const isTodoTab = cat.id === 'top-2' || (index === 1 && cat.name === '할일관리');
+          const isFixedTab = isQuickMemo || isTodoTab;
           const isSelected = cat.id === currentTopId;
           const isDragged = cat.id === draggedId;
           const isEditing = editingId === cat.id;
@@ -43,6 +50,8 @@ export const TopCategoryGrid: React.FC = () => {
           // 행별 배경 톤 구분 (채도와 명암비를 높여 훨씬 선명하게 구분)
           const rowClass = isQuickMemo
             ? 'bg-blue-100 hover:bg-blue-200/90 text-blue-950 font-bold'
+            : isTodoTab
+            ? 'bg-amber-100/90 hover:bg-amber-200/90 text-amber-950 font-bold'
             : index < 5
             ? 'bg-slate-100/90 hover:bg-slate-200/90 text-slate-800 font-semibold'
             : index < 10
@@ -56,24 +65,24 @@ export const TopCategoryGrid: React.FC = () => {
           return (
             <div
               key={cat.id}
-              draggable={!isEditing && !isQuickMemo}
+              draggable={!isEditing && !isFixedTab}
               onDragStart={(e) => {
-                if (isQuickMemo) return;
+                if (isFixedTab) return;
                 handleDragStart(cat.id, e);
               }}
               onDragOver={(e) => {
-                if (isQuickMemo) return;
+                if (isFixedTab) return;
                 handleDragOver(e);
               }}
               onDrop={(e) => {
-                if (isQuickMemo) return;
+                if (isFixedTab) return;
                 handleDrop(cat.id, e);
               }}
               onDragEnd={handleDragEnd}
               onClick={() => selectTopCategory(cat.id)}
               onDoubleClick={(e) => {
                 e.stopPropagation();
-                if (isQuickMemo) return; // 퀵메모는 이름 수정 불가 (하드코딩 고정)
+                if (isFixedTab) return; // 퀵메모, 할일관리는 이름 수정 불가 (하드코딩 고정)
                 setEditingId(cat.id);
               }}
               className={`h-8 px-0.5 flex items-center justify-center text-center font-medium cursor-pointer transition-colors truncate ${rowClass} ${
@@ -86,6 +95,8 @@ export const TopCategoryGrid: React.FC = () => {
             >
               {isQuickMemo ? (
                 <span className="truncate text-[11px] px-1 font-bold">퀵메모</span>
+              ) : isTodoTab ? (
+                <span className="truncate text-[11px] px-1 font-bold">할일관리</span>
               ) : (
                 <InlineEditableText
                   value={cat.name}
