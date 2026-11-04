@@ -16,6 +16,7 @@ interface CategoryGroupAccordionProps {
   onMoveCategory?: (catId: string, direction: MoveDirection) => void;
   groupTargets?: { id: string; name: string }[];
   onMoveCategoryToGroup?: (catId: string, groupId: string) => void;
+  onDropSubItem?: (subItemId: string, targetCategoryId: string) => void;
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
@@ -38,6 +39,7 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
   canMoveGroupDown = false,
   onMoveGroup,
   onMoveCategory,  groupTargets,  onMoveCategoryToGroup,
+  onDropSubItem,
   onToggleExpand,
   onUpdateGroupName,
   onDeleteGroup,
@@ -125,6 +127,7 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
               onMoveToGroup={
                 onMoveCategoryToGroup ? (gid) => onMoveCategoryToGroup(item.id, gid) : undefined
               }
+              onDropSubItem={onDropSubItem}
               onSelect={() => onSelectCategory(item.id)}
               onUpdateName={onUpdateCategoryName}
               onDelete={onDeleteCategory}

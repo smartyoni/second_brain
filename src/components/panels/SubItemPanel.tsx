@@ -8,6 +8,7 @@ import { moveScopedItem } from '../../utils/orderUtils';
 
 export const SubItemPanel: React.FC = () => {
   const {
+    categoryGroups,
     categoryItems,
     subItems,
     setSubItems,
@@ -16,11 +17,29 @@ export const SubItemPanel: React.FC = () => {
     addSubItem,
   } = useWorkspace();
 
+  const currentTopId = getCurrentActiveState().topCategoryId;
   const selectedCategoryId = getCurrentActiveState().categoryId;
   const selectedSubItemId = getCurrentActiveState().subItemId;
 
   const currentCategory = categoryItems.find((c) => c.id === selectedCategoryId);
   const currentSubItems = subItems.filter((s) => s.categoryId === selectedCategoryId);
+
+  // 현재 대분류에 속한 다른 카테고리 목록 (그룹명과 함께 표시)
+  const categoryTargets = categoryItems
+    .filter((c) => c.topCategoryId === currentTopId && c.id !== selectedCategoryId)
+    .map((c) => {
+      const grp = categoryGroups.find((g) => g.id === c.groupId);
+      return {
+        id: c.id,
+        name: grp ? `[${grp.name}] ${c.name}` : c.name,
+      };
+    });
+
+  const handleMoveToCategory = (subItemId: string, targetCategoryId: string) => {
+    setSubItems((prev) =>
+      prev.map((s) => (s.id === subItemId ? { ...s, categoryId: targetCategoryId } : s))
+    );
+  };
 
   const {
     draggedId,
@@ -58,6 +77,8 @@ export const SubItemPanel: React.FC = () => {
             isDragged={item.id === draggedId}
             canMoveUp={idx > 0}
             canMoveDown={idx < currentSubItems.length - 1}
+            categoryTargets={categoryTargets}
+            onMoveToCategory={(targetCatId) => handleMoveToCategory(item.id, targetCatId)}
             onMove={(dir) =>
               setSubItems((prev) =>
                 moveScopedItem(prev, (s) => s.categoryId === selectedCategoryId, item.id, dir)

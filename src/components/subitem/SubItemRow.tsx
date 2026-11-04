@@ -10,6 +10,8 @@ interface SubItemRowProps {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMove?: (direction: MoveDirection) => void;
+  categoryTargets?: { id: string; name: string }[];
+  onMoveToCategory?: (targetCategoryId: string) => void;
   onSelect: () => void;
   onUpdateTitle: (id: string, newTitle: string) => void;
   onDelete: (id: string) => void;
@@ -26,6 +28,8 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
   canMoveUp = true,
   canMoveDown = true,
   onMove,
+  categoryTargets,
+  onMoveToCategory,
   onSelect,
   onUpdateTitle,
   onDelete,
@@ -39,7 +43,13 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
   return (
     <div
       draggable={!isEditing}
-      onDragStart={onDragStart}
+      onDragStart={(e) => {
+        try {
+          e.dataTransfer.setData('text/plain', item.id);
+          e.dataTransfer.setData('application/subitem-id', item.id);
+        } catch {}
+        onDragStart(e);
+      }}
       onDragOver={onDragOver}
       onDrop={onDrop}
       onDragEnd={onDragEnd}
@@ -75,6 +85,9 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
 
       <ThreeDotMenu
         onMove={onMove}
+        targetItems={categoryTargets}
+        targetActionLabel="카테고리 이동"
+        onMoveToTarget={onMoveToCategory}
         canMoveUp={canMoveUp}
         canMoveDown={canMoveDown}
         onEdit={() => setIsEditing(true)}

@@ -26,6 +26,9 @@ interface ThreeDotMenuProps {
   onMove?: (direction: MoveDirection) => void;
   groupTargets?: { id: string; name: string }[];
   onMoveToGroup?: (groupId: string) => void;
+  targetItems?: { id: string; name: string }[];
+  targetActionLabel?: string;
+  onMoveToTarget?: (targetId: string) => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
 }
@@ -38,6 +41,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
   customItems,
   buttonClassName,
   onMove,  groupTargets,  onMoveToGroup,
+  targetItems,  targetActionLabel,  onMoveToTarget,
   canMoveUp = true,
   canMoveDown = true,
 }) => {
@@ -201,25 +205,28 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
               복사
             </button>
           )}
-          {onMoveToGroup && groupTargets && groupTargets.length > 0 && (
+          {((onMoveToTarget && targetItems && targetItems.length > 0) ||
+            (onMoveToGroup && groupTargets && groupTargets.length > 0)) && (
             <>
               <button
                 type="button"
                 onClick={() => setIsGroupListOpen((prev) => !prev)}
-                className="w-full text-left px-2 py-1 text-slate-700 hover:bg-slate-100"
+                className="w-full text-left px-2 py-1 text-slate-700 hover:bg-slate-100 flex items-center justify-between"
               >
-                그룹 이동 {isGroupListOpen ? '▴' : '▾'}
+                <span>{targetActionLabel || '그룹 이동'}</span>
+                <span>{isGroupListOpen ? '▴' : '▾'}</span>
               </button>
               {isGroupListOpen && (
                 <div className="max-h-40 overflow-y-auto bg-slate-50 border-y border-slate-100">
-                  {groupTargets.map((g, i) => (
+                  {(targetItems || groupTargets || []).map((g, i) => (
                     <button
                       key={g.id}
                       type="button"
                       autoFocus={i === 0}
                       onClick={() => {
                         setIsOpen(false);
-                        onMoveToGroup(g.id);
+                        if (onMoveToTarget) onMoveToTarget(g.id);
+                        else if (onMoveToGroup) onMoveToGroup(g.id);
                       }}
                       className="w-full text-left pl-3 pr-2 py-1 truncate text-slate-700 hover:bg-emerald-100"
                     >

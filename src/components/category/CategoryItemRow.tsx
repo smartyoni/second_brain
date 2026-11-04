@@ -14,6 +14,7 @@ interface CategoryItemRowProps {
   onMove?: (direction: MoveDirection) => void;
   groupTargets?: { id: string; name: string }[];
   onMoveToGroup?: (groupId: string) => void;
+  onDropSubItem?: (subItemId: string, targetCategoryId: string) => void;
   onSelect: () => void;
   onUpdateName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
@@ -30,6 +31,7 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
   canMoveUp = true,
   canMoveDown = true,
   onMove,  groupTargets,  onMoveToGroup,
+  onDropSubItem,
   onSelect,
   onUpdateName,
   onDelete,
@@ -39,6 +41,7 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
   onDragEnd,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isOverSubItem, setIsOverSubItem] = useState(false);
   const { subItems } = useWorkspace();
   const subItemCount = subItems.filter((s) => s.categoryId === item.id).length;
 
@@ -46,8 +49,26 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
     <div
       draggable={!isEditing}
       onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes('application/subitem-id')) {
+          e.preventDefault();
+          setIsOverSubItem(true);
+          return;
+        }
+        onDragOver(e);
+      }}
+      onDragLeave={() => setIsOverSubItem(false)}
+      onDrop={(e) => {
+        setIsOverSubItem(false);
+        const subId = e.dataTransfer.getData('application/subitem-id');
+        if (subId && onDropSubItem) {
+          e.preventDefault();
+          e.stopPropagation();
+          onDropSubItem(subId, item.id);
+          return;
+        }
+        onDrop(e);
+      }}
       onDragEnd={onDragEnd}
       onClick={onSelect}
       onDoubleClick={(e) => {
@@ -55,7 +76,9 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
         setIsEditing(true);
       }}
       className={`group relative h-7 px-2 flex items-center gap-1.5 text-xs cursor-pointer select-none border-b border-slate-200 transition-colors pr-0 ${
-        isSelected
+        isOverSubItem
+          ? 'bg-blue-100 ring-2 ring-blue-500 ring-inset'
+          : isSelected
           ? 'bg-emerald-100 text-emerald-950 font-semibold'
           : 'hover:bg-slate-100 text-slate-800'
       } ${isDragged ? 'opacity-40 border-dashed border-slate-400' : ''}`}
