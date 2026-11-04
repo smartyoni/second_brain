@@ -54,16 +54,7 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
 
   return (
     <aside className="w-full lg:w-[331px] shrink-0 h-full bg-white border-r border-[#dadce0] flex flex-col select-none overflow-y-auto px-3 py-3 space-y-3">
-      {/* 1. 구글 미니 달력 */}
-      <div className="pb-1">
-        <GoogleMiniCalendar
-          currentDateObj={currentDateObj}
-          selectedDate={selectedDate}
-          onSelectDate={onSelectDate}
-        />
-      </div>
-
-      {/* 2. 미니달력 하단: [ 퀵메모이동 | 퀵메모 | 모드전환 ] 각진 사각 세그먼트바 */}
+      {/* 1. 상단: [ 퀵메모이동 | 퀵메모 | 모드전환 ] 각진 사각 세그먼트바 */}
       <div className="w-full">
         <QuickMemoBar
           activeSegment={activeSegment}
@@ -71,6 +62,15 @@ export const GoogleCalendarSidebar: React.FC<GoogleCalendarSidebarProps> = ({
           onOpenModal={() => setIsQuickMemoOpen(true)}
           memoCount={quickMemos.length}
           isQuickMemoTab={false}
+        />
+      </div>
+
+      {/* 2. 구글 미니 달력 */}
+      <div className="pb-1">
+        <GoogleMiniCalendar
+          currentDateObj={currentDateObj}
+          selectedDate={selectedDate}
+          onSelectDate={onSelectDate}
         />
       </div>
 
