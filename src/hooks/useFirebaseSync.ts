@@ -11,7 +11,11 @@ import {
   QuickMemo,
   CalendarEvent,
 } from '../types';
-import { initialTopCategories } from '../context/initialData';
+import {
+  initialTopCategories,
+  initialTodoGroups,
+  initialTodoCategories,
+} from '../context/initialData';
 
 interface FirebaseSyncProps {
   topCategories: TopCategory[];
@@ -78,6 +82,25 @@ const ensureFixedTopCategories = (list: TopCategory[]): TopCategory[] => {
   ];
 };
 
+const ensureFixedTodoData = (
+  groups: CategoryGroup[],
+  items: CategoryItem[]
+): { groups: CategoryGroup[]; items: CategoryItem[] } => {
+  const mergedGroups = Array.isArray(groups) ? [...groups] : [];
+  for (const fg of initialTodoGroups) {
+    if (!mergedGroups.some((g) => g.id === fg.id)) {
+      mergedGroups.push(fg);
+    }
+  }
+  const mergedItems = Array.isArray(items) ? [...items] : [];
+  for (const fi of initialTodoCategories) {
+    if (!mergedItems.some((c) => c.id === fi.id)) {
+      mergedItems.push(fi);
+    }
+  }
+  return { groups: mergedGroups, items: mergedItems };
+};
+
 export const useFirebaseSync = ({
   topCategories,
   setTopCategories,
@@ -103,9 +126,10 @@ export const useFirebaseSync = ({
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const applyPayloadToState = (payload: WorkspacePayload) => {
+    const { groups, items } = ensureFixedTodoData(payload.categoryGroups, payload.categoryItems);
     setTopCategories(ensureFixedTopCategories(payload.topCategories));
-    setCategoryGroups(payload.categoryGroups);
-    setCategoryItems(payload.categoryItems);
+    setCategoryGroups(groups);
+    setCategoryItems(items);
     setSubItems(payload.subItems);
     setTextGroups(payload.textGroups);
     setChecklistGroups(payload.checklistGroups);
@@ -143,14 +167,18 @@ export const useFirebaseSync = ({
 
         const data = snapshot.data();
         if (data) {
+          const { groups: syncedGroups, items: syncedItems } = ensureFixedTodoData(
+            Array.isArray(data.categoryGroups) ? data.categoryGroups : [],
+            Array.isArray(data.categoryItems) ? data.categoryItems : []
+          );
           const remotePayload = sanitizePayload({
             topCategories: ensureFixedTopCategories(
               Array.isArray(data.topCategories) && data.topCategories.length > 0
                 ? data.topCategories
                 : initialTopCategories
             ),
-            categoryGroups: Array.isArray(data.categoryGroups) ? data.categoryGroups : [],
-            categoryItems: Array.isArray(data.categoryItems) ? data.categoryItems : [],
+            categoryGroups: syncedGroups,
+            categoryItems: syncedItems,
             subItems: Array.isArray(data.subItems) ? data.subItems : [],
             textGroups: Array.isArray(data.textGroups) ? data.textGroups : [],
             checklistGroups: Array.isArray(data.checklistGroups) ? data.checklistGroups : [],

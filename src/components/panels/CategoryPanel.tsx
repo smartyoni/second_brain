@@ -10,6 +10,7 @@ import { QuickMemoModal } from '../category/QuickMemoModal';
 import { QuickMemoMonthList } from '../category/QuickMemoMonthList';
 import { QuickMemoSegment } from '../../types';
 import { moveScopedItem } from '../../utils/orderUtils';
+import { FIXED_TODO_GROUP_IDS, FIXED_TODO_CATEGORY_IDS } from '../../context/initialData';
 
 export const CategoryPanel: React.FC = () => {
   const {
@@ -163,6 +164,7 @@ export const CategoryPanel: React.FC = () => {
                     )
                   }
                   onDeleteGroup={(id) => {
+                    if (FIXED_TODO_GROUP_IDS.has(id)) return;
                     setCategoryGroups((prev) => prev.filter((g) => g.id !== id));
                     setCategoryItems((prev) =>
                       prev.map((c) => (c.groupId === id ? { ...c, groupId: undefined } : c))
@@ -177,9 +179,10 @@ export const CategoryPanel: React.FC = () => {
                       prev.map((c) => (c.id === id ? { ...c, name } : c))
                     )
                   }
-                  onDeleteCategory={(id) =>
-                    setCategoryItems((prev) => prev.filter((c) => c.id !== id))
-                  }
+                  onDeleteCategory={(id) => {
+                    if (FIXED_TODO_CATEGORY_IDS.has(id)) return;
+                    setCategoryItems((prev) => prev.filter((c) => c.id !== id));
+                  }}
                   onCategoryDragStart={onCategoryDragStart}
                   onCategoryDragOver={onCategoryDragOver}
                   onCategoryDrop={onCategoryDrop}
@@ -223,9 +226,10 @@ export const CategoryPanel: React.FC = () => {
                     prev.map((c) => (c.id === id ? { ...c, name } : c))
                   )
                 }
-                onDeleteCategory={(id) =>
-                  setCategoryItems((prev) => prev.filter((c) => c.id !== id))
-                }
+                onDeleteCategory={(id) => {
+                  if (FIXED_TODO_CATEGORY_IDS.has(id)) return;
+                  setCategoryItems((prev) => prev.filter((c) => c.id !== id));
+                }}
                 onCategoryDragStart={onCategoryDragStart}
                 onCategoryDragOver={onCategoryDragOver}
                 onCategoryDrop={onCategoryDrop}
