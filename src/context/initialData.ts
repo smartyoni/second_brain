@@ -45,7 +45,7 @@ export const initialTodoGroups: CategoryGroup[] = [
   },
 ];
 
-// 할일관리(top-2) 전용 하드코딩 기본 카테고리
+// 할일관리(top-2) 전용 하드코딩 기본 카테고리 (TODO LIST 하위 고정)
 export const initialTodoCategories: CategoryItem[] = [
   {
     id: 'cat-1793318137485',
@@ -77,14 +77,6 @@ export const initialTodoCategories: CategoryItem[] = [
     groupId: 'grp-1793352952647',
     name: '언젠가/어쩌면',
     order: 3,
-    itemCount: 0,
-  },
-  {
-    id: 'cat-1793598358393',
-    topCategoryId: 'top-2',
-    groupId: 'grp-1793598347056',
-    name: '사무실폐업',
-    order: 0,
     itemCount: 0,
   },
 ];
