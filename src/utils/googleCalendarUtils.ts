@@ -7,6 +7,7 @@ import {
   shiftDateStr,
   isItemOnDate,
   getDatesInRange,
+  formatSchedulePeriod,
 } from './calendarUtils';
 
 export {
@@ -16,6 +17,7 @@ export {
   shiftDateStr,
   isItemOnDate,
   getDatesInRange,
+  formatSchedulePeriod,
 };
 
 // 구글 캘린더 공식 머티리얼 컬러 팔레트

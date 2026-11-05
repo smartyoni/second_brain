@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { CalendarScheduleItem } from '../../types';
-import { parseTimeToMinutes, getTodayDateStr, getDatesInRange } from '../../utils/calendarUtils';
+import { parseTimeToMinutes, getTodayDateStr, formatSchedulePeriod } from '../../utils/calendarUtils';
 import { GoogleCalendarScheduleItemRow } from './GoogleCalendarScheduleItemRow';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
@@ -44,11 +44,10 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
     }
 
     items.forEach((item) => {
-      getDatesInRange(item.dueDate, item.endDate).forEach((dStr) => {
-        const list = dayMap.get(dStr) || [];
-        list.push(item);
-        dayMap.set(dStr, list);
-      });
+      if (!item.dueDate) return;
+      const list = dayMap.get(item.dueDate) || [];
+      list.push(item);
+      dayMap.set(item.dueDate, list);
     });
 
     const sortedDates = Array.from(dayMap.keys()).sort();
@@ -111,18 +110,22 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
     }
   }, [todayStr, selectedDate, groupedDays]);
 
-  // 시간 포맷 헬퍼 (종일 / HH:mm~HH:mm)
-  const formatTimeRange = (dueTime?: string, endTime?: string) => {
-    if (!dueTime) return '종일';
-    if (endTime) return `${dueTime}~${endTime}`;
-    const [hStr, mStr] = dueTime.split(':');
+  // 시간 또는 기간 포맷 (기간 일정: 13~15, 시간 일정: HH:mm~HH:mm, 종일: 종일)
+  const formatTimeRange = (item: CalendarScheduleItem) => {
+    const periodText = formatSchedulePeriod(item.dueDate, item.endDate);
+    if (periodText) {
+      return item.dueTime ? `${periodText} ${item.dueTime}` : periodText;
+    }
+    if (!item.dueTime) return '종일';
+    if (item.endTime) return `${item.dueTime}~${item.endTime}`;
+    const [hStr, mStr] = item.dueTime.split(':');
     const h = parseInt(hStr, 10);
     const m = parseInt(mStr || '0', 10);
     if (!isNaN(h) && !isNaN(m)) {
       const endH = (h + 1) % 24;
-      return `${dueTime}~${String(endH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      return `${item.dueTime}~${String(endH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     }
-    return dueTime;
+    return item.dueTime;
   };
 
   // 구글 캘린더 현재 시각 레드 인디케이터 라인

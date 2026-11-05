@@ -7,7 +7,7 @@ import { SmartText } from '../shared/SmartText';
 interface GoogleCalendarScheduleItemRowProps {
   item: CalendarScheduleItem;
   onSelectItem: (item: CalendarScheduleItem) => void;
-  formatTimeRange: (dueTime?: string, endTime?: string) => string;
+  formatTimeRange: (item: CalendarScheduleItem) => string;
   onContextMenu?: (item: CalendarScheduleItem, e: React.MouseEvent) => void;
 }
 
@@ -18,7 +18,7 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
   onContextMenu,
 }) => {
   const colorTheme = getGoogleCategoryColor(item.categoryId);
-  const timeText = formatTimeRange(item.dueTime, item.endTime);
+  const timeText = formatTimeRange(item);
 
   return (
     <div
@@ -35,8 +35,8 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
         className="w-2.5 h-2.5 rounded-full shrink-0 mr-2"
         style={{ backgroundColor: colorTheme.rawHex }}
       />
-      {/* 시간 표기 (종일 또는 HH:mm~HH:mm) */}
-      <span className="w-[76px] mr-2 text-xs text-[#3c4043] font-medium shrink-0 whitespace-nowrap">
+      {/* 시간 또는 기간 표기 (예: "종일", "13~15", "09:00~10:00") */}
+      <span className="min-w-[64px] max-w-[96px] mr-2 text-xs text-[#3c4043] font-medium shrink-0 whitespace-nowrap">
         {timeText}
       </span>
       {/* 일정 제목 */}

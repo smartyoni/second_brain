@@ -129,3 +129,29 @@ export const getDatesInRange = (startDate: string, endDate?: string): string[] =
   return dates;
 };
 
+/**
+ * 시작일(dueDate)과 마감일(endDate)을 기반으로 일정뷰 기간 텍스트를 반환합니다.
+ * 같은 달인 경우: "13~15"
+ * 다른 달인 경우: "11.30~12.2"
+ * 다른 연도인 경우: "25.12.30~26.1.2"
+ * 마감일이 없거나 시작일 이하인 경우: null
+ */
+export const formatSchedulePeriod = (
+  dueDate?: string,
+  endDate?: string
+): string | null => {
+  if (!dueDate || !endDate || endDate <= dueDate) return null;
+  const [sy, sm, sd] = dueDate.split('-').map(Number);
+  const [ey, em, ed] = endDate.split('-').map(Number);
+  if (isNaN(sy) || isNaN(ey) || isNaN(sd) || isNaN(ed)) return null;
+
+  if (sy === ey && sm === em) {
+    return `${sd}~${ed}`;
+  } else if (sy === ey) {
+    return `${sm}.${sd}~${em}.${ed}`;
+  } else {
+    return `${String(sy).slice(2)}.${sm}.${sd}~${String(ey).slice(2)}.${em}.${ed}`;
+  }
+};
+
+
