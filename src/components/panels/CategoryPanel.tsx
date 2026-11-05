@@ -1,23 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { useDragSort } from '../../hooks/useDragSort';
 import { AccountBar } from '../category/AccountBar';
 import { TopCategoryGrid } from '../category/TopCategoryGrid';
 import { CategoryToolbar } from '../category/CategoryToolbar';
-import { CategoryGroupAccordion } from '../category/CategoryGroupAccordion';
+import { CategoryGroupList } from '../category/CategoryGroupList';
 import { QuickMemoBar } from '../category/QuickMemoBar';
 import { QuickMemoModal } from '../category/QuickMemoModal';
 import { QuickMemoMonthList } from '../category/QuickMemoMonthList';
+import { GoogleMiniCalendar } from '../googlecalendar/GoogleMiniCalendar';
 import { QuickMemoSegment } from '../../types';
 import { moveScopedItem } from '../../utils/orderUtils';
+import { parseLocalDate } from '../../utils/calendarUtils';
 import {
   FIXED_TODO_GROUP_IDS,
   FIXED_TODO_CATEGORY_IDS,
   FIXED_PROJECT_GROUP_IDS,
 } from '../../context/initialData';
 
-export const CategoryPanel: React.FC = () => {
+interface CategoryPanelProps {
+  showMiniCalendar?: boolean;
+}
+
+export const CategoryPanel: React.FC<CategoryPanelProps> = ({ showMiniCalendar }) => {
   const {
+    appMode,
     categoryGroups,
     setCategoryGroups,
     categoryItems,
@@ -29,6 +36,8 @@ export const CategoryPanel: React.FC = () => {
     quickMemos,
     addQuickMemo,
     selectTopCategory,
+    selectedCalendarDate,
+    setSelectedCalendarDate,
   } = useWorkspace();
 
   const [activeSegment, setActiveSegment] = useState<QuickMemoSegment>('memo');
@@ -37,6 +46,13 @@ export const CategoryPanel: React.FC = () => {
   const currentTopId = getCurrentActiveState().topCategoryId;
   const isQuickMemoTab = currentTopId === 'top-1';
   const selectedCategoryId = getCurrentActiveState().categoryId;
+
+  // 캘린더 모드이거나 props로 명시된 경우 미니달력 표시
+  const isMiniCalendarVisible = showMiniCalendar ?? (appMode === 'calendar');
+
+  const currentDateObj = useMemo(() => {
+    return parseLocalDate(selectedCalendarDate);
+  }, [selectedCalendarDate]);
 
   // 현재 선택된 대분류에 속한 그룹 및 카테고리 필터링
   const currentGroups = categoryGroups.filter((g) => g.topCategoryId === currentTopId);
@@ -134,129 +150,78 @@ export const CategoryPanel: React.FC = () => {
             onAddCategory={handleAddCategory}
           />
 
-          <div className="flex-1 overflow-y-auto">
-            {currentGroups.map((group, groupIdx) => {
-              const groupItems = currentItems.filter((c) => c.groupId === group.id);
-              return (
-                <CategoryGroupAccordion
-                  key={group.id}
-                  group={group}
-                  items={groupItems}
-                  selectedCategoryId={selectedCategoryId}
-                  draggedCategoryId={draggedCategoryId}
-                  canMoveGroupUp={groupIdx > 0}
-                  canMoveGroupDown={groupIdx < currentGroups.length - 1}
-                  onMoveGroup={(id, dir) =>
-                    setCategoryGroups((prev) =>
-                      moveScopedItem(prev, (g) => g.topCategoryId === currentTopId, id, dir)
-                    )
-                  }
-                  onMoveCategory={(catId, dir) =>
-                    setCategoryItems((prev) =>
-                      moveScopedItem(
-                        prev,
-                        (c) => c.topCategoryId === currentTopId && c.groupId === group.id,
-                        catId,
-                        dir
-                      )
-                    )
-                  }
-                  groupTargets={groupTargets}
-                  onMoveCategoryToGroup={handleMoveCategoryToGroup}
-                  onDropSubItem={handleDropSubItem}
-                  onToggleExpand={(id) =>
-                    setCategoryGroups((prev) =>
-                      prev.map((g) => (g.id === id ? { ...g, isExpanded: !g.isExpanded } : g))
-                    )
-                  }
-                  onUpdateGroupName={(id, name) =>
-                    setCategoryGroups((prev) =>
-                      prev.map((g) => (g.id === id ? { ...g, name } : g))
-                    )
-                  }
-                  onDeleteGroup={(id) => {
-                    if (FIXED_TODO_GROUP_IDS.has(id) || FIXED_PROJECT_GROUP_IDS.has(id)) return;
-                    setCategoryGroups((prev) => prev.filter((g) => g.id !== id));
-                    setCategoryItems((prev) =>
-                      prev.map((c) => (c.groupId === id ? { ...c, groupId: undefined } : c))
-                    );
-                  }}
-                  onAddCategoryToGroup={(id) => {
-                    if (currentTopId) addCategoryItem(currentTopId, id);
-                  }}
-                  onSelectCategory={selectCategory}
-                  onUpdateCategoryName={(id, name) =>
-                    setCategoryItems((prev) =>
-                      prev.map((c) => (c.id === id ? { ...c, name } : c))
-                    )
-                  }
-                  onDeleteCategory={(id) => {
-                    if (FIXED_TODO_CATEGORY_IDS.has(id)) return;
-                    setCategoryItems((prev) => prev.filter((c) => c.id !== id));
-                  }}
-                  onCategoryDragStart={onCategoryDragStart}
-                  onCategoryDragOver={onCategoryDragOver}
-                  onCategoryDrop={onCategoryDrop}
-                  onCategoryDragEnd={onCategoryDragEnd}
-                />
+          <CategoryGroupList
+            currentTopId={currentTopId}
+            currentGroups={currentGroups}
+            currentItems={currentItems}
+            unclassifiedItems={unclassifiedItems}
+            selectedCategoryId={selectedCategoryId}
+            draggedCategoryId={draggedCategoryId}
+            groupTargets={groupTargets}
+            onMoveGroup={(id, dir) =>
+              setCategoryGroups((prev) =>
+                moveScopedItem(prev, (g) => g.topCategoryId === currentTopId, id, dir)
+              )
+            }
+            onMoveCategory={(catId, dir, gId) =>
+              setCategoryItems((prev) =>
+                moveScopedItem(
+                  prev,
+                  (c) => c.topCategoryId === currentTopId && (gId ? c.groupId === gId : !c.groupId),
+                  catId,
+                  dir
+                )
+              )
+            }
+            onMoveCategoryToGroup={handleMoveCategoryToGroup}
+            onDropSubItem={handleDropSubItem}
+            onToggleExpand={(id) =>
+              setCategoryGroups((prev) =>
+                prev.map((g) => (g.id === id ? { ...g, isExpanded: !g.isExpanded } : g))
+              )
+            }
+            onUpdateGroupName={(id, name) =>
+              setCategoryGroups((prev) =>
+                prev.map((g) => (g.id === id ? { ...g, name } : g))
+              )
+            }
+            onDeleteGroup={(id) => {
+              if (FIXED_TODO_GROUP_IDS.has(id) || FIXED_PROJECT_GROUP_IDS.has(id)) return;
+              setCategoryGroups((prev) => prev.filter((g) => g.id !== id));
+              setCategoryItems((prev) =>
+                prev.map((c) => (c.groupId === id ? { ...c, groupId: undefined } : c))
               );
-            })}
-
-            {unclassifiedItems.length > 0 && (
-              <CategoryGroupAccordion
-                group={{
-                  id: 'grp-unclassified',
-                  topCategoryId: currentTopId || '',
-                  name: '미분류 카테고리',
-                  isExpanded: true,
-                  order: 9999,
-                }}
-                items={unclassifiedItems}
-                selectedCategoryId={selectedCategoryId}
-                draggedCategoryId={draggedCategoryId}
-                onMoveGroup={() => {}}
-                onMoveCategory={(catId, dir) =>
-                  setCategoryItems((prev) =>
-                    moveScopedItem(
-                      prev,
-                      (c) => c.topCategoryId === currentTopId && !c.groupId,
-                      catId,
-                      dir
-                    )
-                  )
-                }
-                groupTargets={groupTargets}
-                onMoveCategoryToGroup={handleMoveCategoryToGroup}
-                onDropSubItem={handleDropSubItem}
-                onToggleExpand={() => {}}
-                onUpdateGroupName={() => {}}
-                onDeleteGroup={() => {}}
-                onAddCategoryToGroup={() => currentTopId && addCategoryItem(currentTopId)}
-                onSelectCategory={selectCategory}
-                onUpdateCategoryName={(id, name) =>
-                  setCategoryItems((prev) =>
-                    prev.map((c) => (c.id === id ? { ...c, name } : c))
-                  )
-                }
-                onDeleteCategory={(id) => {
-                  if (FIXED_TODO_CATEGORY_IDS.has(id)) return;
-                  setCategoryItems((prev) => prev.filter((c) => c.id !== id));
-                }}
-                onCategoryDragStart={onCategoryDragStart}
-                onCategoryDragOver={onCategoryDragOver}
-                onCategoryDrop={onCategoryDrop}
-                onCategoryDragEnd={onCategoryDragEnd}
-              />
-            )}
-
-            {currentGroups.length === 0 && unclassifiedItems.length === 0 && (
-              <div className="p-8 text-center text-xs text-slate-400 leading-relaxed">
-                등록된 그룹이나 카테고리가 없습니다.<br />
-                상단 툴바의 <strong>[+ 그룹 추가]</strong> 또는 <strong>[+ 카테고리 추가]</strong>를 눌러보세요.
-              </div>
-            )}
-          </div>
+            }}
+            onAddCategoryToGroup={(id) => {
+              if (currentTopId) addCategoryItem(currentTopId, id || undefined);
+            }}
+            onSelectCategory={selectCategory}
+            onUpdateCategoryName={(id, name) =>
+              setCategoryItems((prev) =>
+                prev.map((c) => (c.id === id ? { ...c, name } : c))
+              )
+            }
+            onDeleteCategory={(id) => {
+              if (FIXED_TODO_CATEGORY_IDS.has(id)) return;
+              setCategoryItems((prev) => prev.filter((c) => c.id !== id));
+            }}
+            onCategoryDragStart={onCategoryDragStart}
+            onCategoryDragOver={onCategoryDragOver}
+            onCategoryDrop={onCategoryDrop}
+            onCategoryDragEnd={onCategoryDragEnd}
+          />
         </>
+      )}
+
+      {/* 1번 패널 가장 하단 구글 미니달력 (캘린더 모드 등 활성화 시) */}
+      {isMiniCalendarVisible && (
+        <div className="shrink-0 border-t border-slate-200 bg-white py-2 px-1">
+          <GoogleMiniCalendar
+            currentDateObj={currentDateObj}
+            selectedDate={selectedCalendarDate}
+            onSelectDate={setSelectedCalendarDate}
+          />
+        </div>
       )}
 
       {/* 모바일(lg 미만): 하단 네비게이터바 바로 위로 5*3열 기능탭 배치 */}

@@ -16,6 +16,10 @@ export const GoogleMiniCalendar: React.FC<GoogleMiniCalendarProps> = ({
 }) => {
   const [navDate, setNavDate] = React.useState<Date>(new Date(currentDateObj));
 
+  React.useEffect(() => {
+    setNavDate(new Date(currentDateObj));
+  }, [currentDateObj]);
+
   const year = navDate.getFullYear();
   const month = navDate.getMonth();
 

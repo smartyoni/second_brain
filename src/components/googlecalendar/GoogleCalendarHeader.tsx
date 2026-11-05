@@ -30,7 +30,7 @@ export const GoogleCalendarHeader: React.FC<GoogleCalendarHeaderProps> = ({
   const todayNum = new Date().getDate();
 
   return (
-    <header className="h-14 sm:h-16 px-2 sm:px-4 bg-white border-b border-[#dadce0] flex items-center justify-between select-none shrink-0 z-30">
+    <header className="h-12 sm:h-13 px-2 sm:px-3 bg-white border-b border-[#dadce0] flex items-center justify-between select-none shrink-0 z-30">
       {/* 1. 좌측: 햄버거 메뉴 + 로고 + 네비게이션 + 날짜 */}
       <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 shrink-0 min-w-0">
         <button

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFullCalendar } from '../../hooks/useFullCalendar';
 import { useCalendarDragDrop } from '../../hooks/useCalendarDragDrop';
 import { GoogleCalendarHeader } from './GoogleCalendarHeader';
-import { GoogleCalendarSidebar } from './GoogleCalendarSidebar';
+import { CategoryPanel } from '../panels/CategoryPanel';
 import { GoogleCalendarMonthView } from './GoogleCalendarMonthView';
 import { CalendarSideViewType } from './GoogleCalendarRightPanel';
 import { GoogleCalendarEventDialog } from './GoogleCalendarEventDialog';
@@ -137,66 +137,70 @@ export const GoogleCalendarLayout: React.FC = () => {
 
   return (
     <div className="h-full w-full overflow-hidden flex flex-col bg-white select-none">
-      {/* 1. 상단 글로벌 앱 헤더 */}
-      <GoogleCalendarHeader
-        onToggleSidebar={handleHeaderMenuToggle}
-        title={headerTitle}
-        onPrev={goToPrev}
-        onNext={goToNext}
-        onToday={goToToday}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-
-      {/* 2. 데스크탑 / 태블릿 가로모드 뷰 (1200px 이상 & landscape): 3패널 상시 분할 레이아웃 */}
-      <div className="hidden lg:flex flex-1 overflow-hidden">
-        <GoogleCalendarSidebar
-          isOpen={isSidebarOpen}
-          currentDateObj={currentDateObj}
-          selectedDate={selectedCalendarDate}
-          onSelectDate={setDateByString}
-          allItems={allItems}
-          topCategories={topCategories}
-          selectedFilterKeys={selectedFilterKeys}
-          onToggleFilterKey={toggleFilterKey}
-          onSelectAll={selectAll}
-          onClearAll={clearAll}
-          showCompleted={showCompleted}
-          onToggleShowCompleted={() => setShowCompleted(!showCompleted)}
-          onBackToWorkspace={() => setAppMode('workspace')}
+      {/* 1. 모바일 뷰 상단 헤더 (lg 미만) */}
+      <div className="block lg:hidden shrink-0">
+        <GoogleCalendarHeader
+          onToggleSidebar={handleHeaderMenuToggle}
+          title={headerTitle}
+          onPrev={goToPrev}
+          onNext={goToNext}
+          onToday={goToToday}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
+      </div>
 
-        <main className="flex-1 flex flex-col h-full overflow-hidden bg-white">
-          <GoogleCalendarMonthView
-            currentDateObj={currentDateObj}
-            selectedDate={selectedCalendarDate}
-            items={filteredItems}
-            sideViewType={sideViewType}
-            onSideViewTypeChange={(type) => {
-              setSideViewType(type);
-              setViewType(type);
-            }}
-            isRightPanelOpen={isRightPanelOpen}
-            onToggleRightPanel={(isOpen) => {
-              setIsRightPanelOpen(isOpen);
-              setViewType(isOpen ? sideViewType : 'month');
-            }}
-            onSelectDate={setDateByString}
-            onSelectItem={setSelectedScheduleItem}
-            onCellClick={(date, time, isAllDay) =>
-              handleOpenQuickCreate(date, time || '10:00', isAllDay || false)
-            }
-            draggedItem={draggedItem}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDropOnDate={handleDropOnDate}
-            onDropOnTime={handleDropOnTime}
-            onDropAllDay={handleDropAllDay}
-            onDragEnd={handleDragEnd}
-            onContextMenu={handleContextMenu}
-            onPrevMonth={goToPrev}
-            onNextMonth={goToNext}
+      {/* 2. 데스크탑 뷰 (lg 이상): 1번 패널(지식보관소 카테고리 + 하단 미니달력) + 2·3·4번 패널(캘린더 헤더 및 메인 뷰) */}
+      <div className="hidden lg:flex flex-1 overflow-hidden">
+        {isSidebarOpen && (
+          <aside className="w-[331px] shrink-0 h-full border-r border-[#dadce0] overflow-hidden bg-white">
+            <CategoryPanel showMiniCalendar />
+          </aside>
+        )}
+
+        <main className="flex-1 min-w-0 flex flex-col h-full overflow-hidden bg-white">
+          <GoogleCalendarHeader
+            onToggleSidebar={handleHeaderMenuToggle}
+            title={headerTitle}
+            onPrev={goToPrev}
+            onNext={goToNext}
+            onToday={goToToday}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
+
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <GoogleCalendarMonthView
+              currentDateObj={currentDateObj}
+              selectedDate={selectedCalendarDate}
+              items={filteredItems}
+              sideViewType={sideViewType}
+              onSideViewTypeChange={(type) => {
+                setSideViewType(type);
+                setViewType(type);
+              }}
+              isRightPanelOpen={isRightPanelOpen}
+              onToggleRightPanel={(isOpen) => {
+                setIsRightPanelOpen(isOpen);
+                setViewType(isOpen ? sideViewType : 'month');
+              }}
+              onSelectDate={setDateByString}
+              onSelectItem={setSelectedScheduleItem}
+              onCellClick={(date, time, isAllDay) =>
+                handleOpenQuickCreate(date, time || '10:00', isAllDay || false)
+              }
+              draggedItem={draggedItem}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDropOnDate={handleDropOnDate}
+              onDropOnTime={handleDropOnTime}
+              onDropAllDay={handleDropAllDay}
+              onDragEnd={handleDragEnd}
+              onContextMenu={handleContextMenu}
+              onPrevMonth={goToPrev}
+              onNextMonth={goToNext}
+            />
+          </div>
         </main>
       </div>
 
