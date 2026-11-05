@@ -15,6 +15,8 @@ import {
   initialTopCategories,
   initialTodoGroups,
   initialTodoCategories,
+  initialProjectGroups,
+  initialProjectCategories,
 } from '../context/initialData';
 
 interface FirebaseSyncProps {
@@ -74,11 +76,13 @@ const ensureFixedTopCategories = (list: TopCategory[]): TopCategory[] => {
   if (!Array.isArray(list) || list.length === 0) return initialTopCategories;
   const top1 = list.find((t) => t.id === 'top-1') || { id: 'top-1', name: '퀵메모', index: 0 };
   const top2 = list.find((t) => t.id === 'top-2') || { id: 'top-2', name: '할일관리', index: 1 };
-  const others = list.filter((t) => t.id !== 'top-1' && t.id !== 'top-2');
+  const top3 = list.find((t) => t.id === 'top-3') || { id: 'top-3', name: '프로젝트', index: 2 };
+  const others = list.filter((t) => t.id !== 'top-1' && t.id !== 'top-2' && t.id !== 'top-3');
   return [
     { ...top1, name: '퀵메모', index: 0 },
     { ...top2, name: '할일관리', index: 1 },
-    ...others.map((item, idx) => ({ ...item, index: idx + 2 })),
+    { ...top3, name: '프로젝트', index: 2 },
+    ...others.map((item, idx) => ({ ...item, index: idx + 3 })),
   ];
 };
 
@@ -87,13 +91,15 @@ const ensureFixedTodoData = (
   items: CategoryItem[]
 ): { groups: CategoryGroup[]; items: CategoryItem[] } => {
   const mergedGroups = Array.isArray(groups) ? [...groups] : [];
-  for (const fg of initialTodoGroups) {
+  const requiredGroups = [...initialTodoGroups, ...initialProjectGroups];
+  for (const fg of requiredGroups) {
     if (!mergedGroups.some((g) => g.id === fg.id)) {
       mergedGroups.push(fg);
     }
   }
   const mergedItems = Array.isArray(items) ? [...items] : [];
-  for (const fi of initialTodoCategories) {
+  const requiredItems = [...initialTodoCategories, ...initialProjectCategories];
+  for (const fi of requiredItems) {
     if (!mergedItems.some((c) => c.id === fi.id)) {
       mergedItems.push(fi);
     }

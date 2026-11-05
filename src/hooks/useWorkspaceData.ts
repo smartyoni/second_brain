@@ -28,7 +28,7 @@ export const useWorkspaceData = (
   const [checklistGroups, setChecklistGroups] = useState<ChecklistGroupData[]>(initialChecklistGroups);
 
   const updateTopCategoryName = (id: string, name: string) => {
-    if (id === 'top-1' || id === 'top-2') return; // 1*1 퀵메모, 1*2 할일관리는 이름 변경 불가 (하드코딩 고정)
+    if (id === 'top-1' || id === 'top-2' || id === 'top-3') return; // 1*1 퀵메모, 1*2 할일관리, 1*3 프로젝트는 이름 변경 불가 (하드코딩 고정)
     setTopCategories((prev) => prev.map((item) => (item.id === id ? { ...item, name } : item)));
   };
 

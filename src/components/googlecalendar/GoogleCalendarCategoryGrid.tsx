@@ -23,6 +23,7 @@ export const GoogleCalendarCategoryGrid: React.FC<GoogleCalendarCategoryGridProp
         {topCategories.slice(0, 15).map((cat, index) => {
           const isQuickMemo = cat.id === 'top-1' || index === 0;
           const isTodoTab = cat.id === 'top-2' || (index === 1 && cat.name === '할일관리');
+          const isProjectTab = cat.id === 'top-3' || (index === 2 && cat.name === '프로젝트');
           const isKeyIncluded = !isNoneSelected && selectedFilterKeys.includes(cat.id);
           // 전체 선택 상태이거나, 개별 선택된 경우 활성 상태
           const isFilterActive = isAllSelected || isKeyIncluded;
@@ -33,6 +34,8 @@ export const GoogleCalendarCategoryGrid: React.FC<GoogleCalendarCategoryGridProp
             ? 'bg-blue-100 hover:bg-blue-200/90 text-blue-950 font-bold'
             : isTodoTab
             ? 'bg-amber-100/90 hover:bg-amber-200/90 text-amber-950 font-bold'
+            : isProjectTab
+            ? 'bg-indigo-100/90 hover:bg-indigo-200/90 text-indigo-950 font-bold'
             : index < 5
             ? 'bg-slate-100/90 hover:bg-slate-200/90 text-slate-800 font-semibold'
             : index < 10
@@ -55,18 +58,20 @@ export const GoogleCalendarCategoryGrid: React.FC<GoogleCalendarCategoryGridProp
             (i) => i.topCategoryId === cat.id && i.sourceType !== 'calendar'
           ).length;
 
+          const tabTitle = isQuickMemo ? '퀵메모' : isTodoTab ? '할일관리' : isProjectTab ? '프로젝트' : cat.name;
+
           return (
             <button
               key={cat.id}
               type="button"
               onClick={() => onToggleFilterKey(cat.id)}
-              title={`${isQuickMemo ? '퀵메모' : isTodoTab ? '할일관리' : cat.name}${count > 0 ? ` (${count}개)` : ''}`}
+              title={`${tabTitle}${count > 0 ? ` (${count}개)` : ''}`}
               className={`h-7 px-0.5 relative flex items-center justify-center text-center cursor-pointer transition-all truncate ${activeClass} ${
                 !isRightEdge ? 'border-r border-slate-300' : ''
               } ${!isBottomEdge ? 'border-b border-slate-300' : ''}`}
             >
               <span className="truncate text-[10.5px] px-0.5 leading-none">
-                {isQuickMemo ? '퀵메모' : isTodoTab ? '할일관리' : cat.name}
+                {tabTitle}
               </span>
               {count > 0 && (
                 <span

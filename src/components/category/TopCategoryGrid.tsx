@@ -23,14 +23,16 @@ export const TopCategoryGrid: React.FC = () => {
     handleDrop,
     handleDragEnd,
   } = useDragSort(topCategories, (newItems: TopCategory[]) => {
-    // 1*1 퀵메모(top-1)는 index 0, 1*2 할일관리(top-2)는 index 1 자리에 항상 고정
+    // 1*1 퀵메모(top-1)는 index 0, 1*2 할일관리(top-2)는 index 1, 1*3 프로젝트(top-3)는 index 2 자리에 항상 고정
     const top1 = topCategories.find((t) => t.id === 'top-1') || { id: 'top-1', name: '퀵메모', index: 0 };
     const top2 = topCategories.find((t) => t.id === 'top-2') || { id: 'top-2', name: '할일관리', index: 1 };
-    const others = newItems.filter((t) => t.id !== 'top-1' && t.id !== 'top-2');
+    const top3 = topCategories.find((t) => t.id === 'top-3') || { id: 'top-3', name: '프로젝트', index: 2 };
+    const others = newItems.filter((t) => t.id !== 'top-1' && t.id !== 'top-2' && t.id !== 'top-3');
     const reindexed = [
       { ...top1, name: '퀵메모', index: 0 },
       { ...top2, name: '할일관리', index: 1 },
-      ...others.map((item, idx) => ({ ...item, index: idx + 2 })),
+      { ...top3, name: '프로젝트', index: 2 },
+      ...others.map((item, idx) => ({ ...item, index: idx + 3 })),
     ];
     setTopCategories(reindexed);
   });
@@ -42,7 +44,8 @@ export const TopCategoryGrid: React.FC = () => {
         {topCategories.slice(0, 15).map((cat, index) => {
           const isQuickMemo = cat.id === 'top-1' || index === 0;
           const isTodoTab = cat.id === 'top-2' || (index === 1 && cat.name === '할일관리');
-          const isFixedTab = isQuickMemo || isTodoTab;
+          const isProjectTab = cat.id === 'top-3' || (index === 2 && cat.name === '프로젝트');
+          const isFixedTab = isQuickMemo || isTodoTab || isProjectTab;
           const isSelected = cat.id === currentTopId;
           const isDragged = cat.id === draggedId;
           const isEditing = editingId === cat.id;
@@ -52,6 +55,8 @@ export const TopCategoryGrid: React.FC = () => {
             ? 'bg-blue-100 hover:bg-blue-200/90 text-blue-950 font-bold'
             : isTodoTab
             ? 'bg-amber-100/90 hover:bg-amber-200/90 text-amber-950 font-bold'
+            : isProjectTab
+            ? 'bg-indigo-100/90 hover:bg-indigo-200/90 text-indigo-950 font-bold'
             : index < 5
             ? 'bg-slate-100/90 hover:bg-slate-200/90 text-slate-800 font-semibold'
             : index < 10
@@ -97,6 +102,8 @@ export const TopCategoryGrid: React.FC = () => {
                 <span className="truncate text-[11px] px-1 font-bold">퀵메모</span>
               ) : isTodoTab ? (
                 <span className="truncate text-[11px] px-1 font-bold">할일관리</span>
+              ) : isProjectTab ? (
+                <span className="truncate text-[11px] px-1 font-bold">프로젝트</span>
               ) : (
                 <InlineEditableText
                   value={cat.name}

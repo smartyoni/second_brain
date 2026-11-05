@@ -10,7 +10,11 @@ import { QuickMemoModal } from '../category/QuickMemoModal';
 import { QuickMemoMonthList } from '../category/QuickMemoMonthList';
 import { QuickMemoSegment } from '../../types';
 import { moveScopedItem } from '../../utils/orderUtils';
-import { FIXED_TODO_GROUP_IDS, FIXED_TODO_CATEGORY_IDS } from '../../context/initialData';
+import {
+  FIXED_TODO_GROUP_IDS,
+  FIXED_TODO_CATEGORY_IDS,
+  FIXED_PROJECT_GROUP_IDS,
+} from '../../context/initialData';
 
 export const CategoryPanel: React.FC = () => {
   const {
@@ -171,7 +175,7 @@ export const CategoryPanel: React.FC = () => {
                     )
                   }
                   onDeleteGroup={(id) => {
-                    if (FIXED_TODO_GROUP_IDS.has(id)) return;
+                    if (FIXED_TODO_GROUP_IDS.has(id) || FIXED_PROJECT_GROUP_IDS.has(id)) return;
                     setCategoryGroups((prev) => prev.filter((g) => g.id !== id));
                     setCategoryItems((prev) =>
                       prev.map((c) => (c.groupId === id ? { ...c, groupId: undefined } : c))
