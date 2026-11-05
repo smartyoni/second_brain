@@ -95,7 +95,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
           <h2 className="text-lg font-bold text-[#202124] flex items-center gap-1.5">
             <span>{formattedDate}</span>
             {lunar && (
-              <span className="text-xs font-normal text-[#5f6368]" title={lunar.fullText}>
+              <span className="text-xs font-medium text-purple-600" title={lunar.fullText}>
                 ({lunar.text})
               </span>
             )}

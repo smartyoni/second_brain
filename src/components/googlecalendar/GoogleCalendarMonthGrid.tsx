@@ -191,8 +191,8 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
                   {/* 음력 날짜 표기 */}
                   {lunar && !compact && (
                     <span
-                      className={`text-[9px] sm:text-[10px] tracking-tight shrink-0 font-normal ${
-                        item.isCurrentMonth ? 'text-[#70757a]' : 'text-[#a0a5aa]'
+                      className={`text-[9px] sm:text-[10px] tracking-tight shrink-0 font-medium ${
+                        item.isCurrentMonth ? 'text-purple-600' : 'text-purple-300'
                       }`}
                       title={lunar.fullText}
                     >
