@@ -11,6 +11,7 @@ import {
 import { CalendarScheduleItem } from '../../types';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { getGoogleCategoryColor, getTodayDateStr, parseLocalDate } from '../../utils/googleCalendarUtils';
+import { getLunarDate } from '../../utils/lunarCalendar';
 import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarMonthDayAgendaProps {
@@ -45,6 +46,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
 
   const todayStr = getTodayDateStr();
   const isToday = selectedDate === todayStr;
+  const lunar = getLunarDate(selectedDate);
 
   const handleToggleComplete = (item: CalendarScheduleItem, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -90,7 +92,14 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
         </div>
 
         <div className="mt-1.5 flex items-baseline justify-between">
-          <h2 className="text-lg font-bold text-[#202124]">{formattedDate}</h2>
+          <h2 className="text-lg font-bold text-[#202124] flex items-center gap-1.5">
+            <span>{formattedDate}</span>
+            {lunar && (
+              <span className="text-xs font-normal text-[#5f6368]" title={lunar.fullText}>
+                ({lunar.text})
+              </span>
+            )}
+          </h2>
           <span className="text-xs text-[#5f6368]">
             일정 <strong className="text-[#1a73e8]">{items.length}</strong>건
           </span>

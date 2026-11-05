@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { CalendarScheduleItem } from '../../types';
 import { getGoogleCategoryColor, getTodayDateStr } from '../../utils/googleCalendarUtils';
 import { getKoreanHoliday } from '../../utils/koreanHolidays';
+import { getLunarDate } from '../../utils/lunarCalendar';
 import { SmartText } from '../shared/SmartText';
 
 export interface GoogleCalendarMonthGridProps {
@@ -26,21 +27,10 @@ export interface GoogleCalendarMonthGridProps {
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = ({
-  currentDateObj,
-  selectedDate,
-  items,
-  draggedItem,
-  onSelectDate,
-  onSelectItem,
-  onCellClick,
-  onDragStart,
-  onDragOver,
-  onDropOnDate,
-  onDragEnd,
-  onContextMenu,
-  onDateClickMobile,
-  onPrevMonth,
-  onNextMonth,
+  currentDateObj, selectedDate, items, draggedItem,
+  onSelectDate, onSelectItem, onCellClick,
+  onDragStart, onDragOver, onDropOnDate, onDragEnd,
+  onContextMenu, onDateClickMobile, onPrevMonth, onNextMonth,
   compact = false,
 }) => {
   const touchStartX = useRef<number | null>(null);
@@ -146,6 +136,7 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
           const dayItems = itemsByDate.get(item.dateStr) || [];
           const isFirstDayOfMonth = item.dayNum === 1;
           const holiday = getKoreanHoliday(item.dateStr);
+          const lunar = getLunarDate(item.dateStr);
           const colIdx = idx % 7;
           const isSunday = colIdx === 0;
           const isSaturday = colIdx === 6;
@@ -186,22 +177,28 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
                       isToday
                         ? 'bg-[#1a73e8] text-white font-bold'
                         : isHolidayOrSunday
-                        ? item.isCurrentMonth
-                          ? 'text-red-500 font-bold'
-                          : 'text-red-300 font-normal'
+                        ? item.isCurrentMonth ? 'text-red-500 font-bold' : 'text-red-300 font-normal'
                         : isSaturday
-                        ? item.isCurrentMonth
-                          ? 'text-blue-500 font-medium'
-                          : 'text-blue-300 font-normal'
+                        ? item.isCurrentMonth ? 'text-blue-500 font-medium' : 'text-blue-300 font-normal'
                         : isFirstDayOfMonth && !compact
                         ? 'font-medium text-[#3c4043] px-1'
-                        : item.isCurrentMonth
-                        ? 'text-[#3c4043] font-normal'
-                        : 'text-[#70757a] font-normal'
+                        : item.isCurrentMonth ? 'text-[#3c4043] font-normal' : 'text-[#70757a] font-normal'
                     }`}
                   >
                     {isFirstDayOfMonth && !compact ? `${item.monthNum}월 1일` : item.dayNum}
                   </span>
+
+                  {/* 음력 날짜 표기 */}
+                  {lunar && !compact && (
+                    <span
+                      className={`text-[9px] sm:text-[10px] tracking-tight shrink-0 font-normal ${
+                        item.isCurrentMonth ? 'text-[#70757a]' : 'text-[#a0a5aa]'
+                      }`}
+                      title={lunar.fullText}
+                    >
+                      (<span className="hidden sm:inline">음 </span>{lunar.text})
+                    </span>
+                  )}
 
                   {holiday && item.isCurrentMonth && !compact && (
                     <span
