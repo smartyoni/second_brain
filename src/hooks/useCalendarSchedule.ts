@@ -200,6 +200,7 @@ export const useCalendarSchedule = (
         title: evt.title,
         dueDate: evt.dueDate,
         dueTime: evt.dueTime,
+        endDate: evt.endDate,
         endTime: evt.endTime,
         isCompleted: evt.isCompleted,
         sourceType: 'calendar',

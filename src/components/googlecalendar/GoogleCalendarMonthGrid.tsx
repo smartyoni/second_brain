@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { CalendarScheduleItem } from '../../types';
-import { getGoogleCategoryColor, getTodayDateStr } from '../../utils/googleCalendarUtils';
+import { getGoogleCategoryColor, getTodayDateStr, getDatesInRange } from '../../utils/googleCalendarUtils';
 import { getKoreanHoliday } from '../../utils/koreanHolidays';
 import { getLunarDate } from '../../utils/lunarCalendar';
 import { SmartText } from '../shared/SmartText';
@@ -66,9 +66,11 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
   const itemsByDate = React.useMemo(() => {
     const map = new Map<string, CalendarScheduleItem[]>();
     items.forEach((item) => {
-      const arr = map.get(item.dueDate) || [];
-      arr.push(item);
-      map.set(item.dueDate, arr);
+      getDatesInRange(item.dueDate, item.endDate).forEach((dStr) => {
+        const arr = map.get(dStr) || [];
+        arr.push(item);
+        map.set(dStr, arr);
+      });
     });
     return map;
   }, [items]);

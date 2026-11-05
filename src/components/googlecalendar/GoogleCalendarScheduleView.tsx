@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { CalendarScheduleItem } from '../../types';
-import { parseTimeToMinutes, getTodayDateStr } from '../../utils/calendarUtils';
+import { parseTimeToMinutes, getTodayDateStr, getDatesInRange } from '../../utils/calendarUtils';
 import { GoogleCalendarScheduleItemRow } from './GoogleCalendarScheduleItemRow';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
@@ -44,10 +44,11 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
     }
 
     items.forEach((item) => {
-      if (!item.dueDate) return;
-      const list = dayMap.get(item.dueDate) || [];
-      list.push(item);
-      dayMap.set(item.dueDate, list);
+      getDatesInRange(item.dueDate, item.endDate).forEach((dStr) => {
+        const list = dayMap.get(dStr) || [];
+        list.push(item);
+        dayMap.set(dStr, list);
+      });
     });
 
     const sortedDates = Array.from(dayMap.keys()).sort();

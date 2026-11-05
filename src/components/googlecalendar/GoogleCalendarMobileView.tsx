@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CalendarScheduleItem, TopCategory } from '../../types';
+import { isItemOnDate } from '../../utils/calendarUtils';
 import { CalendarMobilePanel, GoogleCalendarMobileNavBar } from './GoogleCalendarMobileNavBar';
 import { GoogleCalendarMonthGrid } from './GoogleCalendarMonthGrid';
 import { GoogleCalendarMonthDayAgenda } from './GoogleCalendarMonthDayAgenda';
@@ -114,7 +115,7 @@ export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> =
               <div className="flex-1 h-[54%] w-full overflow-hidden bg-white animate-in slide-in-from-bottom-4 duration-200">
                 <GoogleCalendarMonthDayAgenda
                   selectedDate={selectedDate}
-                  items={items.filter((i) => i.dueDate === selectedDate)}
+                  items={items.filter((i) => isItemOnDate(i, selectedDate))}
                   onSelectItem={onSelectItem}
                   onAddEvent={(dateStr) => onCellClick(dateStr)}
                   onClose={() => setIsAgendaOpen(false)}

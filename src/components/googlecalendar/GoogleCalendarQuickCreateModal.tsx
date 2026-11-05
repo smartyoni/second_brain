@@ -24,6 +24,7 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
   const [eventType, setEventType] = useState<'event' | 'task'>('event');
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(createState.date);
+  const [endDate, setEndDate] = useState('');
   const [time, setTime] = useState(createState.time || '10:00');
   const [isAllDay, setIsAllDay] = useState(createState.isAllDay);
   const [selectedColorId, setSelectedColorId] = useState<string>(GOOGLE_COLORS[0].id);
@@ -32,6 +33,7 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
   useEffect(() => {
     if (createState.isOpen) {
       setDate(createState.date);
+      setEndDate('');
       setTime(createState.time || '10:00');
       setIsAllDay(createState.isAllDay);
       setTitle('');
@@ -53,9 +55,12 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
     e.preventDefault();
     if (!title.trim()) return;
 
+    const validEndDate = endDate && endDate >= date ? endDate : undefined;
+
     addCalendarEvent({
       title: title.trim(),
       dueDate: date,
+      endDate: validEndDate,
       dueTime: isAllDay ? undefined : time,
       categoryId: selectedColorId,
       description: description.trim() || undefined,
@@ -130,20 +135,30 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
 
           {/* 일시 및 시간 / 종일 */}
           <div className="space-y-2">
-            <div className="flex items-center gap-3 text-[#3c4043]">
+            <div className="flex items-center gap-2 flex-wrap text-[#3c4043]">
               <Clock className="w-4 h-4 text-[#5f6368] shrink-0" />
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="px-2.5 py-1.5 bg-[#f1f3f4] rounded text-xs text-[#3c4043] outline-none border border-transparent focus:border-[#1a73e8]"
+                className="px-2 py-1.5 bg-[#f1f3f4] rounded text-xs text-[#3c4043] outline-none border border-transparent focus:border-[#1a73e8]"
+                title="시작일"
+              />
+              <span className="text-[#5f6368]">~</span>
+              <input
+                type="date"
+                value={endDate}
+                min={date}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="px-2 py-1.5 bg-[#f1f3f4] rounded text-xs text-[#3c4043] outline-none border border-transparent focus:border-[#1a73e8]"
+                title="마감일 (선택)"
               />
 
               {!isAllDay && (
                 <TimePicker24h
                   value={time}
                   onChange={setTime}
-                  className="px-2.5 py-1.5 bg-[#f1f3f4] rounded text-xs text-[#3c4043] outline-none border border-transparent focus:border-[#1a73e8]"
+                  className="px-2 py-1.5 bg-[#f1f3f4] rounded text-xs text-[#3c4043] outline-none border border-transparent focus:border-[#1a73e8]"
                 />
               )}
             </div>

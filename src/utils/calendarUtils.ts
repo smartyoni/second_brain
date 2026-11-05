@@ -91,3 +91,41 @@ export const getCategoryColor = (categoryId?: string) => {
   const index = Math.abs(hash) % COLOR_PALETTES.length;
   return COLOR_PALETTES[index];
 };
+
+/**
+ * 일정이 주어진 날짜(targetDate)에 포함되는지 확인합니다.
+ * - endDate(마감일)가 있는 경우: dueDate <= targetDate <= endDate 범위 내에 있으면 true
+ * - endDate가 없거나 dueDate와 같은 경우: dueDate === targetDate 이면 true
+ */
+export const isItemOnDate = (
+  item: { dueDate?: string; endDate?: string },
+  targetDate: string
+): boolean => {
+  if (!item.dueDate || !targetDate) return false;
+  if (!item.endDate || item.endDate <= item.dueDate) {
+    return item.dueDate === targetDate;
+  }
+  return targetDate >= item.dueDate && targetDate <= item.endDate;
+};
+
+/**
+ * startDate부터 endDate까지의 모든 'YYYY-MM-DD' 날짜 목록을 반환합니다.
+ */
+export const getDatesInRange = (startDate: string, endDate?: string): string[] => {
+  if (!startDate) return [];
+  if (!endDate || endDate <= startDate) return [startDate];
+
+  const dates: string[] = [];
+  const start = parseLocalDate(startDate);
+  const end = parseLocalDate(endDate);
+
+  let count = 0;
+  const curr = new Date(start);
+  while (curr <= end && count < 366) {
+    dates.push(formatLocalDateStr(curr));
+    curr.setDate(curr.getDate() + 1);
+    count++;
+  }
+  return dates;
+};
+

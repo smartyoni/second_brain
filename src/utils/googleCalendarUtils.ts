@@ -5,9 +5,18 @@ import {
   formatLocalDateStr,
   parseLocalDate,
   shiftDateStr,
+  isItemOnDate,
+  getDatesInRange,
 } from './calendarUtils';
 
-export { getTodayDateStr, formatLocalDateStr, parseLocalDate, shiftDateStr };
+export {
+  getTodayDateStr,
+  formatLocalDateStr,
+  parseLocalDate,
+  shiftDateStr,
+  isItemOnDate,
+  getDatesInRange,
+};
 
 // 구글 캘린더 공식 머티리얼 컬러 팔레트
 export interface GoogleColorTheme {

@@ -6,11 +6,11 @@ import {
   TIMELINE_HOUR_HEIGHT,
   formatGoogleHourLabel,
   computeOverlappingLayout,
-  getTimelineColumnDate,
   getSlotRealDate,
   getNowTimelinePosition,
   getTodayDateStr,
   parseLocalDate,
+  isItemOnDate,
 } from '../../utils/googleCalendarUtils';
 import { getKoreanHoliday } from '../../utils/koreanHolidays';
 import { SmartText } from '../shared/SmartText';
@@ -42,9 +42,9 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
   onDragEnd,
   onContextMenu,
 }) => {
-  const allDayItems = items.filter((i) => i.dueDate === selectedDate && !i.dueTime);
+  const allDayItems = items.filter((i) => !i.dueTime && isItemOnDate(i, selectedDate));
   const timedItems = items.filter(
-    (i) => !!i.dueTime && getTimelineColumnDate(i.dueDate, i.dueTime) === selectedDate
+    (i) => !!i.dueTime && isItemOnDate(i, selectedDate)
   );
   const dayItems = [...allDayItems, ...timedItems];
 

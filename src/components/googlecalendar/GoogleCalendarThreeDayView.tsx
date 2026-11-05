@@ -6,11 +6,11 @@ import {
   TIMELINE_HOUR_HEIGHT,
   formatGoogleHourLabel,
   computeOverlappingLayout,
-  getTimelineColumnDate,
   getSlotRealDate,
   getNowTimelinePosition,
   getTodayDateStr,
   formatLocalDateStr,
+  isItemOnDate,
 } from '../../utils/googleCalendarUtils';
 import { SmartText } from '../shared/SmartText';
 
@@ -90,7 +90,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
             const isSelected = col.dateStr === selectedDate;
             const isSunday = col.dayName === '일';
             const isSaturday = col.dayName === '토';
-            const colItems = items.filter((i) => i.dueDate === col.dateStr);
+            const colItems = items.filter((i) => isItemOnDate(i, col.dateStr));
 
             return (
               <div
@@ -142,7 +142,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
         </div>
         <div className="flex-1 grid grid-cols-3 divide-x divide-[#dadce0]">
           {threeDays.map((col) => {
-            const allDayItems = items.filter((i) => i.dueDate === col.dateStr && !i.dueTime);
+            const allDayItems = items.filter((i) => !i.dueTime && isItemOnDate(i, col.dateStr));
             return (
               <div
                 key={col.dateStr}
@@ -197,7 +197,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
         {/* 3개 컬럼 메인 영역 */}
         <div className="flex-1 grid grid-cols-3 divide-x divide-[#dadce0] relative">
           {threeDays.map((col) => {
-            const timedItems = items.filter((i) => !!i.dueTime && getTimelineColumnDate(i.dueDate, i.dueTime) === col.dateStr);
+            const timedItems = items.filter((i) => !!i.dueTime && isItemOnDate(i, col.dateStr));
 
             return (
               <div key={col.dateStr} className="relative h-full">
