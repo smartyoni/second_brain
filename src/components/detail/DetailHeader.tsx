@@ -9,7 +9,7 @@ interface DetailHeaderProps {
 }
 
 export const DetailHeader: React.FC<DetailHeaderProps> = ({ subItem }) => {
-  const { jumpedFromCalendar, returnToCalendar, setAppMode } = useWorkspace();
+  const { jumpedFromCalendar, returnToCalendar } = useWorkspace();
 
   return (
     <div className="h-9 px-3 bg-slate-100 border-b border-slate-300 flex items-center justify-between text-xs shrink-0 select-none">
@@ -20,9 +20,9 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ subItem }) => {
         </h2>
       </div>
 
-      {/* 우측: 캘린더 복귀 버튼 */}
-      <div className="shrink-0 flex items-center gap-1.5">
-        {jumpedFromCalendar ? (
+      {/* 우측: 캘린더에서 점프해 온 경우에만 복귀 버튼 노출 */}
+      {jumpedFromCalendar && (
+        <div className="shrink-0 flex items-center gap-1.5">
           <button
             type="button"
             onClick={returnToCalendar}
@@ -33,18 +33,8 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ subItem }) => {
             <span>보던 캘린더로 돌아가기</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setAppMode('calendar')}
-            className="flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-blue-700 hover:bg-slate-200/70 border border-slate-300 rounded text-[11px] font-semibold transition-colors cursor-pointer"
-            title="전체 캘린더 화면 열기"
-          >
-            <CalendarIcon className="w-3.5 h-3.5 text-blue-600" />
-            <span>캘린더</span>
-          </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
