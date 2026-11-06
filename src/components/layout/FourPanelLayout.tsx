@@ -26,8 +26,8 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
           {panel1}
         </div>
 
-        {/* 2번 패널: 하위 항목 리스트 패널 (너비 276px 고정) */}
-        <div className="w-[276px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
+        {/* 2번 패널: 하위 항목 리스트 패널 (1번 패널과 동일 너비: 331px 고정) */}
+        <div className="w-[331px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
           {panel2}
         </div>
 
