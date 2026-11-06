@@ -7,6 +7,9 @@ import { CategoryPanel } from './components/panels/CategoryPanel';
 import { SubItemPanel } from './components/panels/SubItemPanel';
 import { DetailPanel } from './components/panels/DetailPanel';
 import { GanttMemoPanel } from './components/panels/GanttMemoPanel';
+import { ProjectTaskPanel } from './components/project/ProjectTaskPanel';
+import { ProjectDetailPanel } from './components/project/ProjectDetailPanel';
+import { ProjectTimelinePanel } from './components/project/ProjectTimelinePanel';
 import { GoogleCalendarLayout } from './components/googlecalendar/GoogleCalendarLayout';
 import { QuickMemoModal } from './components/category/QuickMemoModal';
 
@@ -19,9 +22,12 @@ const AppContent: React.FC = () => {
     addQuickMemo,
     selectTopCategory,
     setSelectedCalendarDate,
+    getCurrentActiveState,
   } = useWorkspace();
   const [showExitToast, setShowExitToast] = useState(false);
   const [isQuickMemoOpen, setIsQuickMemoOpen] = useState(false);
+
+  const isProjectTab = getCurrentActiveState().topCategoryId === 'top-3';
 
   const handleQuickMove = () => {
     setAppMode('workspace');
@@ -136,9 +142,21 @@ const AppContent: React.FC = () => {
         ) : (
           <FourPanelLayout
             panel1={<CategoryPanel />}
-            panel2={<SubItemPanel />}
-            panel3={<DetailPanel panelId="panel-3" />}
-            panel4={<GanttMemoPanel />}
+            panel2={isProjectTab ? <ProjectTaskPanel /> : <SubItemPanel />}
+            panel3={
+              isProjectTab ? (
+                <ProjectDetailPanel />
+              ) : (
+                <DetailPanel panelId="panel-3" />
+              )
+            }
+            panel4={
+              isProjectTab ? (
+                <ProjectTimelinePanel />
+              ) : (
+                <GanttMemoPanel />
+              )
+            }
           />
         )}
       </div>
