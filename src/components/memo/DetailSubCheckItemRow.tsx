@@ -85,8 +85,8 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
             isEditing={isEditing}
             onSave={handleSave}
             onCancel={handleCancel}
-            rows={2}
-            saveOnEnter={true}
+            rows={3}
+            saveOnEnter={false}
             placeholder="(체크 항목을 입력하세요)"
           />
         </div>

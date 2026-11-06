@@ -109,7 +109,7 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
               </button>
 
               <div
-                className={`flex-1 text-xs leading-relaxed break-words min-w-0 ${
+                className={`flex-1 text-xs leading-relaxed whitespace-pre-wrap break-words min-w-0 ${
                   sub.isCompleted ? 'line-through text-slate-400' : 'font-normal'
                 }`}
               >
