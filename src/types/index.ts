@@ -53,6 +53,8 @@ export interface TextBlock {
   memo?: string; // 4번 패널 상단 전속 추가 메모
   checklist?: SubCheckItem[]; // 4번 패널 하단 전속 체크리스트
   colorId?: string; // 캘린더 커스텀 색상 ID
+  isInProgress?: boolean; // 진행중 여부
+  isCompleted?: boolean;
 }
 
 // 3번 패널: 텍스트 그룹
@@ -77,6 +79,7 @@ export interface CheckItem {
   memo?: string; // 4번 패널 상단 전속 추가 메모
   checklist?: SubCheckItem[]; // 4번 패널 하단 전속 체크리스트
   colorId?: string; // 캘린더 커스텀 색상 ID
+  isInProgress?: boolean; // 진행중 여부
 }
 
 // 캘린더 자체 독립 일정 모델
@@ -89,6 +92,7 @@ export interface CalendarEvent {
   memo?: string; // 4번 패널 하단 전속 추가 메모
   endTime?: string;
   isCompleted?: boolean;
+  isInProgress?: boolean; // 진행중 여부
   categoryId?: string; // 소속 카테고리 (색상/분류)
   description?: string;
   eventType?: 'event' | 'task';
@@ -105,6 +109,7 @@ export interface CalendarScheduleItem {
   memo?: string;
   endTime?: string;
   isCompleted?: boolean;
+  isInProgress?: boolean; // 진행중 여부
   sourceType: 'checklist' | 'text' | 'calendar';
   subItemId: string;
   groupId: string;

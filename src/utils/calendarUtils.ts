@@ -94,14 +94,21 @@ export const getCategoryColor = (categoryId?: string) => {
 
 /**
  * 일정이 주어진 날짜(targetDate)에 포함되는지 확인합니다.
+ * - '진행중'이고 아직 '완료'되지 않은 경우: 시작일(dueDate) 이후의 모든 날짜에 항상 표시
  * - endDate(마감일)가 있는 경우: dueDate <= targetDate <= endDate 범위 내에 있으면 true
  * - endDate가 없거나 dueDate와 같은 경우: dueDate === targetDate 이면 true
  */
 export const isItemOnDate = (
-  item: { dueDate?: string; endDate?: string },
+  item: { dueDate?: string; endDate?: string; isInProgress?: boolean; isCompleted?: boolean },
   targetDate: string
 ): boolean => {
   if (!item.dueDate || !targetDate) return false;
+
+  // 진행중 체크 시 완료되기 전까지 시작일 이후 매일 상시 표시
+  if (item.isInProgress && !item.isCompleted) {
+    return targetDate >= item.dueDate;
+  }
+
   if (!item.endDate || item.endDate <= item.dueDate) {
     return item.dueDate === targetDate;
   }

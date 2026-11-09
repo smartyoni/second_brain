@@ -3,6 +3,7 @@ import { X, Clock, AlignLeft, Check, Palette } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { getGoogleCategoryColor, GOOGLE_COLORS } from '../../utils/googleCalendarUtils';
 import { TimePicker24h } from '../shared/TimePicker24h';
+import { GoogleCalendarStatusToggle } from './GoogleCalendarStatusToggle';
 
 export interface QuickCreateState {
   isOpen: boolean;
@@ -27,6 +28,8 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
   const [endDate, setEndDate] = useState('');
   const [time, setTime] = useState(createState.time || '10:00');
   const [isAllDay, setIsAllDay] = useState(createState.isAllDay);
+  const [isInProgress, setIsInProgress] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState<string>(GOOGLE_COLORS[0].id);
   const [description, setDescription] = useState('');
 
@@ -36,6 +39,8 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
       setEndDate('');
       setTime(createState.time || '10:00');
       setIsAllDay(createState.isAllDay);
+      setIsInProgress(false);
+      setIsCompleted(false);
       setTitle('');
       setDescription('');
     }
@@ -65,7 +70,8 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
       categoryId: selectedColorId,
       description: description.trim() || undefined,
       eventType,
-      isCompleted: false,
+      isInProgress,
+      isCompleted,
     });
 
     onClose();
@@ -163,9 +169,20 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
               )}
             </div>
 
-            {/* 종일 체크박스 */}
-            <div className="pl-7">
-              <label className="inline-flex items-center gap-2 cursor-pointer text-[#3c4043]">
+            {/* 종일 체크박스 & 진행중/완료 토글 */}
+            <div className="pl-7 flex items-center gap-3">
+              <GoogleCalendarStatusToggle
+                isInProgress={isInProgress}
+                isCompleted={isCompleted}
+                onChange={(status) => {
+                  setIsInProgress(status.isInProgress);
+                  setIsCompleted(status.isCompleted);
+                  if (status.isInProgress) {
+                    setIsAllDay(true);
+                  }
+                }}
+              />
+              <label className="inline-flex items-center gap-2 cursor-pointer text-[#3c4043] select-none">
                 <div
                   className={`w-4 h-4 rounded-xs flex items-center justify-center transition-colors border ${
                     isAllDay

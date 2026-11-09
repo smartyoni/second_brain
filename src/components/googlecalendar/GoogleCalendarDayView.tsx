@@ -42,9 +42,11 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
   onDragEnd,
   onContextMenu,
 }) => {
-  const allDayItems = items.filter((i) => !i.dueTime && isItemOnDate(i, selectedDate));
+  const allDayItems = items.filter(
+    (i) => (!i.dueTime || (i.isInProgress && !i.isCompleted)) && isItemOnDate(i, selectedDate)
+  );
   const timedItems = items.filter(
-    (i) => !!i.dueTime && isItemOnDate(i, selectedDate)
+    (i) => !!i.dueTime && !(i.isInProgress && !i.isCompleted) && isItemOnDate(i, selectedDate)
   );
   const dayItems = [...allDayItems, ...timedItems];
 
@@ -147,12 +149,17 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
                   e.stopPropagation();
                   onContextMenu?.(schedule, e);
                 }}
-                className={`px-2 py-0.5 rounded-xs text-[11px] font-medium text-white shadow-2xs cursor-grab active:cursor-grabbing ${
+                className={`px-2 py-0.5 rounded-xs text-[11px] font-medium text-white shadow-2xs cursor-grab active:cursor-grabbing flex items-center gap-1 ${
                   color.bg
                 } ${schedule.isCompleted ? 'line-through opacity-50' : 'hover:opacity-90'} ${
                   isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
                 }`}
               >
+                {schedule.isInProgress && !schedule.isCompleted && (
+                  <span className="px-1 py-0.2 rounded-xs bg-black/20 text-[9px] font-bold shrink-0">
+                    진행
+                  </span>
+                )}
                 <SmartText text={schedule.title} />
               </div>
             );

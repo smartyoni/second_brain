@@ -129,7 +129,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
           items.map((schedule) => {
             const color = getGoogleCategoryColor(schedule.categoryId);
             const subItem = subItems.find((s) => s.id === schedule.subItemId);
-            const isAllDay = !schedule.dueTime;
+            const isAllDay = !schedule.dueTime || (schedule.isInProgress && !schedule.isCompleted);
 
             return (
               <div
@@ -152,6 +152,11 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
                     ) : (
                       <span className="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-medium">
                         지식 메모
+                      </span>
+                    )}
+                    {schedule.isInProgress && !schedule.isCompleted && (
+                      <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 border border-blue-200 rounded font-semibold">
+                        진행중
                       </span>
                     )}
                   </div>

@@ -146,7 +146,9 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
         </div>
         <div className="flex-1 grid grid-cols-7 divide-x divide-[#dadce0]">
           {weekDays.map((col) => {
-            const allDayItems = items.filter((i) => !i.dueTime && isItemOnDate(i, col.dateStr));
+            const allDayItems = items.filter(
+              (i) => (!i.dueTime || (i.isInProgress && !i.isCompleted)) && isItemOnDate(i, col.dateStr)
+            );
             return (
               <div
                 key={col.dateStr}
@@ -167,12 +169,15 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
                       onDragEnd={onDragEnd}
                       onClick={(e) => { e.stopPropagation(); onSelectItem(schedule); }}
                       onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onContextMenu?.(schedule, e); }}
-                      className={`px-1.5 py-0.5 rounded-xs text-[11px] font-medium text-white truncate shadow-2xs cursor-grab active:cursor-grabbing ${
+                      className={`px-1.5 py-0.5 rounded-xs text-[11px] font-medium text-white truncate shadow-2xs cursor-grab active:cursor-grabbing flex items-center gap-1 ${
                         color.bg
                       } ${schedule.isCompleted ? 'line-through opacity-50' : 'hover:opacity-90'} ${
                         isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
                       }`}
                     >
+                      {schedule.isInProgress && !schedule.isCompleted && (
+                        <span className="px-1 py-0.2 rounded-xs bg-black/20 text-[9px] font-bold shrink-0">진행</span>
+                      )}
                       <SmartText text={schedule.title} />
                     </div>
                   );
@@ -202,7 +207,9 @@ export const GoogleCalendarWeekView: React.FC<GoogleCalendarWeekViewProps> = ({
         <div className="flex-1 grid grid-cols-7 divide-x divide-[#dadce0] relative">
           {/* 각 날짜 컬럼 */}
           {weekDays.map((col) => {
-            const timedItems = items.filter((i) => !!i.dueTime && isItemOnDate(i, col.dateStr));
+            const timedItems = items.filter(
+              (i) => !!i.dueTime && !(i.isInProgress && !i.isCompleted) && isItemOnDate(i, col.dateStr)
+            );
 
             return (
               <div key={col.dateStr} className="relative h-full">

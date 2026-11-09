@@ -78,9 +78,11 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
           }
         }
 
-        const allDayItems = dayEvents.filter((item) => !item.dueTime);
+        const allDayItems = dayEvents.filter(
+          (item) => !item.dueTime || (item.isInProgress && !item.isCompleted)
+        );
         const timedItems = dayEvents
-          .filter((item) => !!item.dueTime)
+          .filter((item) => !!item.dueTime && !(item.isInProgress && !item.isCompleted))
           .sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
 
         return {

@@ -52,7 +52,15 @@ export const useCalendarSchedule = (
 
   const toggleCalendarEventCompleted = (id: string) => {
     setCalendarEvents((prev) =>
-      prev.map((evt) => (evt.id === id ? { ...evt, isCompleted: !evt.isCompleted } : evt))
+      prev.map((evt) => {
+        if (evt.id !== id) return evt;
+        const nextCompleted = !evt.isCompleted;
+        return {
+          ...evt,
+          isCompleted: nextCompleted,
+          isInProgress: nextCompleted ? false : evt.isInProgress,
+        };
+      })
     );
   };
 
@@ -125,7 +133,13 @@ export const useCalendarSchedule = (
       prev.map((g) => {
         if (g.id !== groupId) return g;
         const toggled = g.items.map((i) =>
-          i.id === itemId ? { ...i, isCompleted: !i.isCompleted } : i
+          i.id === itemId
+            ? {
+                ...i,
+                isCompleted: !i.isCompleted,
+                isInProgress: !i.isCompleted ? false : i.isInProgress,
+              }
+            : i
         );
         const incomplete = toggled.filter((i) => !i.isCompleted);
         const completed = toggled.filter((i) => i.isCompleted);
@@ -156,6 +170,7 @@ export const useCalendarSchedule = (
             endDate: item.endDate,
             memo: item.memo,
             isCompleted: item.isCompleted,
+            isInProgress: item.isInProgress,
             sourceType: 'checklist',
             subItemId: group.subItemId,
             groupId: group.id,
@@ -181,6 +196,8 @@ export const useCalendarSchedule = (
             dueTime: block.dueTime,
             endDate: block.endDate,
             memo: block.memo,
+            isCompleted: block.isCompleted,
+            isInProgress: block.isInProgress,
             sourceType: 'text',
             subItemId: group.subItemId,
             groupId: group.id,
@@ -203,6 +220,7 @@ export const useCalendarSchedule = (
         endDate: evt.endDate,
         endTime: evt.endTime,
         isCompleted: evt.isCompleted,
+        isInProgress: evt.isInProgress,
         sourceType: 'calendar',
         subItemId: '',
         groupId: '',
@@ -237,37 +255,15 @@ export const useCalendarSchedule = (
     updater: (prev: SubCheckItem[]) => SubCheckItem[]
   ) => {
     if (item.sourceType === 'calendar') {
-      setCalendarEvents((prev) =>
-        prev.map((evt) =>
-          evt.id === item.id ? { ...evt, checklist: updater(evt.checklist || []) } : evt
-        )
-      );
+      setCalendarEvents((prev) => prev.map((e) => e.id === item.id ? { ...e, checklist: updater(e.checklist || []) } : e));
     } else if (item.sourceType === 'checklist') {
-      setChecklistGroups((prev) =>
-        prev.map((g) =>
-          g.id === item.groupId
-            ? {
-                ...g,
-                items: g.items.map((i) =>
-                  i.id === item.id ? { ...i, checklist: updater(i.checklist || []) } : i
-                ),
-              }
-            : g
-        )
-      );
+      setChecklistGroups((prev) => prev.map((g) => g.id === item.groupId ? {
+        ...g, items: g.items.map((i) => i.id === item.id ? { ...i, checklist: updater(i.checklist || []) } : i)
+      } : g));
     } else if (item.sourceType === 'text') {
-      setTextGroups((prev) =>
-        prev.map((g) =>
-          g.id === item.groupId
-            ? {
-                ...g,
-                blocks: g.blocks.map((b) =>
-                  b.id === item.id ? { ...b, checklist: updater(b.checklist || []) } : b
-                ),
-              }
-            : g
-        )
-      );
+      setTextGroups((prev) => prev.map((g) => g.id === item.groupId ? {
+        ...g, blocks: g.blocks.map((b) => b.id === item.id ? { ...b, checklist: updater(b.checklist || []) } : b)
+      } : g));
     }
   };
 

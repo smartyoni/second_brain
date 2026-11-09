@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Clock, Folder, Check } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { TimePicker24h } from '../shared/TimePicker24h';
+import { GoogleCalendarStatusToggle } from './GoogleCalendarStatusToggle';
 
 interface GoogleCalendarCreateModalProps {
   isOpen: boolean;
@@ -19,12 +20,16 @@ export const GoogleCalendarCreateModal: React.FC<GoogleCalendarCreateModalProps>
   const [dueDate, setDueDate] = useState(selectedDate);
   const [isAllDay, setIsAllDay] = useState(false);
   const [dueTime, setDueTime] = useState('09:00');
+  const [isInProgress, setIsInProgress] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   const [selectedSubId, setSelectedSubId] = useState<string>(subItems[0]?.id || '');
 
   // 모달이 열릴 때 선택된 날짜로 업데이트 및 ESC 키 감지
   React.useEffect(() => {
     if (isOpen) {
       setDueDate(selectedDate);
+      setIsInProgress(false);
+      setIsCompleted(false);
     }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -53,7 +58,8 @@ export const GoogleCalendarCreateModal: React.FC<GoogleCalendarCreateModalProps>
                   {
                     id: `chk-${Date.now()}`,
                     text: title.trim(),
-                    isCompleted: false,
+                    isCompleted,
+                    isInProgress,
                     order: g.items.length + 1,
                     dueDate,
                     dueTime: isAllDay ? undefined : dueTime || undefined,
@@ -67,6 +73,8 @@ export const GoogleCalendarCreateModal: React.FC<GoogleCalendarCreateModalProps>
 
     setTitle('');
     setIsAllDay(false);
+    setIsInProgress(false);
+    setIsCompleted(false);
     onClose();
   };
 
@@ -124,9 +132,20 @@ export const GoogleCalendarCreateModal: React.FC<GoogleCalendarCreateModalProps>
               )}
             </div>
 
-            {/* 구글 캘린더 스타일 종일 체크박스 */}
-            <div className="pl-7">
-              <label className="inline-flex items-center gap-2 cursor-pointer text-[#3c4043]">
+            {/* 구글 캘린더 스타일 종일 체크박스 & 진행중/완료 토글 */}
+            <div className="pl-7 flex items-center gap-3">
+              <GoogleCalendarStatusToggle
+                isInProgress={isInProgress}
+                isCompleted={isCompleted}
+                onChange={(status) => {
+                  setIsInProgress(status.isInProgress);
+                  setIsCompleted(status.isCompleted);
+                  if (status.isInProgress) {
+                    setIsAllDay(true);
+                  }
+                }}
+              />
+              <label className="inline-flex items-center gap-2 cursor-pointer text-[#3c4043] select-none">
                 <div
                   className={`w-4 h-4 rounded-xs flex items-center justify-center transition-colors border ${
                     isAllDay

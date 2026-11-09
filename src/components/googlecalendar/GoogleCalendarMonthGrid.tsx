@@ -262,9 +262,14 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
                         } ${
                           isBeingDragged ? 'opacity-30 border-2 border-dashed border-blue-500' : ''
                         }`}
-                        title={`${schedule.title} (${schedule.dueTime || '종일'})`}
+                        title={`${schedule.title} (${schedule.dueTime || '종일'}${schedule.isInProgress && !schedule.isCompleted ? ' · 진행중' : ''})`}
                       >
-                        <span className="truncate">
+                        <span className="truncate flex items-center gap-1">
+                          {schedule.isInProgress && !schedule.isCompleted && (
+                            <span className="px-1 py-0.2 rounded-xs bg-blue-100 text-blue-700 text-[9px] font-bold shrink-0">
+                              진행
+                            </span>
+                          )}
                           <SmartText text={schedule.title} />
                         </span>
                       </div>

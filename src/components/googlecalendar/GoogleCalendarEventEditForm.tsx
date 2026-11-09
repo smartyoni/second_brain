@@ -3,6 +3,7 @@ import { Clock, Calendar as CalendarIcon, Check, Palette } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
 import { GOOGLE_COLORS, getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
 import { TimePicker24h } from '../shared/TimePicker24h';
+import { GoogleCalendarStatusToggle } from './GoogleCalendarStatusToggle';
 
 interface GoogleCalendarEventEditFormProps {
   item: CalendarScheduleItem;
@@ -13,6 +14,8 @@ interface GoogleCalendarEventEditFormProps {
     dueTime?: string;
     categoryId: string;
     description?: string;
+    isInProgress?: boolean;
+    isCompleted?: boolean;
   }) => void;
   onCancel: () => void;
 }
@@ -28,7 +31,9 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
   const [editDate, setEditDate] = useState(item.dueDate || '');
   const [editEndDate, setEditEndDate] = useState(item.endDate || '');
   const [editTime, setEditTime] = useState(item.dueTime || '10:00');
-  const [editIsAllDay, setEditIsAllDay] = useState(!item.dueTime);
+  const [editIsAllDay, setEditIsAllDay] = useState(!item.dueTime || !!item.isInProgress);
+  const [editIsInProgress, setEditIsInProgress] = useState(!!item.isInProgress);
+  const [editIsCompleted, setEditIsCompleted] = useState(!!item.isCompleted);
   const [editColorId, setEditColorId] = useState(
     GOOGLE_COLORS.some((c) => c.id === item.categoryId)
       ? item.categoryId
@@ -54,6 +59,8 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
       dueTime: editIsAllDay ? undefined : editTime,
       categoryId: editColorId,
       description: editDescription.trim() || undefined,
+      isInProgress: editIsInProgress,
+      isCompleted: editIsCompleted,
     });
   };
 
@@ -91,15 +98,28 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
             className="px-2 py-1.5 border border-[#dadce0] rounded-md text-xs bg-white text-[#3c4043] outline-none focus:border-[#1a73e8]"
             title="종료일 (선택)"
           />
-          <label className="flex items-center gap-1.5 text-xs text-[#3c4043] cursor-pointer ml-auto select-none">
-            <input
-              type="checkbox"
-              checked={editIsAllDay}
-              onChange={(e) => setEditIsAllDay(e.target.checked)}
-              className="rounded text-[#1a73e8] focus:ring-0"
+          <div className="flex items-center gap-2 ml-auto">
+            <GoogleCalendarStatusToggle
+              isInProgress={editIsInProgress}
+              isCompleted={editIsCompleted}
+              onChange={({ isInProgress, isCompleted }) => {
+                setEditIsInProgress(isInProgress);
+                setEditIsCompleted(isCompleted);
+                if (isInProgress) {
+                  setEditIsAllDay(true);
+                }
+              }}
             />
-            <span>종일</span>
-          </label>
+            <label className="flex items-center gap-1.5 text-xs text-[#3c4043] cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={editIsAllDay}
+                onChange={(e) => setEditIsAllDay(e.target.checked)}
+                className="rounded text-[#1a73e8] focus:ring-0"
+              />
+              <span>종일</span>
+            </label>
+          </div>
         </div>
 
         {!editIsAllDay && (

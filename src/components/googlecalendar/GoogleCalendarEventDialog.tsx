@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ExternalLink, CheckCircle, Clock, AlignLeft, Pencil } from 'lucide-react';
 import { CalendarScheduleItem, CategoryItem, SubItem } from '../../types';
-import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { GoogleCalendarEventEditForm } from './GoogleCalendarEventEditForm';
-import { GoogleCalendarSubChecklist } from './GoogleCalendarSubChecklist';
 import { GoogleCalendarEventDialogHeader } from './GoogleCalendarEventDialogHeader';
-import { SmartText } from '../shared/SmartText';
+import { GoogleCalendarEventDetailView } from './GoogleCalendarEventDetailView';
 
 interface GoogleCalendarEventDialogProps {
   item: CalendarScheduleItem;
@@ -44,7 +41,6 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     getAllScheduleItems().find((i) => i.id === item.id && i.sourceType === item.sourceType) || item;
 
   const isCalendarOwnEvent = currentItem.sourceType === 'calendar';
-  const activeColor = getGoogleCategoryColor(currentItem.categoryId);
   const [isEditing, setIsEditing] = useState(initialEditMode);
   const [mobileTab, setMobileTab] = useState<'detail' | 'checklist'>('detail');
 
@@ -108,23 +104,68 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
   };
 
   const handleSaveForm = (updates: {
-    title: string; dueDate: string; endDate?: string; dueTime?: string; categoryId: string; description?: string;
+    title: string;
+    dueDate: string;
+    endDate?: string;
+    dueTime?: string;
+    categoryId: string;
+    description?: string;
+    isInProgress?: boolean;
+    isCompleted?: boolean;
   }) => {
     if (isCalendarOwnEvent) {
       updateCalendarEvent(currentItem.id, updates);
     } else if (currentItem.sourceType === 'checklist') {
-      setChecklistGroups((prev) => prev.map((g) => g.id === currentItem.groupId ? {
-        ...g, items: g.items.map((i) => i.id === currentItem.id ? { ...i, text: updates.title, dueDate: updates.dueDate, endDate: updates.endDate, dueTime: updates.dueTime, memo: updates.description, colorId: updates.categoryId } : i)
-      } : g));
+      setChecklistGroups((prev) =>
+        prev.map((g) =>
+          g.id === currentItem.groupId
+            ? {
+                ...g,
+                items: g.items.map((i) =>
+                  i.id === currentItem.id
+                    ? {
+                        ...i,
+                        text: updates.title,
+                        dueDate: updates.dueDate,
+                        endDate: updates.endDate,
+                        dueTime: updates.dueTime,
+                        memo: updates.description,
+                        colorId: updates.categoryId,
+                        isInProgress: updates.isInProgress,
+                        isCompleted: updates.isCompleted ?? i.isCompleted,
+                      }
+                    : i
+                ),
+              }
+            : g
+        )
+      );
     } else if (currentItem.sourceType === 'text') {
-      setTextGroups((prev) => prev.map((g) => g.id === currentItem.groupId ? {
-        ...g, blocks: g.blocks.map((b) => {
-          if (b.id !== currentItem.id) return b;
-          const lines = b.text.split('\n');
-          lines[0] = updates.title;
-          return { ...b, text: lines.join('\n'), dueDate: updates.dueDate, endDate: updates.endDate, dueTime: updates.dueTime, memo: updates.description, colorId: updates.categoryId };
-        })
-      } : g));
+      setTextGroups((prev) =>
+        prev.map((g) =>
+          g.id === currentItem.groupId
+            ? {
+                ...g,
+                blocks: g.blocks.map((b) => {
+                  if (b.id !== currentItem.id) return b;
+                  const lines = b.text.split('\n');
+                  lines[0] = updates.title;
+                  return {
+                    ...b,
+                    text: lines.join('\n'),
+                    dueDate: updates.dueDate,
+                    endDate: updates.endDate,
+                    dueTime: updates.dueTime,
+                    memo: updates.description,
+                    colorId: updates.categoryId,
+                    isInProgress: updates.isInProgress,
+                    isCompleted: updates.isCompleted,
+                  };
+                }),
+              }
+            : g
+        )
+      );
     }
     setIsEditing(false);
   };
@@ -185,106 +226,18 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
             />
           </div>
         ) : (
-          <>
-            <div
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              className="flex-1 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#dadce0] min-h-[300px] touch-pan-y"
-            >
-              {/* 좌측 컬럼: 일정 기본 정보 (제목, 일시, 메모) */}
-              <div
-                className={`p-5 sm:p-6 space-y-4 overflow-y-auto ${
-                  mobileTab === 'detail' ? 'block' : 'hidden md:block'
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`w-3.5 h-3.5 rounded-xs mt-1 shrink-0 ${activeColor.bg}`} />
-                  <div className="flex-1 min-w-0">
-                    <h3
-                      className={`text-lg font-normal text-[#3c4043] leading-snug break-words ${
-                        currentItem.isCompleted ? 'line-through text-[#70757a]' : ''
-                      }`}
-                    >
-                      <SmartText text={currentItem.title} />
-                    </h3>
-                  </div>
-                </div>
-
-                {/* 일시 */}
-                <div className="flex items-center gap-4 text-xs text-[#3c4043]">
-                  <Clock className="w-4 h-4 text-[#5f6368] shrink-0" />
-                  <span>
-                    {currentItem.dueDate}
-                    {currentItem.endDate ? ` ~ ${currentItem.endDate}` : ''}{' '}
-                    {currentItem.dueTime ? `· ${currentItem.dueTime}` : '· 종일'}
-                  </span>
-                </div>
-
-                {/* 상세 설명(메모) */}
-                {(currentItem.description || currentItem.memo) && (
-                  <div className="flex items-start gap-4 text-xs text-[#3c4043]">
-                    <AlignLeft className="w-4 h-4 text-[#5f6368] shrink-0 mt-0.5" />
-                    <div className="flex-1 whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-100">
-                      <SmartText text={currentItem.description || currentItem.memo || ''} />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 우측 컬럼: 하위할일(체크리스트) 전용 패널 */}
-              <div
-                className={`flex flex-col h-full min-h-[280px] ${
-                  mobileTab === 'checklist' ? 'flex' : 'hidden md:flex'
-                }`}
-              >
-                <GoogleCalendarSubChecklist
-                  item={currentItem}
-                  checklist={checklist}
-                  onUpdateChecklist={(updater) => updateItemChecklist(currentItem, updater)}
-                />
-              </div>
-            </div>
-
-            {/* 하단 액션 바 (지식보관소 생성 일정 기준 동일 버튼 구성으로 통일) */}
-            <div className="px-6 py-3 bg-[#f8f9fa] border-t border-[#dadce0] flex items-center justify-between gap-2">
-              {currentItem.sourceType !== 'text' ? (
-                <button
-                  type="button"
-                  onClick={handleToggle}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border cursor-pointer transition-colors ${
-                    currentItem.isCompleted
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                      : 'bg-white text-[#3c4043] border-[#dadce0] hover:bg-[#f1f3f4]'
-                  }`}
-                >
-                  <CheckCircle className="w-3.5 h-3.5" />
-                  <span>{currentItem.isCompleted ? '완료 취소' : '완료 체크'}</span>
-                </button>
-              ) : (
-                <div />
-              )}
-
-              <div className="flex items-center gap-2 ml-auto">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-[#f1f3f4] text-[#3c4043] border border-[#dadce0] rounded-md text-xs font-medium transition-colors shadow-2xs cursor-pointer"
-                >
-                  <Pencil className="w-3.5 h-3.5" />
-                  <span>수정</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleOpenSource}
-                  className="flex items-center gap-1.5 px-4 py-1.5 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-md text-xs font-medium transition-colors shadow-2xs cursor-pointer"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>{subItem ? '문서에서 열기' : '보관소에서 열기'}</span>
-                </button>
-              </div>
-            </div>
-          </>
+          <GoogleCalendarEventDetailView
+            item={currentItem}
+            subItem={subItem}
+            mobileTab={mobileTab}
+            checklist={checklist}
+            onUpdateChecklist={(updater) => updateItemChecklist(currentItem, updater)}
+            onToggleComplete={handleToggle}
+            onStartEdit={() => setIsEditing(true)}
+            onOpenSource={handleOpenSource}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          />
         )}
       </div>
     </div>
