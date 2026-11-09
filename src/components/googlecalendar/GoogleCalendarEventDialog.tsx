@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, CheckCircle, Clock, Trash2, AlignLeft, Pencil } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ExternalLink, CheckCircle, Clock, AlignLeft, Pencil } from 'lucide-react';
 import { CalendarScheduleItem, CategoryItem, SubItem } from '../../types';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { GoogleCalendarEventEditForm } from './GoogleCalendarEventEditForm';
 import { GoogleCalendarSubChecklist } from './GoogleCalendarSubChecklist';
+import { GoogleCalendarEventDialogHeader } from './GoogleCalendarEventDialogHeader';
 import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarEventDialogProps {
@@ -45,6 +46,43 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
   const isCalendarOwnEvent = currentItem.sourceType === 'calendar';
   const activeColor = getGoogleCategoryColor(currentItem.categoryId);
   const [isEditing, setIsEditing] = useState(initialEditMode);
+  const [mobileTab, setMobileTab] = useState<'detail' | 'checklist'>('detail');
+
+  const checklist = currentItem.checklist || [];
+  const checklistCount = checklist.length;
+  const completedChecklistCount = checklist.filter((c) => c.isCompleted).length;
+
+  // 터치 스와이프 제스처 처리 (모바일 탭 좌우 전환)
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      time: Date.now(),
+    };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const deltaX = endX - touchStartRef.current.x;
+    const deltaY = endY - touchStartRef.current.y;
+    const duration = Date.now() - touchStartRef.current.time;
+    touchStartRef.current = null;
+
+    // 800ms 이내, 가로 이동이 세로 이동의 1.3배 이상이며 최소 40px 이동 시 스와이프 전환
+    if (duration < 800 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3 && Math.abs(deltaX) > 40) {
+      if (deltaX < 0) {
+        // 오른쪽에서 왼쪽으로 스와이프 -> 체크리스트 탭으로
+        setMobileTab('checklist');
+      } else {
+        // 왼쪽에서 오른쪽으로 스와이프 -> 세부정보 탭으로
+        setMobileTab('detail');
+      }
+    }
+  };
 
   useEffect(() => {
     setIsEditing(initialEditMode);
@@ -123,54 +161,21 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
         onClick={(e) => e.stopPropagation()}
         className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-hidden sm:my-auto flex flex-col min-h-[440px]"
       >
-        {/* 상단 툴바: [헤더 타이틀 + 일정 유형] ... [수정] [삭제] [닫기] */}
-        <div className="px-4 py-2.5 bg-[#f8f9fa] flex items-center justify-between border-b border-[#dadce0]">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-xs font-semibold text-[#5f6368] shrink-0">
-              {isEditing ? '일정 수정' : '일정 세부정보'}
-            </span>
-            <span className="text-[11px] font-medium text-[#1a73e8] bg-[#e8f0fe] px-2 py-0.5 rounded-full border border-blue-100 shrink-0">
-              {isCalendarOwnEvent
-                ? '캘린더 일정'
-                : currentItem.sourceType === 'checklist'
-                ? '체크리스트 할 일'
-                : '텍스트 메모'}
-            </span>
-          </div>
+        {/* 상단 툴바 및 모바일 탭 헤더 */}
+        <GoogleCalendarEventDialogHeader
+          isEditing={isEditing}
+          isCalendarOwnEvent={isCalendarOwnEvent}
+          sourceType={currentItem.sourceType}
+          mobileTab={mobileTab}
+          checklistCount={checklistCount}
+          completedChecklistCount={completedChecklistCount}
+          onSelectMobileTab={setMobileTab}
+          onStartEdit={() => setIsEditing(true)}
+          onDelete={handleDelete}
+          onClose={onClose}
+        />
 
-          <div className="flex items-center gap-1 shrink-0">
-            {!isEditing && (
-              <button
-                type="button"
-                onClick={() => setIsEditing(true)}
-                className="p-1.5 rounded-full hover:bg-slate-200 text-[#5f6368] hover:text-[#1a73e8] transition-colors cursor-pointer"
-                title="일정 수정"
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="p-1.5 rounded-full hover:bg-red-50 text-[#5f6368] hover:text-red-600 transition-colors cursor-pointer"
-              title={isCalendarOwnEvent ? '일정 삭제' : '일정 해제 (원본 항목 유지)'}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-full hover:bg-slate-200 text-[#5f6368] cursor-pointer"
-              title="닫기"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* 본문 (수정 폼 vs 2컬럼 조회 뷰) */}
+        {/* 본문 (수정 폼 vs 조회 뷰: 모바일에서는 탭 전환 & 터치 스와이프 지원) */}
         {isEditing ? (
           <div className="flex-1 overflow-y-auto">
             <GoogleCalendarEventEditForm
@@ -181,9 +186,17 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           </div>
         ) : (
           <>
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#dadce0]">
+            <div
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              className="flex-1 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#dadce0] min-h-[300px] touch-pan-y"
+            >
               {/* 좌측 컬럼: 일정 기본 정보 (제목, 일시, 메모) */}
-              <div className="p-5 sm:p-6 space-y-4 overflow-y-auto">
+              <div
+                className={`p-5 sm:p-6 space-y-4 overflow-y-auto ${
+                  mobileTab === 'detail' ? 'block' : 'hidden md:block'
+                }`}
+              >
                 <div className="flex items-start gap-4">
                   <div className={`w-3.5 h-3.5 rounded-xs mt-1 shrink-0 ${activeColor.bg}`} />
                   <div className="flex-1 min-w-0">
@@ -219,10 +232,14 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
               </div>
 
               {/* 우측 컬럼: 하위할일(체크리스트) 전용 패널 */}
-              <div className="flex flex-col h-full min-h-[280px]">
+              <div
+                className={`flex flex-col h-full min-h-[280px] ${
+                  mobileTab === 'checklist' ? 'flex' : 'hidden md:flex'
+                }`}
+              >
                 <GoogleCalendarSubChecklist
                   item={currentItem}
-                  checklist={currentItem.checklist || []}
+                  checklist={checklist}
                   onUpdateChecklist={(updater) => updateItemChecklist(currentItem, updater)}
                 />
               </div>
