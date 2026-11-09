@@ -29,9 +29,34 @@ export const SubItemPanel: React.FC = () => {
     : undefined;
 
   const handleToggleComplete = (subItemId: string) => {
-    setSubItems((prev) =>
-      prev.map((s) => (s.id === subItemId ? { ...s, isCompleted: !s.isCompleted } : s))
-    );
+    setSubItems((prev) => {
+      const target = prev.find((s) => s.id === subItemId);
+      if (!target) return prev;
+
+      const nextCompleted = !target.isCompleted;
+
+      // 퀵메모 탭에서는 완료 시 하단으로 자동 이동
+      if (isQuickMemoTab) {
+        const currentCatItems = prev.filter((s) => s.categoryId === selectedCategoryId);
+        const otherCatItems = prev.filter((s) => s.categoryId !== selectedCategoryId);
+        const withoutTarget = currentCatItems.filter((s) => s.id !== subItemId);
+
+        let reorderedCatItems: SubItem[];
+        if (nextCompleted) {
+          // 완료되면 목록의 맨 끝(하단)으로 이동
+          reorderedCatItems = [...withoutTarget, { ...target, isCompleted: true }];
+        } else {
+          // 미완료로 해제되면 미완료 목록의 끝(완료된 항목들 바로 위)으로 복귀
+          const uncompleted = withoutTarget.filter((s) => !s.isCompleted);
+          const completed = withoutTarget.filter((s) => s.isCompleted);
+          reorderedCatItems = [...uncompleted, { ...target, isCompleted: false }, ...completed];
+        }
+
+        return [...otherCatItems, ...reorderedCatItems];
+      }
+
+      return prev.map((s) => (s.id === subItemId ? { ...s, isCompleted: nextCompleted } : s));
+    });
   };
 
   // 현재 대분류에 속한 다른 카테고리 목록 (그룹명과 함께 표시)
