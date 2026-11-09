@@ -25,7 +25,7 @@ const loadPanelState = (key: string): PanelDetailState => {
     const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.topCategoryId) return parsed;
+      if (parsed && parsed.topCategoryId) return { ...parsed, activeTab: 'check' };
     }
   } catch {}
   return defaultPanelState;
@@ -133,7 +133,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     categoryItems,
     setCategoryItems,
     setSubItems,
-    setTextGroups,
+    setChecklistGroups,
     updateActivePanelState
   );
 

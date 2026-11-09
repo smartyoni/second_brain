@@ -8,6 +8,7 @@ import {
   SubItem,
   TextGroupData,
   ChecklistGroupData,
+  CheckItem,
   QuickMemo,
   CalendarEvent,
 } from '../types';
@@ -107,6 +108,46 @@ const ensureFixedTodoData = (
   return { groups: mergedGroups, items: mergedItems };
 };
 
+export const migrateTextGroupsToChecklist = (
+  textGroups: TextGroupData[],
+  checklistGroups: ChecklistGroupData[]
+): { textGroups: TextGroupData[]; checklistGroups: ChecklistGroupData[] } => {
+  if (!Array.isArray(textGroups) || textGroups.length === 0) {
+    return { textGroups: [], checklistGroups: checklistGroups || [] };
+  }
+
+  const existingCgIds = new Set((checklistGroups || []).map((cg) => cg.id));
+  const convertedGroups: ChecklistGroupData[] = textGroups.map((tg, tgIdx) => {
+    const newId = existingCgIds.has(tg.id) ? `cg-migrated-${tg.id}` : tg.id;
+    const items: CheckItem[] = (tg.blocks || []).map((b, bIdx) => ({
+      id: b.id || `ci-${Date.now()}-${tgIdx}-${bIdx}`,
+      text: b.text || '',
+      isCompleted: false,
+      order: typeof b.order === 'number' ? b.order : bIdx,
+      ...(b.dueDate ? { dueDate: b.dueDate } : {}),
+      ...(b.dueTime ? { dueTime: b.dueTime } : {}),
+      ...(b.endDate ? { endDate: b.endDate } : {}),
+      ...(b.memo ? { memo: b.memo } : {}),
+      ...(b.checklist ? { checklist: b.checklist } : {}),
+      ...(b.colorId ? { colorId: b.colorId } : {}),
+    }));
+
+    return {
+      id: newId,
+      subItemId: tg.subItemId,
+      name: tg.name || '새 체크그룹',
+      isExpanded: tg.isExpanded ?? true,
+      order: typeof tg.order === 'number' ? tg.order : (checklistGroups?.length || 0) + tgIdx,
+      items,
+    };
+  });
+
+  return {
+    textGroups: [],
+    checklistGroups: [...(checklistGroups || []), ...convertedGroups],
+  };
+};
+
 export const useFirebaseSync = ({
   topCategories,
   setTopCategories,
@@ -133,12 +174,15 @@ export const useFirebaseSync = ({
 
   const applyPayloadToState = (payload: WorkspacePayload) => {
     const { groups, items } = ensureFixedTodoData(payload.categoryGroups, payload.categoryItems);
+    const { textGroups: migratedText, checklistGroups: migratedCheck } =
+      migrateTextGroupsToChecklist(payload.textGroups, payload.checklistGroups);
+
     setTopCategories(ensureFixedTopCategories(payload.topCategories));
     setCategoryGroups(groups);
     setCategoryItems(items);
     setSubItems(payload.subItems);
-    setTextGroups(payload.textGroups);
-    setChecklistGroups(payload.checklistGroups);
+    setTextGroups(migratedText);
+    setChecklistGroups(migratedCheck);
     setQuickMemos(payload.quickMemos);
     setCalendarEvents(payload.calendarEvents);
   };
@@ -177,6 +221,12 @@ export const useFirebaseSync = ({
             Array.isArray(data.categoryGroups) ? data.categoryGroups : [],
             Array.isArray(data.categoryItems) ? data.categoryItems : []
           );
+          const { textGroups: migratedText, checklistGroups: migratedCheck } =
+            migrateTextGroupsToChecklist(
+              Array.isArray(data.textGroups) ? data.textGroups : [],
+              Array.isArray(data.checklistGroups) ? data.checklistGroups : []
+            );
+
           const remotePayload = sanitizePayload({
             topCategories: ensureFixedTopCategories(
               Array.isArray(data.topCategories) && data.topCategories.length > 0
@@ -186,8 +236,8 @@ export const useFirebaseSync = ({
             categoryGroups: syncedGroups,
             categoryItems: syncedItems,
             subItems: Array.isArray(data.subItems) ? data.subItems : [],
-            textGroups: Array.isArray(data.textGroups) ? data.textGroups : [],
-            checklistGroups: Array.isArray(data.checklistGroups) ? data.checklistGroups : [],
+            textGroups: migratedText,
+            checklistGroups: migratedCheck,
             quickMemos: Array.isArray(data.quickMemos) ? data.quickMemos : [],
             calendarEvents: Array.isArray(data.calendarEvents) ? data.calendarEvents : [],
           });

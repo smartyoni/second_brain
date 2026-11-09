@@ -20,6 +20,7 @@ export const QuickMemoMonthList: React.FC<QuickMemoMonthListProps> = ({
     subItems,
     setSubItems,
     setTextGroups,
+    setChecklistGroups,
   } = useWorkspace();
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -28,10 +29,11 @@ export const QuickMemoMonthList: React.FC<QuickMemoMonthListProps> = ({
   const monthCategories = categoryItems.filter((c) => c.topCategoryId === 'top-1');
 
   const handleDeleteMonth = (catId: string) => {
-    // 해당 월 카테고리와 하위 퀵메모 및 텍스트그룹 일괄 정리
+    // 해당 월 카테고리와 하위 퀵메모 및 텍스트/체크그룹 일괄 정리
     const relatedSubIds = subItems.filter((s) => s.categoryId === catId).map((s) => s.id);
     setCategoryItems((prev) => prev.filter((c) => c.id !== catId));
     setSubItems((prev) => prev.filter((s) => s.categoryId !== catId));
+    setChecklistGroups((prev) => prev.filter((g) => !relatedSubIds.includes(g.subItemId)));
     setTextGroups((prev) => prev.filter((g) => !relatedSubIds.includes(g.subItemId)));
   };
 

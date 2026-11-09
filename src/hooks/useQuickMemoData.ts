@@ -3,7 +3,7 @@ import {
   QuickMemo,
   CategoryItem,
   SubItem,
-  TextGroupData,
+  ChecklistGroupData,
   PanelDetailState,
 } from '../types';
 import { initialQuickMemos } from '../context/initialData';
@@ -12,7 +12,7 @@ export const useQuickMemoData = (
   categoryItems: CategoryItem[],
   setCategoryItems: React.Dispatch<React.SetStateAction<CategoryItem[]>>,
   setSubItems: React.Dispatch<React.SetStateAction<SubItem[]>>,
-  setTextGroups: React.Dispatch<React.SetStateAction<TextGroupData[]>>,
+  setChecklistGroups: React.Dispatch<React.SetStateAction<ChecklistGroupData[]>>,
   updateActivePanelState: (updater: (prev: PanelDetailState) => PanelDetailState) => void
 ) => {
   const [quickMemos, setQuickMemos] = useState<QuickMemo[]>(initialQuickMemos);
@@ -48,14 +48,14 @@ export const useQuickMemoData = (
       ...prev,
     ]);
 
-    setTextGroups((prev) => [
+    setChecklistGroups((prev) => [
       {
-        id: `tg-qm-${Date.now()}`,
+        id: `cg-qm-${Date.now()}`,
         subItemId: newSubId,
         name: '퀵메모 원본',
         isExpanded: true,
         order: 0,
-        blocks: [{ id: `tb-${Date.now()}`, text: trimmed, order: 0 }],
+        items: [{ id: `ci-${Date.now()}`, text: trimmed, isCompleted: false, order: 0 }],
       },
       ...prev,
     ]);
@@ -75,7 +75,7 @@ export const useQuickMemoData = (
       topCategoryId: 'top-1',
       categoryId: targetCatId,
       subItemId: newSubId,
-      activeTab: 'text',
+      activeTab: 'check',
     }));
   };
 
