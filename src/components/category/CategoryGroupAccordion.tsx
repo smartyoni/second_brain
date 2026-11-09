@@ -63,12 +63,12 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
           e.stopPropagation();
           setIsEditing(true);
         }}
-        className="h-7 px-2 bg-blue-100 hover:bg-blue-200/90 border-y border-blue-200 flex items-center gap-1.5 text-xs text-blue-950 font-bold cursor-pointer select-none transition-colors pr-0"
+        className="h-11 lg:h-7 px-3 lg:px-2 bg-blue-100 hover:bg-blue-200/90 border-y border-blue-200 flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs text-blue-950 font-bold cursor-pointer select-none transition-colors pr-0"
       >
         {group.isExpanded ? (
-          <ChevronDown className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+          <ChevronDown className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-blue-700 shrink-0" />
         ) : (
-          <ChevronRight className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+          <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-blue-700 shrink-0" />
         )}
 
         <div className="flex-1 min-w-0" onClick={(e) => isEditing && e.stopPropagation()}>
@@ -80,12 +80,12 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
               setIsEditing(false);
             }}
             onCancel={() => setIsEditing(false)}
-            className="text-xs truncate block font-bold text-blue-950"
-            inputClassName="text-xs h-6 py-0 px-1 font-semibold"
+            className="text-sm lg:text-xs truncate block font-bold text-blue-950"
+            inputClassName="text-sm lg:text-xs h-8 lg:h-6 py-0 px-1 font-semibold"
           />
         </div>
 
-        <span className="text-[10px] bg-blue-200 text-blue-900 rounded px-1 shrink-0 font-semibold">
+        <span className="text-xs lg:text-[10px] bg-blue-200 text-blue-900 rounded px-1.5 lg:px-1 shrink-0 font-semibold">
           {items.length}
         </span>
 
@@ -96,9 +96,9 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
             e.stopPropagation();
             onAddCategoryToGroup(group.id);
           }}
-          className="p-0.5 text-blue-700 hover:bg-blue-200 rounded transition-colors"
+          className="p-1.5 lg:p-0.5 text-blue-700 hover:bg-blue-200 rounded transition-colors"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <Plus className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
         </button>
 
         <ThreeDotMenu
@@ -108,6 +108,7 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
           onEdit={() => setIsEditing(true)}
           onDelete={() => onDeleteGroup(group.id)}
           deleteTitle={`'${group.name}' 그룹을 삭제하시겠습니까?`}
+          buttonClassName="p-2 lg:p-0.5 text-blue-900 hover:bg-blue-200/60"
         />
       </div>
 

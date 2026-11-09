@@ -75,7 +75,7 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className={`group relative h-7 px-2 flex items-center gap-1.5 text-xs cursor-pointer select-none border-b border-slate-200 transition-colors pr-0 ${
+      className={`group relative h-11 lg:h-7 px-3 lg:px-2 flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs cursor-pointer select-none border-b border-slate-200 transition-colors pr-0 ${
         isOverSubItem
           ? 'bg-blue-100 ring-2 ring-blue-500 ring-inset'
           : isSelected
@@ -88,7 +88,7 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
         <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-600" />
       )}
 
-      <Folder className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-emerald-700' : 'text-slate-500'}`} />
+      <Folder className={`w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0 ${isSelected ? 'text-emerald-700' : 'text-slate-500'}`} />
 
       <div className="flex-1 min-w-0">
         <InlineEditableText
@@ -99,12 +99,12 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
             setIsEditing(false);
           }}
           onCancel={() => setIsEditing(false)}
-          className="text-xs truncate block"
-          inputClassName="text-xs h-6 py-0 px-1"
+          className="text-sm lg:text-xs truncate block"
+          inputClassName="text-sm lg:text-xs h-8 lg:h-6 py-0 px-1.5"
         />
       </div>
 
-      <span className="text-[10px] text-slate-400 px-1 shrink-0 font-mono">
+      <span className="text-xs lg:text-[10px] text-slate-400 px-1 shrink-0 font-mono">
         ({subItemCount})
       </span>
 
@@ -117,6 +117,7 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
         onEdit={() => setIsEditing(true)}
         onDelete={() => onDelete(item.id)}
         deleteTitle={`'${item.name}' 카테고리를 삭제하시겠습니까?`}
+        buttonClassName="p-2 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
       />
     </div>
   );

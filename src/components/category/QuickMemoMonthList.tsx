@@ -40,12 +40,12 @@ export const QuickMemoMonthList: React.FC<QuickMemoMonthListProps> = ({
   return (
     <div className="flex-1 overflow-y-auto bg-slate-50/30 select-none">
       {/* 상단 1개월분 퀵메모 모음 헤더 */}
-      <div className="px-3 py-2 bg-slate-100 border-b border-slate-300 text-xs font-bold text-slate-800 flex items-center justify-between">
+      <div className="h-11 lg:h-9 px-3 bg-slate-100 border-b border-slate-300 text-sm lg:text-xs font-bold text-slate-800 flex items-center justify-between shrink-0">
         <span className="flex items-center gap-1.5">
-          <Calendar className="w-3.5 h-3.5 text-blue-600" />
+          <Calendar className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-blue-600" />
           <span>월별 퀵메모 모음</span>
         </span>
-        <span className="text-[11px] text-slate-600 font-semibold">
+        <span className="text-xs lg:text-[11px] text-slate-600 font-semibold">
           총 {monthCategories.length}개월
         </span>
       </div>
@@ -71,14 +71,14 @@ export const QuickMemoMonthList: React.FC<QuickMemoMonthListProps> = ({
                   e.stopPropagation();
                   setEditingId(month.id);
                 }}
-                className={`group relative h-9 px-3 flex items-center gap-2 cursor-pointer transition-colors pr-0 ${
+                className={`group relative h-11 lg:h-9 px-3 flex items-center gap-2 text-sm lg:text-xs cursor-pointer transition-colors pr-0 ${
                   isSelected
                     ? 'bg-blue-100 text-blue-950 font-bold border-l-4 border-blue-600 shadow-xs'
                     : 'hover:bg-slate-100 text-slate-800'
                 }`}
               >
                 <Calendar
-                  className={`w-3.5 h-3.5 shrink-0 ${
+                  className={`w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0 ${
                     isSelected ? 'text-blue-700' : 'text-slate-500 group-hover:text-slate-700'
                   }`}
                 />
@@ -94,14 +94,14 @@ export const QuickMemoMonthList: React.FC<QuickMemoMonthListProps> = ({
                       setEditingId(null);
                     }}
                     onCancel={() => setEditingId(null)}
-                    className="text-xs truncate block font-medium"
-                    inputClassName="text-xs h-6 py-0 px-1 font-normal"
+                    className="text-sm lg:text-xs truncate block font-medium"
+                    inputClassName="text-sm lg:text-xs h-8 lg:h-6 py-0 px-1 font-normal"
                   />
                 </div>
 
                 {/* 해당 월에 보관된 퀵메모 개수 뱃지 */}
                 <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold shrink-0 ${
+                  className={`text-xs lg:text-[10px] px-2 py-0.5 lg:px-1.5 lg:py-0.5 rounded-full font-semibold shrink-0 ${
                     isSelected
                       ? 'bg-blue-200 text-blue-900'
                       : 'bg-slate-200 text-slate-700'
@@ -111,7 +111,7 @@ export const QuickMemoMonthList: React.FC<QuickMemoMonthListProps> = ({
                 </span>
 
                 <ChevronRight
-                  className={`w-3.5 h-3.5 shrink-0 transition-transform ${
+                  className={`w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0 transition-transform ${
                     isSelected ? 'text-blue-600 translate-x-0.5' : 'text-slate-300'
                   }`}
                 />
@@ -127,6 +127,7 @@ export const QuickMemoMonthList: React.FC<QuickMemoMonthListProps> = ({
                   onEdit={() => setEditingId(month.id)}
                   onDelete={() => handleDeleteMonth(month.id)}
                   deleteTitle={`'${month.name}' 퀵메모 모음을 삭제하시겠습니까?`}
+                  buttonClassName="p-2 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
                 />
               </div>
             );
