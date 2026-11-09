@@ -16,6 +16,7 @@ export const DetailItemChecklistSection: React.FC = () => {
     editingItemId,
     setEditingItemId,
     handleAddChecklistItem,
+    handleAddMultipleItems,
     handleToggleComplete,
     handleUpdateText,
     handleDeleteItem,
@@ -29,6 +30,12 @@ export const DetailItemChecklistSection: React.FC = () => {
     handleDrop,
     handleDragEnd,
   } = useDragSort(checklistItems, handleReorderItems);
+
+  const validLines = newItemText
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  const hasMultipleLines = validLines.length > 1;
 
   if (!targetItem) {
     return (
@@ -74,29 +81,54 @@ export const DetailItemChecklistSection: React.FC = () => {
         </button>
       </div>
 
-      {/* 빠른 입력 바 */}
-      <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/40 shrink-0 flex items-center gap-1.5">
-        <input
-          type="text"
-          value={newItemText}
-          onChange={(e) => setNewItemText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && newItemText.trim()) {
-              e.preventDefault();
-              handleAddChecklistItem(newItemText);
-            }
-          }}
-          placeholder="새 체크리스트 항목 입력 후 Enter..."
-          className="flex-1 h-7 px-2.5 text-xs text-slate-800 bg-white border border-slate-200 rounded-md outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100 placeholder:text-slate-400"
-        />
-        <button
-          type="button"
-          disabled={!newItemText.trim()}
-          onClick={() => handleAddChecklistItem(newItemText)}
-          className="h-7 px-2.5 rounded-md text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 disabled:bg-slate-200 disabled:text-slate-400 text-white transition-colors cursor-pointer disabled:cursor-not-allowed shrink-0"
-        >
-          추가
-        </button>
+      {/* 빠른 입력 바 (멀티라인/줄바꿈 입력 지원) */}
+      <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 shrink-0 flex flex-col gap-1.5">
+        <div className="flex items-start gap-1.5">
+          <textarea
+            value={newItemText}
+            onChange={(e) => setNewItemText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                if (newItemText.trim()) {
+                  handleAddChecklistItem(newItemText);
+                }
+              }
+            }}
+            rows={2}
+            placeholder="새 체크리스트 입력 (Enter 줄바꿈, Ctrl+Enter 추가)..."
+            className="flex-1 min-h-[50px] max-h-[140px] px-2.5 py-1.5 text-xs text-slate-800 bg-white border border-slate-200 rounded-md outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-100 placeholder:text-slate-400 resize-y leading-relaxed font-sans"
+          />
+          <div className="flex flex-col gap-1 shrink-0">
+            <button
+              type="button"
+              disabled={!newItemText.trim()}
+              onClick={() => handleAddChecklistItem(newItemText)}
+              className="h-7 px-2.5 rounded-md text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 disabled:bg-slate-200 disabled:text-slate-400 text-white transition-colors cursor-pointer disabled:cursor-not-allowed shrink-0"
+              title="Ctrl+Enter로 추가"
+            >
+              추가
+            </button>
+            {hasMultipleLines && (
+              <button
+                type="button"
+                onClick={() => handleAddMultipleItems(newItemText)}
+                className="h-7 px-2 rounded-md text-[10px] font-semibold bg-pink-600 hover:bg-pink-700 text-white transition-colors cursor-pointer shrink-0 whitespace-nowrap"
+                title="줄마다 개별 체크 항목으로 일괄 추가"
+              >
+                줄별 추가
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center justify-between text-[10px] text-slate-400 px-0.5">
+          <span>Enter 줄바꿈 · Ctrl+Enter 추가</span>
+          {hasMultipleLines && (
+            <span className="text-pink-600 font-semibold">
+              {validLines.length}줄 입력됨 ([줄별 추가]로 각각 등록 가능)
+            </span>
+          )}
+        </div>
       </div>
 
       {/* 체크리스트 목록 영역 */}

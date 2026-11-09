@@ -115,6 +115,34 @@ export const useDetailItemChecklist = () => {
     }
   };
 
+  // 줄바꿈된 여러 줄을 개별 체크리스트 항목으로 일괄 추가
+  const handleAddMultipleItems = (multiLineText?: string) => {
+    if (!targetItem) return;
+    const raw = multiLineText !== undefined ? multiLineText : newItemText;
+    const lines = raw
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    if (lines.length === 0) return;
+
+    updateTargetChecklist((prev) => {
+      const newItems: SubCheckItem[] = lines.map((line, idx) => ({
+        id: `sci-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+        text: line,
+        isCompleted: false,
+        order: 0,
+      }));
+      const incomplete = prev.filter((item) => !item.isCompleted);
+      const completed = prev.filter((item) => item.isCompleted);
+      return [...incomplete, ...newItems, ...completed].map((item, idx) => ({
+        ...item,
+        order: idx,
+      }));
+    });
+
+    setNewItemText('');
+  };
+
   // 완료 토글 (완료 표시된 항목은 즉시 리스트 하단으로 이동)
   const handleToggleComplete = (subId: string) => {
     updateTargetChecklist((prev) => {
@@ -178,6 +206,7 @@ export const useDetailItemChecklist = () => {
     editingItemId,
     setEditingItemId,
     handleAddChecklistItem,
+    handleAddMultipleItems,
     handleToggleComplete,
     handleUpdateText,
     handleDeleteItem,
