@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Calendar, FolderKanban, PenLine, ArrowRightLeft, Home } from 'lucide-react';
+import { ArrowLeft, Calendar, CalendarPlus, FolderKanban, PenLine, ArrowRightLeft, Home } from 'lucide-react';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
 import { getTodayDateStr } from './utils/calendarUtils';
 import { FourPanelLayout } from './components/layout/FourPanelLayout';
@@ -12,6 +12,7 @@ import { ProjectDetailPanel } from './components/project/ProjectDetailPanel';
 import { ProjectTimelinePanel } from './components/project/ProjectTimelinePanel';
 import { GoogleCalendarLayout } from './components/googlecalendar/GoogleCalendarLayout';
 import { QuickMemoModal } from './components/category/QuickMemoModal';
+import { GoogleCalendarQuickCreateModal, QuickCreateState } from './components/googlecalendar/GoogleCalendarQuickCreateModal';
 
 const AppContent: React.FC = () => {
   const {
@@ -21,13 +22,29 @@ const AppContent: React.FC = () => {
     setMobileStep,
     addQuickMemo,
     selectTopCategory,
+    selectedCalendarDate,
     setSelectedCalendarDate,
     getCurrentActiveState,
   } = useWorkspace();
   const [showExitToast, setShowExitToast] = useState(false);
   const [isQuickMemoOpen, setIsQuickMemoOpen] = useState(false);
+  const [quickScheduleState, setQuickScheduleState] = useState<QuickCreateState>({
+    isOpen: false,
+    date: getTodayDateStr(),
+    time: '10:00',
+    isAllDay: false,
+  });
 
   const isProjectTab = getCurrentActiveState().topCategoryId === 'top-3';
+
+  const handleOpenScheduleModal = () => {
+    setQuickScheduleState({
+      isOpen: true,
+      date: selectedCalendarDate || getTodayDateStr(),
+      time: '10:00',
+      isAllDay: false,
+    });
+  };
 
   const handleQuickMove = () => {
     setAppMode('workspace');
@@ -162,61 +179,72 @@ const AppContent: React.FC = () => {
       </div>
 
       {/* 모바일 전용 하단 컨트롤 바 */}
-      <footer className="lg:hidden shrink-0 bg-slate-900 border-t border-slate-700 px-2.5 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+10px)] flex items-center gap-1.5 select-none z-40">
+      <footer className="lg:hidden shrink-0 bg-slate-900 border-t border-slate-700 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+10px)] flex items-center gap-1 select-none z-40">
         {/* 1. 퀵이동 버튼 */}
         <button
           type="button"
           onClick={handleQuickMove}
-          className="flex-1 h-9 rounded-lg bg-teal-700 hover:bg-teal-600 active:bg-teal-800 text-white text-xs font-semibold flex items-center justify-center gap-1 border border-teal-600 transition-colors cursor-pointer"
+          className="flex-1 h-9 rounded-lg bg-teal-700 hover:bg-teal-600 active:bg-teal-800 text-white text-[11px] min-w-0 font-semibold flex items-center justify-center gap-1 border border-teal-600 transition-colors cursor-pointer px-1"
         >
-          <ArrowRightLeft className="w-3.5 h-3.5 text-teal-100" />
-          <span>퀵이동</span>
+          <ArrowRightLeft className="w-3.5 h-3.5 text-teal-100 shrink-0" />
+          <span className="truncate">퀵이동</span>
         </button>
 
         {/* 2. 퀵메모 버튼 */}
         <button
           type="button"
           onClick={() => setIsQuickMemoOpen(true)}
-          className="flex-1 h-9 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-semibold flex items-center justify-center gap-1 border border-emerald-500 transition-colors cursor-pointer"
+          className="flex-1 h-9 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-[11px] min-w-0 font-semibold flex items-center justify-center gap-1 border border-emerald-500 transition-colors cursor-pointer px-1"
         >
-          <PenLine className="w-3.5 h-3.5 text-emerald-100" />
-          <span>퀵메모</span>
+          <PenLine className="w-3.5 h-3.5 text-emerald-100 shrink-0" />
+          <span className="truncate">퀵메모</span>
         </button>
 
-        {/* 3. 지식보관소 / 캘린더 모드 전환 버튼 */}
+        {/* 3. 일정추가 버튼 (캘린더 전환버튼 좌측) */}
+        <button
+          type="button"
+          onClick={handleOpenScheduleModal}
+          className="flex-1 h-9 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-[11px] min-w-0 font-semibold flex items-center justify-center gap-1 border border-indigo-500 transition-colors cursor-pointer px-1"
+          title="새 일정 추가"
+        >
+          <CalendarPlus className="w-3.5 h-3.5 text-indigo-100 shrink-0" />
+          <span className="truncate">일정</span>
+        </button>
+
+        {/* 4. 지식보관소 / 캘린더 모드 전환 버튼 */}
         <button
           type="button"
           onClick={() => setAppMode(appMode === 'calendar' ? 'workspace' : 'calendar')}
-          className="flex-1 h-9 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1 border border-blue-500 transition-colors cursor-pointer"
+          className="flex-1 h-9 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-[11px] min-w-0 font-semibold flex items-center justify-center gap-1 border border-blue-500 transition-colors cursor-pointer px-1"
         >
           {appMode === 'calendar' ? (
             <>
-              <FolderKanban className="w-3.5 h-3.5 text-blue-100" />
-              <span>지식보관소</span>
+              <FolderKanban className="w-3.5 h-3.5 text-blue-100 shrink-0" />
+              <span className="truncate">지식보관소</span>
             </>
           ) : (
             <>
-              <Calendar className="w-3.5 h-3.5 text-blue-100" />
-              <span>캘린더</span>
+              <Calendar className="w-3.5 h-3.5 text-blue-100 shrink-0" />
+              <span className="truncate">캘린더</span>
             </>
           )}
         </button>
 
-        {/* 4. 홈 버튼: 뒤로가기 바로 좌측, 동일 크기(w-10 h-9) */}
+        {/* 5. 홈 버튼 */}
         <button
           type="button"
           onClick={handleHomeNavigation}
-          className="w-10 h-9 shrink-0 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white flex items-center justify-center border border-slate-700 transition-colors cursor-pointer"
+          className="w-9 h-9 shrink-0 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white flex items-center justify-center border border-slate-700 transition-colors cursor-pointer"
           title={appMode === 'workspace' ? '1번 패널(카테고리 목록)로 이동' : '당일 일간뷰로 이동'}
         >
           <Home className="w-4 h-4 text-slate-200" />
         </button>
 
-        {/* 5. 뒤로가기 버튼: 가장 우측에 고정, 크기는 약 1/4로 축소, 텍스트 없이 화살표 기호로 표시 */}
+        {/* 6. 뒤로가기 버튼 */}
         <button
           type="button"
           onClick={() => handleBackNavigation(false)}
-          className="w-10 h-9 shrink-0 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white flex items-center justify-center border border-slate-700 transition-colors cursor-pointer"
+          className="w-9 h-9 shrink-0 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white flex items-center justify-center border border-slate-700 transition-colors cursor-pointer"
           title="뒤로가기"
         >
           <ArrowLeft className="w-4 h-4 text-slate-200" />
@@ -227,6 +255,11 @@ const AppContent: React.FC = () => {
         isOpen={isQuickMemoOpen}
         onClose={() => setIsQuickMemoOpen(false)}
         onSave={addQuickMemo}
+      />
+
+      <GoogleCalendarQuickCreateModal
+        createState={quickScheduleState}
+        onClose={() => setQuickScheduleState((prev) => ({ ...prev, isOpen: false }))}
       />
 
       {showExitToast && (
