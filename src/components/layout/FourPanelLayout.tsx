@@ -53,11 +53,11 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
         {mobileStep === 'subitem' && (
           <div className="h-full w-full flex flex-col overflow-hidden">
             {/* 뒤로가기 네비게이션 바 */}
-            <div className="h-9 px-3 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
+            <div className="h-11 px-3.5 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
               <button
                 type="button"
                 onClick={() => setMobileStep('category')}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-blue-600"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-800 hover:text-blue-600 active:text-blue-700"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>카테고리 목록으로</span>
@@ -70,11 +70,11 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
         {mobileStep === 'detail' && (
           <div className="h-full w-full flex flex-col overflow-hidden">
             {/* 뒤로가기 네비게이션 바 */}
-            <div className="h-9 px-3 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
+            <div className="h-11 px-3.5 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
               <button
                 type="button"
                 onClick={() => setMobileStep('subitem')}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-blue-600"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-800 hover:text-blue-600 active:text-blue-700"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>문서 목록으로</span>
@@ -88,11 +88,11 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
         {mobileStep === 'memo' && (
           <div className="h-full w-full flex flex-col overflow-hidden">
             {/* 뒤로가기 네비게이션 바 */}
-            <div className="h-9 px-3 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
+            <div className="h-11 px-3.5 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
               <button
                 type="button"
                 onClick={() => setMobileStep('detail')}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-blue-600"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-800 hover:text-blue-600 active:text-blue-700"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>상세 항목으로</span>

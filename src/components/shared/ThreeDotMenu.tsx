@@ -97,20 +97,20 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
           e.stopPropagation();
           setIsOpen((prev) => !prev);
         }}
-        className={`p-0.5 rounded transition-colors ${
-          buttonClassName || 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/60'
+        className={`rounded transition-colors ${
+          buttonClassName || 'p-1.5 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60'
         }`}
       >
-        <MoreVertical className="w-3.5 h-3.5" />
+        <MoreVertical className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
       </button>
 
       {isOpen && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute right-0 top-full mt-1 z-40 w-32 bg-white border border-slate-300 rounded shadow-md py-0.5 text-[11px]"
+          className="absolute right-0 top-full mt-1 z-40 w-36 lg:w-32 bg-white border border-slate-300 rounded shadow-md py-0.5 text-xs lg:text-[11px]"
         >
           {onMove && (
-            <div className="flex items-center justify-between px-1 py-1 border-b border-slate-100">
+            <div className="flex items-center justify-between px-1.5 py-1 border-b border-slate-100">
               <button
                 type="button"
                 title="가장 위로"
@@ -120,13 +120,13 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                   setIsOpen(false);
                   onMove('top');
                 }}
-                className={`p-1 rounded transition-colors ${
+                className={`p-1.5 lg:p-1 rounded transition-colors ${
                   canMoveUp
                     ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer'
                     : 'text-slate-300 cursor-not-allowed'
                 }`}
               >
-                <ChevronsUp className="w-3.5 h-3.5" />
+                <ChevronsUp className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
               </button>
               <button
                 type="button"
@@ -137,13 +137,13 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                   setIsOpen(false);
                   onMove('bottom');
                 }}
-                className={`p-1 rounded transition-colors ${
+                className={`p-1.5 lg:p-1 rounded transition-colors ${
                   canMoveDown
                     ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer'
                     : 'text-slate-300 cursor-not-allowed'
                 }`}
               >
-                <ChevronsDown className="w-3.5 h-3.5" />
+                <ChevronsDown className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
               </button>
               <button
                 type="button"
@@ -154,13 +154,13 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                   setIsOpen(false);
                   onMove('up');
                 }}
-                className={`p-1 rounded transition-colors ${
+                className={`p-1.5 lg:p-1 rounded transition-colors ${
                   canMoveUp
                     ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer'
                     : 'text-slate-300 cursor-not-allowed'
                 }`}
               >
-                <ChevronUp className="w-3.5 h-3.5" />
+                <ChevronUp className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
               </button>
               <button
                 type="button"
@@ -171,13 +171,13 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                   setIsOpen(false);
                   onMove('down');
                 }}
-                className={`p-1 rounded transition-colors ${
+                className={`p-1.5 lg:p-1 rounded transition-colors ${
                   canMoveDown
                     ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer'
                     : 'text-slate-300 cursor-not-allowed'
                 }`}
               >
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
               </button>
             </div>
           )}
@@ -188,7 +188,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                 setIsOpen(false);
                 onEdit();
               }}
-              className="w-full text-left px-2 py-1 text-slate-700 hover:bg-slate-100"
+              className="w-full text-left px-2.5 py-1.5 lg:px-2 lg:py-1 text-slate-700 hover:bg-slate-100"
             >
               수정
             </button>
@@ -200,7 +200,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                 setIsOpen(false);
                 onCopy();
               }}
-              className="w-full text-left px-2 py-1 text-slate-700 hover:bg-slate-100"
+              className="w-full text-left px-2.5 py-1.5 lg:px-2 lg:py-1 text-slate-700 hover:bg-slate-100"
             >
               복사
             </button>
@@ -211,7 +211,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
               <button
                 type="button"
                 onClick={() => setIsGroupListOpen((prev) => !prev)}
-                className="w-full text-left px-2 py-1 text-slate-700 hover:bg-slate-100 flex items-center justify-between"
+                className="w-full text-left px-2.5 py-1.5 lg:px-2 lg:py-1 text-slate-700 hover:bg-slate-100 flex items-center justify-between"
               >
                 <span>{targetActionLabel || '그룹 이동'}</span>
                 <span>{isGroupListOpen ? '▴' : '▾'}</span>
@@ -228,7 +228,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                         if (onMoveToTarget) onMoveToTarget(g.id);
                         else if (onMoveToGroup) onMoveToGroup(g.id);
                       }}
-                      className="w-full text-left pl-3 pr-2 py-1 truncate text-slate-700 hover:bg-emerald-100"
+                      className="w-full text-left pl-3.5 pr-2 py-1.5 lg:pl-3 lg:pr-2 lg:py-1 truncate text-slate-700 hover:bg-emerald-100"
                     >
                       {g.name}
                     </button>
@@ -245,7 +245,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
                 setIsOpen(false);
                 item.onClick();
               }}
-              className={`w-full text-left px-2 py-1 ${item.isDanger ? 'text-red-600 hover:bg-red-50' : 'text-slate-700 hover:bg-slate-100'}`}
+              className={`w-full text-left px-2.5 py-1.5 lg:px-2 lg:py-1 ${item.isDanger ? 'text-red-600 hover:bg-red-50' : 'text-slate-700 hover:bg-slate-100'}`}
             >
               {item.label}
             </button>
@@ -254,7 +254,7 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
             <button
               type="button"
               onClick={handleDeleteClick}
-              className="w-full text-left px-2 py-1 text-red-600 hover:bg-red-50"
+              className="w-full text-left px-2.5 py-1.5 lg:px-2 lg:py-1 text-red-600 hover:bg-red-50"
             >
               삭제
             </button>

@@ -62,7 +62,7 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
           setIsEditing(true);
         }
       }}
-      className={`p-3 hover:bg-slate-50 transition-colors group select-text text-xs border-b border-slate-100 last:border-b-0 cursor-pointer ${
+      className={`p-3.5 lg:p-3 hover:bg-slate-50 transition-colors group select-text text-sm lg:text-xs border-b border-slate-100 last:border-b-0 cursor-pointer ${
         isSelected ? 'bg-emerald-50/70 ring-1 ring-emerald-300 rounded' : block.dueDate ? 'hover:bg-emerald-50/30' : ''
       }`}
       title={
@@ -84,12 +84,12 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
           placeholder="(내용을 입력하세요)"
         />
       ) : (
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-2 flex-1 min-w-0">
-            <span className="text-slate-800 text-sm leading-none mt-1 select-none font-bold">
+        <div className="flex items-start justify-between gap-2.5 lg:gap-2">
+          <div className="flex items-start gap-2.5 lg:gap-2 flex-1 min-w-0">
+            <span className="text-slate-800 text-base lg:text-sm leading-none mt-1 select-none font-bold">
               •
             </span>
-            <div className="flex-1 whitespace-pre-wrap leading-relaxed text-slate-800">
+            <div className="flex-1 whitespace-pre-wrap leading-relaxed text-sm lg:text-xs text-slate-800">
               {block.text ? (
                 <SmartText text={block.text} />
               ) : (
@@ -105,10 +105,10 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
                   e.stopPropagation();
                   setSelectedCalendarDate(block.dueDate!);
                 }}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-emerald-50 hover:bg-emerald-200 active:bg-emerald-300 text-emerald-800 border border-emerald-300 shrink-0 font-semibold cursor-pointer transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1 px-2 py-0.5 lg:px-1.5 text-xs lg:text-[10px] rounded bg-emerald-50 hover:bg-emerald-200 active:bg-emerald-300 text-emerald-800 border border-emerald-300 shrink-0 font-semibold cursor-pointer transition-colors shadow-2xs"
                 title={`클릭 시 등록된 일정(${block.dueDate}${block.endDate ? ` ~ ${block.endDate}` : ''})으로 이동`}
               >
-                <CalendarIcon className="w-3 h-3 text-emerald-600" />
+                <CalendarIcon className="w-3.5 h-3.5 lg:w-3 lg:h-3 text-emerald-600" />
                 <span>
                   {block.dueDate.slice(5)}
                   {block.endDate && ` ~ ${block.endDate.slice(5)}`}
@@ -118,7 +118,7 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-0.5 shrink-0">
+          <div className="flex items-center gap-1 lg:gap-0.5 shrink-0">
             <button
               type="button"
               title={block.dueDate ? '일정 수정/해제' : '일정 등록'}
@@ -126,25 +126,26 @@ export const TextBlockRow: React.FC<TextBlockRowProps> = ({
                 e.stopPropagation();
                 onOpenSchedule(block.id);
               }}
-              className={`p-0.5 rounded transition-colors cursor-pointer ${
+              className={`p-1.5 lg:p-0.5 rounded transition-colors cursor-pointer ${
                 block.dueDate
                   ? 'text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100'
                   : 'text-slate-400 hover:text-emerald-600 hover:bg-slate-200/60'
               }`}
             >
-              <CalendarIcon className="w-3.5 h-3.5" />
+              <CalendarIcon className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
             </button>
 
             <ThreeDotMenu
               onMove={onMoveBlock ? (dir) => onMoveBlock(groupId, block.id, dir) : undefined}
-        groupTargets={groupTargets}
-        onMoveToGroup={onMoveToGroup ? (gid) => onMoveToGroup(groupId, block.id, gid) : undefined}
+              groupTargets={groupTargets}
+              onMoveToGroup={onMoveToGroup ? (gid) => onMoveToGroup(groupId, block.id, gid) : undefined}
               canMoveUp={canMoveUp}
               canMoveDown={canMoveDown}
               onEdit={() => setIsEditing(true)}
               onCopy={() => copyToClipboard(block.text)}
               onDelete={() => onDeleteBlock(groupId, block.id)}
               deleteTitle="이 텍스트 블록을 삭제하시겠습니까?"
+              buttonClassName="p-1.5 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
             />
           </div>
         </div>

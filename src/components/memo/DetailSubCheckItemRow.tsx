@@ -73,7 +73,7 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
           setIsEditing(true);
         }
       }}
-      className={`pl-2.5 pr-0 py-2 hover:bg-slate-50 transition-colors group select-text text-xs border-b border-slate-100 last:border-b-0 cursor-pointer ${
+      className={`pl-3.5 pr-0 py-3 lg:pl-2.5 lg:py-2 hover:bg-slate-50 transition-colors group select-text text-sm lg:text-xs border-b border-slate-100 last:border-b-0 cursor-pointer ${
         isDragging ? 'opacity-40 border border-dashed border-blue-400 bg-blue-50/30' : ''
       }`}
       title={!isEditing ? '더블클릭하여 내용 수정 / 드래그하여 순서 변경' : undefined}
@@ -91,24 +91,24 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
           />
         </div>
       ) : (
-        <div className="flex items-start justify-between gap-1.5 pr-0">
-          <div className="flex items-start gap-2 flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2 lg:gap-1.5 pr-0">
+          <div className="flex items-start gap-2.5 lg:gap-2 flex-1 min-w-0">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleComplete(item.id);
               }}
-              className="mt-0.5 text-slate-500 hover:text-blue-600 transition-colors shrink-0 cursor-pointer"
+              className="mt-0.5 p-1 -m-1 lg:p-0 lg:m-0 text-slate-500 hover:text-blue-600 transition-colors shrink-0 cursor-pointer"
             >
               {item.isCompleted ? (
-                <CheckSquare className="w-4 h-4 text-blue-600" />
+                <CheckSquare className="w-5 h-5 lg:w-4 lg:h-4 text-blue-600" />
               ) : (
-                <Square className="w-4 h-4 text-slate-400" />
+                <Square className="w-5 h-5 lg:w-4 lg:h-4 text-slate-400" />
               )}
             </button>
             <div
-              className={`flex-1 whitespace-pre-wrap leading-relaxed break-words ${
+              className={`flex-1 whitespace-pre-wrap leading-relaxed break-words text-sm lg:text-xs ${
                 item.isCompleted ? 'line-through text-slate-400' : 'text-slate-800'
               }`}
             >
@@ -124,6 +124,7 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
             onCopy={() => navigator.clipboard.writeText(item.text)}
             onDelete={() => onDelete(item.id)}
             deleteTitle="이 체크 항목을 삭제하시겠습니까?"
+            buttonClassName="p-1.5 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
           />
         </div>
       )}

@@ -6,6 +6,25 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          'Pretendard Variable',
+          'Pretendard',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'system-ui',
+          'Roboto',
+          'Helvetica Neue',
+          'Segoe UI',
+          'Apple SD Gothic Neo',
+          'Noto Sans KR',
+          'Malgun Gothic',
+          'Apple Color Emoji',
+          'Segoe UI Emoji',
+          'Segoe UI Symbol',
+          'sans-serif',
+        ],
+      },
       screens: {
         // 태블릿(갤럭시탭 S10+ 등) 세로모드에서도 모바일 드릴다운 뷰가 표시되도록
         // 가로 폭 1200px 이상이면서 가로(landscape) 방향일 때만 데스크톱 다중 패널 뷰 활성화

@@ -51,15 +51,15 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
           e.stopPropagation();
           setIsEditingGroupName(true);
         }}
-        className="h-8 px-2 bg-[#5ea578] hover:bg-[#4f9569] text-white flex items-center gap-1.5 text-xs font-bold cursor-pointer select-none transition-colors pr-0 border-b border-[#43835a]"
+        className="h-10 lg:h-8 px-2.5 lg:px-2 bg-[#5ea578] hover:bg-[#4f9569] text-white flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs font-bold cursor-pointer select-none transition-colors pr-0 border-b border-[#43835a]"
       >
         {group.isExpanded ? (
-          <ChevronDown className="w-3.5 h-3.5 text-white/95 shrink-0" />
+          <ChevronDown className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white/95 shrink-0" />
         ) : (
-          <ChevronRight className="w-3.5 h-3.5 text-white/95 shrink-0" />
+          <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white/95 shrink-0" />
         )}
 
-        <Folder className="w-3.5 h-3.5 text-white/95 shrink-0" />
+        <Folder className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white/95 shrink-0" />
 
         <div className="flex-1 min-w-0" onClick={(e) => isEditingGroupName && e.stopPropagation()}>
           <InlineEditableText
@@ -70,8 +70,8 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
               setIsEditingGroupName(false);
             }}
             onCancel={() => setIsEditingGroupName(false)}
-            className="text-xs truncate block text-white font-bold"
-            inputClassName="text-xs h-6 py-0 px-1 text-slate-900 font-semibold"
+            className="text-sm lg:text-xs truncate block text-white font-bold"
+            inputClassName="text-sm lg:text-xs h-7 lg:h-6 py-0 px-1 text-slate-900 font-semibold"
           />
         </div>
 
@@ -82,9 +82,9 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
             e.stopPropagation();
             onAddBlock(group.id);
           }}
-          className="p-1 hover:bg-white/20 rounded text-white transition-colors cursor-pointer"
+          className="p-1.5 lg:p-1 hover:bg-white/20 rounded text-white transition-colors cursor-pointer"
         >
-          <span className="text-sm font-bold leading-none">+</span>
+          <span className="text-base lg:text-sm font-bold leading-none">+</span>
         </button>
 
         <ThreeDotMenu
@@ -94,7 +94,7 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
           onEdit={() => setIsEditingGroupName(true)}
           onDelete={() => onDeleteGroup(group.id)}
           deleteTitle="이 텍스트박스 그룹을 삭제하시겠습니까?"
-          buttonClassName="text-white/90 hover:text-white hover:bg-white/20"
+          buttonClassName="p-2 lg:p-0.5 text-white/90 hover:text-white hover:bg-white/20"
         />
       </div>
 

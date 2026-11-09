@@ -59,15 +59,15 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
           e.stopPropagation();
           setIsEditingGroupName(true);
         }}
-        className="h-8 px-2 bg-[#5287be] hover:bg-[#4378af] text-white flex items-center gap-1.5 text-xs font-bold cursor-pointer select-none transition-colors pr-0 border-b border-[#3b6f9f]"
+        className="h-10 lg:h-8 px-2.5 lg:px-2 bg-[#5287be] hover:bg-[#4378af] text-white flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs font-bold cursor-pointer select-none transition-colors pr-0 border-b border-[#3b6f9f]"
       >
         {group.isExpanded ? (
-          <ChevronDown className="w-3.5 h-3.5 text-white/95 shrink-0" />
+          <ChevronDown className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white/95 shrink-0" />
         ) : (
-          <ChevronRight className="w-3.5 h-3.5 text-white/95 shrink-0" />
+          <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white/95 shrink-0" />
         )}
 
-        <Folder className="w-3.5 h-3.5 text-white/95 shrink-0" />
+        <Folder className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white/95 shrink-0" />
 
         <div className="flex-1 min-w-0" onClick={(e) => isEditingGroupName && e.stopPropagation()}>
           <InlineEditableText
@@ -78,12 +78,12 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
               setIsEditingGroupName(false);
             }}
             onCancel={() => setIsEditingGroupName(false)}
-            className="text-xs truncate block text-white font-bold"
-            inputClassName="text-xs h-6 py-0 px-1 text-slate-900 font-semibold"
+            className="text-sm lg:text-xs truncate block text-white font-bold"
+            inputClassName="text-sm lg:text-xs h-7 lg:h-6 py-0 px-1 text-slate-900 font-semibold"
           />
         </div>
 
-        <span className="text-[10px] bg-white/25 text-white font-semibold rounded px-1.5 py-0.5 shrink-0">
+        <span className="text-xs lg:text-[10px] bg-white/25 text-white font-semibold rounded px-1.5 py-0.5 shrink-0">
           {completedCount}/{group.items.length}
         </span>
 
@@ -94,9 +94,9 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
             e.stopPropagation();
             onAddItem(group.id);
           }}
-          className="p-1 hover:bg-white/20 rounded text-white transition-colors cursor-pointer"
+          className="p-1.5 lg:p-1 hover:bg-white/20 rounded text-white transition-colors cursor-pointer"
         >
-          <span className="text-sm font-bold leading-none">+</span>
+          <span className="text-base lg:text-sm font-bold leading-none">+</span>
         </button>
 
         <ThreeDotMenu
@@ -106,7 +106,7 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
           onEdit={() => setIsEditingGroupName(true)}
           onDelete={() => onDeleteGroup(group.id)}
           deleteTitle="이 체크리스트 그룹을 삭제하시겠습니까?"
-          buttonClassName="text-white/90 hover:text-white hover:bg-white/20"
+          buttonClassName="p-2 lg:p-0.5 text-white/90 hover:text-white hover:bg-white/20"
         />
       </div>
 

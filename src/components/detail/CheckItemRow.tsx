@@ -64,7 +64,7 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
           setIsEditing(true);
         }
       }}
-      className={`p-2.5 hover:bg-slate-50 transition-colors group select-text text-xs border-b border-slate-100 last:border-b-0 cursor-pointer ${
+      className={`p-3.5 lg:p-2.5 hover:bg-slate-50 transition-colors group select-text text-sm lg:text-xs border-b border-slate-100 last:border-b-0 cursor-pointer ${
         isSelected ? 'bg-blue-50/70 ring-1 ring-blue-300 rounded' : item.dueDate ? 'hover:bg-blue-50/30' : ''
       }`}
       title={
@@ -86,24 +86,24 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
           placeholder="(체크 항목을 입력하세요)"
         />
       ) : (
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-2 flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2.5 lg:gap-2">
+          <div className="flex items-start gap-2.5 lg:gap-2 flex-1 min-w-0">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleComplete(groupId, item.id);
               }}
-              className="mt-0.5 text-slate-500 hover:text-blue-600 transition-colors shrink-0 cursor-pointer"
+              className="mt-0.5 p-1 -m-1 lg:p-0 lg:m-0 text-slate-500 hover:text-blue-600 transition-colors shrink-0 cursor-pointer"
             >
               {item.isCompleted ? (
-                <CheckSquare className="w-4 h-4 text-blue-600" />
+                <CheckSquare className="w-5 h-5 lg:w-4 lg:h-4 text-blue-600" />
               ) : (
-                <Square className="w-4 h-4 text-slate-400" />
+                <Square className="w-5 h-5 lg:w-4 lg:h-4 text-slate-400" />
               )}
             </button>
             <div
-              className={`flex-1 whitespace-pre-wrap leading-relaxed ${
+              className={`flex-1 whitespace-pre-wrap leading-relaxed text-sm lg:text-xs ${
                 item.isCompleted
                   ? 'line-through text-slate-400'
                   : 'text-slate-800'
@@ -120,10 +120,10 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
                   e.stopPropagation();
                   setSelectedCalendarDate(item.dueDate!);
                 }}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-blue-50 hover:bg-blue-200 active:bg-blue-300 text-blue-700 border border-blue-300 shrink-0 font-semibold cursor-pointer transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1 px-2 py-0.5 lg:px-1.5 text-xs lg:text-[10px] rounded bg-blue-50 hover:bg-blue-200 active:bg-blue-300 text-blue-700 border border-blue-300 shrink-0 font-semibold cursor-pointer transition-colors shadow-2xs"
                 title={`클릭 시 등록된 일정(${item.dueDate}${item.endDate ? ` ~ ${item.endDate}` : ''})으로 이동`}
               >
-                <CalendarIcon className="w-3 h-3 text-blue-600" />
+                <CalendarIcon className="w-3.5 h-3.5 lg:w-3 lg:h-3 text-blue-600" />
                 <span>
                   {item.dueDate.slice(5)}
                   {item.endDate && ` ~ ${item.endDate.slice(5)}`}
@@ -133,7 +133,7 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-0.5 shrink-0">
+          <div className="flex items-center gap-1 lg:gap-0.5 shrink-0">
             <button
               type="button"
               title={item.dueDate ? '일정 수정/해제' : '일정 등록'}
@@ -141,25 +141,26 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
                 e.stopPropagation();
                 onOpenSchedule(item.id);
               }}
-              className={`p-0.5 rounded transition-colors cursor-pointer ${
+              className={`p-1.5 lg:p-0.5 rounded transition-colors cursor-pointer ${
                 item.dueDate
                   ? 'text-blue-600 hover:text-blue-800 hover:bg-blue-100'
                   : 'text-slate-400 hover:text-blue-600 hover:bg-slate-200/60'
               }`}
             >
-              <CalendarIcon className="w-3.5 h-3.5" />
+              <CalendarIcon className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
             </button>
 
             <ThreeDotMenu
               onMove={onMoveItem ? (dir) => onMoveItem(groupId, item.id, dir) : undefined}
-        groupTargets={groupTargets}
-        onMoveToGroup={onMoveToGroup ? (gid) => onMoveToGroup(groupId, item.id, gid) : undefined}
+              groupTargets={groupTargets}
+              onMoveToGroup={onMoveToGroup ? (gid) => onMoveToGroup(groupId, item.id, gid) : undefined}
               canMoveUp={canMoveUp}
               canMoveDown={canMoveDown}
               onEdit={() => setIsEditing(true)}
               onCopy={() => copyToClipboard(item.text)}
               onDelete={() => onDeleteItem(groupId, item.id)}
               deleteTitle="이 체크 항목을 삭제하시겠습니까?"
+              buttonClassName="p-1.5 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
             />
           </div>
         </div>
