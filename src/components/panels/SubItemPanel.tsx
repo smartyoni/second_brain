@@ -18,11 +18,21 @@ export const SubItemPanel: React.FC = () => {
   } = useWorkspace();
 
   const currentTopId = getCurrentActiveState().topCategoryId;
+  const isQuickMemoTab = currentTopId === 'top-1';
   const selectedCategoryId = getCurrentActiveState().categoryId;
   const selectedSubItemId = getCurrentActiveState().subItemId;
 
   const currentCategory = categoryItems.find((c) => c.id === selectedCategoryId);
   const currentSubItems = subItems.filter((s) => s.categoryId === selectedCategoryId);
+  const completedCount = isQuickMemoTab
+    ? currentSubItems.filter((s) => s.isCompleted).length
+    : undefined;
+
+  const handleToggleComplete = (subItemId: string) => {
+    setSubItems((prev) =>
+      prev.map((s) => (s.id === subItemId ? { ...s, isCompleted: !s.isCompleted } : s))
+    );
+  };
 
   // 현재 대분류에 속한 다른 카테고리 목록 (그룹명과 함께 표시)
   const categoryTargets = categoryItems
@@ -65,6 +75,7 @@ export const SubItemPanel: React.FC = () => {
       <SubItemHeader
         categoryTitle={currentCategory?.name || '카테고리'}
         totalCount={currentSubItems.length}
+        completedCount={completedCount}
         onAddSubItem={handleAdd}
       />
 
@@ -77,6 +88,8 @@ export const SubItemPanel: React.FC = () => {
             isDragged={item.id === draggedId}
             canMoveUp={idx > 0}
             canMoveDown={idx < currentSubItems.length - 1}
+            showCheckbox={isQuickMemoTab}
+            onToggleComplete={handleToggleComplete}
             categoryTargets={categoryTargets}
             onMoveToCategory={(targetCatId) => handleMoveToCategory(item.id, targetCatId)}
             onMove={(dir) =>

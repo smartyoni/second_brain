@@ -31,6 +31,7 @@ export interface SubItem {
   groupId?: string;
   title: string;
   order: number;
+  isCompleted?: boolean;
 }
 
 // 4번 패널 하단: 항목별 전속 하위 체크리스트 아이템

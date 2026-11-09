@@ -44,7 +44,7 @@ export const useQuickMemoData = (
     const title = firstLine.length > 50 ? firstLine.slice(0, 50) + '...' : firstLine;
     const newSubId = `sub-qm-${Date.now()}`;
     setSubItems((prev) => [
-      { id: newSubId, categoryId: targetCatId, title: title || '새 퀵메모', order: 0 },
+      { id: newSubId, categoryId: targetCatId, title: title || '새 퀵메모', order: 0, isCompleted: false },
       ...prev,
     ]);
 

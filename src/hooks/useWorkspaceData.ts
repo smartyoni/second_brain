@@ -57,6 +57,7 @@ export const useWorkspaceData = (
       categoryId,
       title: '새 항목',
       order: subItems.length,
+      isCompleted: false,
     };
     setSubItems((prev) => [...prev, newSub]);
     selectSubItem(newSub.id);
