@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, CalendarDays, CalendarRange, Clock, List } from 'lucide-react';
+import { Calendar, CalendarDays, Clock, List, ListTodo } from 'lucide-react';
 import { CalendarSideViewType } from './GoogleCalendarRightPanel';
 
 export type CalendarMobilePanel = 'month' | 'detail' | 'sidebar';
@@ -51,11 +51,11 @@ export const GoogleCalendarMobileNavBar: React.FC<GoogleCalendarMobileNavBarProp
       onClick: () => handleSelectSideView('threeDay'),
     },
     {
-      id: 'week' as const,
-      label: '주',
-      Icon: CalendarRange,
-      isActive: !isMonthActive && sideViewType === 'week',
-      onClick: () => handleSelectSideView('week'),
+      id: 'todo' as const,
+      label: 'TODO',
+      Icon: ListTodo,
+      isActive: !isMonthActive && sideViewType === 'todo',
+      onClick: () => handleSelectSideView('todo'),
     },
     {
       id: 'schedule' as const,

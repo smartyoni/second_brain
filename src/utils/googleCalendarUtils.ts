@@ -236,9 +236,7 @@ export function shiftDateBySideView(
   const base = parseLocalDate(selectedDate);
   const delta = direction === 'prev' ? -1 : 1;
 
-  if (sideViewType === 'week') {
-    base.setDate(base.getDate() + delta * 7);
-  } else if (sideViewType === 'threeDay') {
+  if (sideViewType === 'threeDay') {
     base.setDate(base.getDate() + delta * 3);
   } else {
     base.setDate(base.getDate() + delta * 1);
@@ -254,13 +252,8 @@ export function getSidePanelDateLabel(
   const isValid = !isNaN(currentDateObj.getTime());
   if (!isValid) return selectedDate;
 
-  if (sideViewType === 'week') {
-    const dayOfWeek = currentDateObj.getDay();
-    const sunday = new Date(currentDateObj);
-    sunday.setDate(sunday.getDate() - dayOfWeek);
-    const saturday = new Date(sunday);
-    saturday.setDate(saturday.getDate() + 6);
-    return `${sunday.getMonth() + 1}월 ${sunday.getDate()}일 ~ ${saturday.getMonth() + 1}월 ${saturday.getDate()}일`;
+  if (sideViewType === 'todo') {
+    return 'TODO';
   }
 
   if (sideViewType === 'threeDay') {
