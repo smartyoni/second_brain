@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   Calendar as CalendarIcon,
   Plus,
@@ -13,6 +13,7 @@ import { useWorkspace } from '../../context/WorkspaceContext';
 import { getGoogleCategoryColor, getTodayDateStr, parseLocalDate } from '../../utils/googleCalendarUtils';
 import { getLunarDate } from '../../utils/lunarCalendar';
 import { SmartText } from '../shared/SmartText';
+import { useSwipeDownToClose } from '../../hooks/useSwipeDownToClose';
 
 interface GoogleCalendarMonthDayAgendaProps {
   selectedDate: string;
@@ -32,6 +33,18 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
   className,
 }) => {
   const { toggleCheckItemCompleted, toggleCalendarEventCompleted, subItems } = useWorkspace();
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const {
+    translateY,
+    isDragging,
+    headerTouchHandlers,
+    contentTouchHandlers,
+  } = useSwipeDownToClose({
+    onClose,
+    threshold: 50,
+    scrollContainerRef: listRef,
+  });
 
   const dateObj = parseLocalDate(selectedDate);
   const isValid = !isNaN(dateObj.getTime());
@@ -64,11 +77,25 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
           ? className
           : 'w-[448px] shrink-0 bg-white border-l border-[#dadce0] flex flex-col h-full select-none shadow-sm z-10'
       }
+      style={{
+        transform: translateY > 0 ? `translate3d(0, ${translateY}px, 0)` : undefined,
+        transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+        touchAction: 'pan-y',
+      }}
     >
       {/* 1. 상단 헤더 */}
-      <div className="p-3 sm:p-4 border-b border-[#dadce0] bg-[#fafafa]">
+      <div
+        className="p-3 sm:p-4 border-b border-[#dadce0] bg-[#fafafa] touch-none select-none"
+        {...headerTouchHandlers}
+      >
         {/* 모바일 시트 핸들 바 */}
-        <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-2 sm:hidden" />
+        <div
+          onClick={onClose}
+          className="w-full flex justify-center py-1 -mt-1 mb-1.5 sm:hidden cursor-pointer active:opacity-70 transition-opacity"
+          title="아래로 스와이프하거나 터치하여 닫기"
+        >
+          <div className="w-10 h-1.5 bg-slate-300 hover:bg-slate-400 rounded-full transition-colors" />
+        </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-xs text-[#5f6368] font-medium">
             <CalendarIcon className="w-3.5 h-3.5 text-[#1a73e8]" />
@@ -116,7 +143,11 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
       </div>
 
       {/* 2. 일정 카드 리스트 */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2.5 bg-[#f8f9fa]">
+      <div
+        ref={listRef}
+        {...contentTouchHandlers}
+        className="flex-1 overflow-y-auto p-3 space-y-2.5 bg-[#f8f9fa] overscroll-contain"
+      >
         {items.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-6 text-[#70757a]">
             <CalendarIcon className="w-8 h-8 text-[#dadce0] mb-2" />
