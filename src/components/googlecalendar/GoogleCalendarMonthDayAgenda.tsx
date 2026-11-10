@@ -5,7 +5,6 @@ import {
   X,
   Check,
   Clock,
-  FileText,
   AlignLeft,
 } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
@@ -32,7 +31,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
   onClose,
   className,
 }) => {
-  const { toggleCheckItemCompleted, toggleCalendarEventCompleted, subItems } = useWorkspace();
+  const { toggleCheckItemCompleted, toggleCalendarEventCompleted } = useWorkspace();
   const listRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -161,8 +160,6 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
         ) : (
           items.map((schedule) => {
             const color = getGoogleCategoryColor(schedule.categoryId, schedule.isInProgress && !schedule.isCompleted);
-            const subItem = subItems.find((s) => s.id === schedule.subItemId);
-            const isAllDay = !schedule.dueTime || (schedule.isInProgress && !schedule.isCompleted);
 
             return (
               <div
@@ -217,37 +214,26 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
                   <SmartText text={schedule.title} />
                 </h3>
 
-                {/* 하단 메타 정보 (시간, 장소, 출처 지식문서) */}
-                <div className="space-y-1 pt-1.5 border-t border-gray-100 text-[11px] text-[#5f6368]">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
-                    <span className={schedule.isInProgress && !schedule.isCompleted ? 'text-[#d50000] font-semibold' : ''}>
-                      {schedule.isInProgress && !schedule.isCompleted
-                        ? '진행중'
-                        : isAllDay
-                        ? '종일'
-                        : schedule.dueTime}
-                    </span>
+                {/* 하단 메타 정보 (설정된 시간, 메모/설명) - 출처 지식문서 및 중복 진행중/종일 표시는 제거 */}
+                {(schedule.dueTime || schedule.description) && (
+                  <div className="space-y-1 pt-1.5 border-t border-gray-100 text-[11px] text-[#5f6368]">
+                    {schedule.dueTime && (
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
+                        <span>{schedule.dueTime}</span>
+                      </div>
+                    )}
+
+                    {schedule.description && (
+                      <div className="flex items-center gap-1.5">
+                        <AlignLeft className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
+                        <span className="truncate">
+                          <SmartText text={schedule.description} />
+                        </span>
+                      </div>
+                    )}
                   </div>
-
-                  {schedule.description && (
-                    <div className="flex items-center gap-1.5">
-                      <AlignLeft className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
-                      <span className="truncate">
-                        <SmartText text={schedule.description} />
-                      </span>
-                    </div>
-                  )}
-
-                  {subItem && (
-                    <div className="flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
-                      <span className="truncate">
-                        <SmartText text={subItem.title} />
-                      </span>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             );
           })
