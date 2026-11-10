@@ -230,7 +230,7 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
                     <span
                       key={s.id}
                       className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                        getGoogleCategoryColor(s.categoryId).bg
+                        getGoogleCategoryColor(s.categoryId, s.isInProgress && !s.isCompleted).bg
                       }`}
                     />
                   ))}
@@ -243,7 +243,7 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
               ) : (
                 <div className="flex-1 space-y-0.5 overflow-hidden">
                   {dayItems.slice(0, 3).map((schedule) => {
-                    const color = getGoogleCategoryColor(schedule.categoryId);
+                    const color = getGoogleCategoryColor(schedule.categoryId, schedule.isInProgress && !schedule.isCompleted);
                     const isBeingDragged = draggedItem?.id === schedule.id;
 
                     return (

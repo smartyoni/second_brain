@@ -155,7 +155,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
                 title="클릭하여 종일 일정 등록 / 드래그하여 이동"
               >
                 {allDayItems.map((schedule) => {
-                  const color = getGoogleCategoryColor(schedule.categoryId);
+                  const color = getGoogleCategoryColor(schedule.categoryId, schedule.isInProgress && !schedule.isCompleted);
                   const isBeingDragged = draggedItem?.id === schedule.id;
                   return (
                     <div
@@ -241,7 +241,7 @@ export const GoogleCalendarThreeDayView: React.FC<GoogleCalendarThreeDayViewProp
                 {/* 해당 일자의 시간제 일정 블록들 (구글 캘린더 스타일 오버랩 레이아웃) */}
                 {computeOverlappingLayout(timedItems, TIMELINE_HOUR_HEIGHT, 60).map(
                   ({ item: schedule, top, height, leftPercent, widthPercent }) => {
-                    const color = getGoogleCategoryColor(schedule.categoryId);
+                    const color = getGoogleCategoryColor(schedule.categoryId, schedule.isInProgress && !schedule.isCompleted);
                     const isBeingDragged = draggedItem?.id === schedule.id;
 
                     return (

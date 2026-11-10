@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, AlignLeft, Check, Palette } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { getGoogleCategoryColor, GOOGLE_COLORS } from '../../utils/googleCalendarUtils';
+import { getGoogleCategoryColor, SELECTABLE_GOOGLE_COLORS, GOOGLE_RED_COLOR } from '../../utils/googleCalendarUtils';
 import { TimePicker24h } from '../shared/TimePicker24h';
 import { GoogleCalendarStatusToggle } from './GoogleCalendarStatusToggle';
 
@@ -30,8 +30,10 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
   const [isAllDay, setIsAllDay] = useState(createState.isAllDay);
   const [isInProgress, setIsInProgress] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [selectedColorId, setSelectedColorId] = useState<string>(GOOGLE_COLORS[0].id);
+  const [selectedColorId, setSelectedColorId] = useState<string>(SELECTABLE_GOOGLE_COLORS[0].id);
   const [description, setDescription] = useState('');
+
+  const isOngoing = isInProgress && !isCompleted;
 
   useEffect(() => {
     if (createState.isOpen) {
@@ -67,7 +69,7 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
       dueDate: date,
       endDate: validEndDate,
       dueTime: isAllDay ? undefined : time,
-      categoryId: selectedColorId,
+      categoryId: isOngoing ? GOOGLE_RED_COLOR.id : selectedColorId,
       description: description.trim() || undefined,
       eventType,
       isInProgress,
@@ -77,7 +79,7 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
     onClose();
   };
 
-  const selectedColor = getGoogleCategoryColor(selectedColorId);
+  const selectedColor = getGoogleCategoryColor(selectedColorId, isOngoing);
 
   return (
     <div
@@ -200,32 +202,39 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
             </div>
           </div>
 
-          {/* 구글 캘린더 색상 라벨 팔레트 */}
+          {/* 구글 캘린더 색상 라벨 팔레트 (진행중은 빨간색 고정, 일반 일정은 빨간색 제외) */}
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5 text-xs text-[#5f6368] font-medium">
               <Palette className="w-3.5 h-3.5 text-[#1a73e8]" />
               <span>색상 라벨: <strong className="text-[#3c4043]">{selectedColor.name}</strong></span>
             </div>
-            <div className="flex items-center flex-wrap gap-2 p-2 bg-[#f1f3f4] rounded-lg">
-              {GOOGLE_COLORS.map((c) => {
-                const isSelected = selectedColorId === c.id;
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setSelectedColorId(c.id)}
-                    className={`w-5 h-5 rounded-full ${c.bg} flex items-center justify-center transition-all cursor-pointer hover:scale-110 shadow-2xs ${
-                      isSelected
-                        ? 'ring-2 ring-offset-2 ring-[#1a73e8] scale-110'
-                        : 'hover:opacity-90'
-                    }`}
-                    title={c.name}
-                  >
-                    {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
-                  </button>
-                );
-              })}
-            </div>
+            {isOngoing ? (
+              <div className="p-2.5 bg-red-50 rounded-lg border border-red-200 text-xs text-red-700 font-medium flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-[#d50000] inline-block shrink-0 shadow-2xs" />
+                <span>진행 중 일정은 빨간색으로 자동 고정됩니다.</span>
+              </div>
+            ) : (
+              <div className="flex items-center flex-wrap gap-2 p-2 bg-[#f1f3f4] rounded-lg">
+                {SELECTABLE_GOOGLE_COLORS.map((c) => {
+                  const isSelected = selectedColorId === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setSelectedColorId(c.id)}
+                      className={`w-5 h-5 rounded-full ${c.bg} flex items-center justify-center transition-all cursor-pointer hover:scale-110 shadow-2xs ${
+                        isSelected
+                          ? 'ring-2 ring-offset-2 ring-[#1a73e8] scale-110'
+                          : 'hover:opacity-90'
+                      }`}
+                      title={c.name}
+                    >
+                      {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* 설명 추가 */}

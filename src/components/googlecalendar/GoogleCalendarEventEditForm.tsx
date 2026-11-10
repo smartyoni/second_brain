@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Clock, Calendar as CalendarIcon, Check, Palette } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
-import { GOOGLE_COLORS, getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
+import { SELECTABLE_GOOGLE_COLORS, getGoogleCategoryColor, GOOGLE_RED_COLOR } from '../../utils/googleCalendarUtils';
 import { TimePicker24h } from '../shared/TimePicker24h';
 import { GoogleCalendarStatusToggle } from './GoogleCalendarStatusToggle';
 
@@ -25,8 +25,6 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
   onSave,
   onCancel,
 }) => {
-  const currentColor = getGoogleCategoryColor(item.categoryId);
-
   const [editTitle, setEditTitle] = useState(item.title);
   const [editDate, setEditDate] = useState(item.dueDate || '');
   const [editEndDate, setEditEndDate] = useState(item.endDate || '');
@@ -34,16 +32,17 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
   const [editIsAllDay, setEditIsAllDay] = useState(!item.dueTime || !!item.isInProgress);
   const [editIsInProgress, setEditIsInProgress] = useState(!!item.isInProgress);
   const [editIsCompleted, setEditIsCompleted] = useState(!!item.isCompleted);
+  const isOngoing = editIsInProgress && !editIsCompleted;
   const [editColorId, setEditColorId] = useState(
-    GOOGLE_COLORS.some((c) => c.id === item.categoryId)
+    SELECTABLE_GOOGLE_COLORS.some((c) => c.id === item.categoryId)
       ? item.categoryId
-      : currentColor.id
+      : SELECTABLE_GOOGLE_COLORS[0].id
   );
   const [editDescription, setEditDescription] = useState(
     item.description ?? item.memo ?? ''
   );
 
-  const activeColor = getGoogleCategoryColor(editColorId);
+  const activeColor = getGoogleCategoryColor(editColorId, isOngoing);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +56,7 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
       dueDate: editDate,
       endDate: validEndDate,
       dueTime: editIsAllDay ? undefined : editTime,
-      categoryId: editColorId,
+      categoryId: isOngoing ? GOOGLE_RED_COLOR.id : editColorId,
       description: editDescription.trim() || undefined,
       isInProgress: editIsInProgress,
       isCompleted: editIsCompleted,
@@ -145,7 +144,7 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
         />
       </div>
 
-      {/* 구글 캘린더 색상 라벨 팔레트 (모달 푸터 바로 위) */}
+      {/* 구글 캘린더 색상 라벨 팔레트 (진행중은 빨간색 고정, 일반 일정은 빨간색 제외) */}
       <div className="space-y-1.5">
         <div className="flex items-center gap-1.5 text-xs text-[#5f6368] font-medium">
           <Palette className="w-3.5 h-3.5 text-[#1a73e8]" />
@@ -153,24 +152,31 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
             색상 라벨: <strong className="text-[#3c4043]">{activeColor.name}</strong>
           </span>
         </div>
-        <div className="flex items-center flex-wrap gap-2 p-2.5 bg-[#f8f9fa] rounded-lg border border-[#dadce0]">
-          {GOOGLE_COLORS.map((c) => {
-            const isSelected = editColorId === c.id;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setEditColorId(c.id)}
-                className={`w-6 h-6 rounded-full ${c.bg} flex items-center justify-center transition-all cursor-pointer hover:scale-110 shadow-2xs ${
-                  isSelected ? 'ring-2 ring-offset-2 ring-[#1a73e8] scale-110' : 'hover:opacity-90'
-                }`}
-                title={c.name}
-              >
-                {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
-              </button>
-            );
-          })}
-        </div>
+        {isOngoing ? (
+          <div className="p-2.5 bg-red-50 rounded-lg border border-red-200 text-xs text-red-700 font-medium flex items-center gap-2">
+            <span className="w-4 h-4 rounded-full bg-[#d50000] inline-block shrink-0 shadow-2xs" />
+            <span>진행 중 일정은 빨간색으로 자동 고정됩니다.</span>
+          </div>
+        ) : (
+          <div className="flex items-center flex-wrap gap-2 p-2.5 bg-[#f8f9fa] rounded-lg border border-[#dadce0]">
+            {SELECTABLE_GOOGLE_COLORS.map((c) => {
+              const isSelected = editColorId === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setEditColorId(c.id)}
+                  className={`w-6 h-6 rounded-full ${c.bg} flex items-center justify-center transition-all cursor-pointer hover:scale-110 shadow-2xs ${
+                    isSelected ? 'ring-2 ring-offset-2 ring-[#1a73e8] scale-110' : 'hover:opacity-90'
+                  }`}
+                  title={c.name}
+                >
+                  {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 편집 하단 액션 버튼 */}

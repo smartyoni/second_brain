@@ -17,7 +17,7 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
   formatTimeRange,
   onContextMenu,
 }) => {
-  const colorTheme = getGoogleCategoryColor(item.categoryId);
+  const colorTheme = getGoogleCategoryColor(item.categoryId, item.isInProgress && !item.isCompleted);
   const timeText = formatTimeRange(item);
 
   return (

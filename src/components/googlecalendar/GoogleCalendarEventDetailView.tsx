@@ -30,7 +30,7 @@ export const GoogleCalendarEventDetailView: React.FC<GoogleCalendarEventDetailVi
   onTouchStart,
   onTouchEnd,
 }) => {
-  const activeColor = getGoogleCategoryColor(item.categoryId);
+  const activeColor = getGoogleCategoryColor(item.categoryId, item.isInProgress && !item.isCompleted);
 
   return (
     <>

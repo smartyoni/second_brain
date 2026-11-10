@@ -132,7 +132,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
           title="클릭하여 종일 일정 등록 / 드래그하여 이동"
         >
           {allDayItems.map((schedule) => {
-            const color = getGoogleCategoryColor(schedule.categoryId);
+            const color = getGoogleCategoryColor(schedule.categoryId, schedule.isInProgress && !schedule.isCompleted);
             const isBeingDragged = draggedItem?.id === schedule.id;
             return (
               <div
@@ -217,7 +217,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
           {/* 일정 블록들 (구글 캘린더 스타일 시간 겹침 오버랩 레이아웃) */}
           {computeOverlappingLayout(timedItems, TIMELINE_HOUR_HEIGHT, 60).map(
             ({ item: schedule, top, height, leftPercent, widthPercent }) => {
-              const color = getGoogleCategoryColor(schedule.categoryId);
+              const color = getGoogleCategoryColor(schedule.categoryId, schedule.isInProgress && !schedule.isCompleted);
               const isBeingDragged = draggedItem?.id === schedule.id;
 
               return (

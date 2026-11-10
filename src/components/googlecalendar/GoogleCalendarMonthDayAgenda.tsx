@@ -127,7 +127,7 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
           </div>
         ) : (
           items.map((schedule) => {
-            const color = getGoogleCategoryColor(schedule.categoryId);
+            const color = getGoogleCategoryColor(schedule.categoryId, schedule.isInProgress && !schedule.isCompleted);
             const subItem = subItems.find((s) => s.id === schedule.subItemId);
             const isAllDay = !schedule.dueTime || (schedule.isInProgress && !schedule.isCompleted);
 
