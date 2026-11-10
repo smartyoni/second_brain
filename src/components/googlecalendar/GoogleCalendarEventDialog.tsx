@@ -4,6 +4,7 @@ import { useWorkspace } from '../../context/WorkspaceContext';
 import { GoogleCalendarEventDialogHeader } from './GoogleCalendarEventDialogHeader';
 import { GoogleCalendarEventDetailView } from './GoogleCalendarEventDetailView';
 import { EventInlineUpdateData } from './GoogleCalendarEventInlineEdit';
+import { ConfirmModal } from '../shared/ConfirmModal';
 import { GOOGLE_RED_COLOR } from '../../utils/googleCalendarUtils';
 
 interface GoogleCalendarEventDialogProps {
@@ -44,6 +45,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
   const isCalendarOwnEvent = currentItem.sourceType === 'calendar';
   const [isEditing, setIsEditing] = useState(initialEditMode);
   const [mobileTab, setMobileTab] = useState<'detail' | 'checklist'>('detail');
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   const checklist = currentItem.checklist || [];
   const checklistCount = checklist.length;
@@ -170,6 +172,10 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        if (isDeleteConfirmOpen) {
+          setIsDeleteConfirmOpen(false);
+          return;
+        }
         if (isEditing) {
           setIsEditing(false);
         } else {
@@ -179,7 +185,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose, isEditing]);
+  }, [onClose, isEditing, isDeleteConfirmOpen]);
 
   const handleOpenSource = () => {
     if (subItem) {
@@ -214,7 +220,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           completedChecklistCount={completedChecklistCount}
           onSelectMobileTab={setMobileTab}
           onStartEdit={handleStartEdit}
-          onDelete={handleDelete}
+          onDelete={() => setIsDeleteConfirmOpen(true)}
           onClose={onClose}
         />
 
@@ -233,6 +239,24 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           onOpenSource={handleOpenSource}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
+        />
+
+        {/* 삭제 확인 모달 */}
+        <ConfirmModal
+          isOpen={isDeleteConfirmOpen}
+          title={isCalendarOwnEvent ? '일정 삭제' : '일정 해제'}
+          message={
+            isCalendarOwnEvent
+              ? '정말 이 일정을 삭제하시겠습니까?\n삭제된 일정은 복구할 수 없습니다.'
+              : '이 항목의 일정을 해제하시겠습니까?\n(캘린더에서만 제외되며, 원본 메모/체크리스트는 안전하게 보존됩니다)'
+          }
+          confirmLabel={isCalendarOwnEvent ? '삭제' : '일정 해제'}
+          isDestructive={true}
+          onConfirm={() => {
+            setIsDeleteConfirmOpen(false);
+            handleDelete();
+          }}
+          onCancel={() => setIsDeleteConfirmOpen(false)}
         />
       </div>
     </div>
