@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { CheckSquare, FileText } from 'lucide-react';
 import { DetailItemChecklistSection } from '../memo/DetailItemChecklistSection';
 import { DetailItemMemoSection } from '../memo/DetailItemMemoSection';
@@ -9,6 +9,45 @@ export const GanttMemoPanel: React.FC = () => {
   // 기본 화면: 체크리스트, [체크] [텍스트] 순서로 탭 전환
   const [activeTab, setActiveTab] = useState<'check' | 'text'>('check');
   const { selectedDetailItem, checklistGroups, textGroups } = useWorkspace();
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  // 모바일/터치 기기 좌우 스와이프 탭 전환 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    const target = e.target as HTMLElement;
+    // 텍스트/입력 필드 내에서는 커서 조작 보호를 위해 스와이프 전환 비활성화
+    if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') return;
+
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || e.changedTouches.length !== 1) return;
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
+      touchStartRef.current = null;
+      return;
+    }
+
+    const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
+    touchStartRef.current = null;
+
+    const SWIPE_THRESHOLD = 45;
+    // 수평 스와이프가 수직 스크롤보다 우세하고 임계치(45px)를 넘는 경우 탭 전환
+    if (Math.abs(deltaX) >= SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+      if (deltaX < 0 && activeTab === 'check') {
+        // 왼쪽으로 스와이프: [체크] -> [텍스트] 이동
+        setActiveTab('text');
+      } else if (deltaX > 0 && activeTab === 'text') {
+        // 오른쪽으로 스와이프: [텍스트] -> [체크] 이동
+        setActiveTab('check');
+      }
+    }
+  };
 
   // 현재 선택된 항목의 제목 및 하위 항목 숫자(체크/텍스트) 계산
   const { targetTitle, checkCount, textCount } = useMemo(() => {
@@ -45,7 +84,11 @@ export const GanttMemoPanel: React.FC = () => {
   }, [selectedDetailItem, checklistGroups, textGroups]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-white border-l border-slate-200 overflow-hidden select-none">
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="flex flex-col h-full w-full bg-white border-l border-slate-200 overflow-hidden select-none"
+    >
       {/* 4번 패널 상단 헤더: 1·2·3번 패널과 일관된 높이 및 디자인 규격 */}
       <div className="h-11 lg:h-9 px-3 lg:px-2.5 bg-slate-100 border-b border-slate-300 flex items-center justify-between text-sm lg:text-xs shrink-0 select-none">
         {/* 체크 / 텍스트 순서의 탭 전환 세그먼트 버튼 (하위 항목 숫자 표기) */}
@@ -99,8 +142,11 @@ export const GanttMemoPanel: React.FC = () => {
         )}
       </div>
 
-      {/* 4번 패널 본문 영역 (탭에 따라 단일 컴포넌트 100% 렌더링) */}
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+      {/* 4번 패널 본문 영역 (탭에 따라 단일 컴포넌트 100% 렌더링, 부드러운 페이드 전환) */}
+      <div
+        key={activeTab}
+        className="flex-1 overflow-hidden flex flex-col min-h-0 animate-in fade-in duration-150"
+      >
         {activeTab === 'check' ? (
           <DetailItemChecklistSection />
         ) : (
