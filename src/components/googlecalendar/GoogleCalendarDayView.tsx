@@ -8,11 +8,8 @@ import {
   computeOverlappingLayout,
   getSlotRealDate,
   getNowTimelinePosition,
-  getTodayDateStr,
-  parseLocalDate,
   isItemOnDate,
 } from '../../utils/googleCalendarUtils';
-import { getKoreanHoliday } from '../../utils/koreanHolidays';
 import { SmartText } from '../shared/SmartText';
 
 interface GoogleCalendarDayViewProps {
@@ -48,22 +45,6 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
   const timedItems = items.filter(
     (i) => !!i.dueTime && !(i.isInProgress && !i.isCompleted) && isItemOnDate(i, selectedDate)
   );
-  const dayItems = [...allDayItems, ...timedItems];
-
-  const todayStr = getTodayDateStr();
-  const isToday = selectedDate === todayStr;
-  const holiday = getKoreanHoliday(selectedDate);
-
-  const dateObj = parseLocalDate(selectedDate);
-  const dayOfWeek = !isNaN(dateObj.getTime()) ? dateObj.getDay() : -1;
-  const isSunday = dayOfWeek === 0;
-  const isSaturday = dayOfWeek === 6;
-  const isHolidayOrSunday = isSunday || !!holiday;
-
-  const dayName = !isNaN(dateObj.getTime())
-    ? dateObj.toLocaleDateString('ko-KR', { weekday: 'short' })
-    : '';
-  const dayNum = !isNaN(dateObj.getTime()) ? dateObj.getDate() : '';
 
   const nowPos = getNowTimelinePosition(TIMELINE_HOUR_HEIGHT);
   const redLineTop = nowPos.top;
@@ -85,38 +66,7 @@ export const GoogleCalendarDayView: React.FC<GoogleCalendarDayViewProps> = ({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden select-none">
-      {/* 1. 상단 일자 헤더 (높이 축소 및 1개 라인 배치) */}
-      <div className="flex border-b border-[#dadce0] bg-white shrink-0 h-9">
-        <div className="w-16 sm:w-20 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
-          GMT+9
-        </div>
-        <div className="flex-1 px-3 sm:px-4 flex items-center gap-2 overflow-hidden">
-          <span
-            className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-xs font-bold shrink-0 ${
-              isToday
-                ? 'bg-[#1a73e8] text-white shadow-2xs'
-                : isHolidayOrSunday
-                ? 'text-red-500'
-                : isSaturday
-                ? 'text-blue-500'
-                : 'text-[#3c4043]'
-            }`}
-          >
-            {dayNum}
-          </span>
-          <span className={`text-xs font-semibold shrink-0 ${isHolidayOrSunday ? 'text-red-500' : isSaturday ? 'text-blue-500' : 'text-[#3c4043]'}`}>
-            {dayName}요일
-          </span>
-          {holiday && (
-            <span className="text-[10px] bg-red-50 text-red-600 font-semibold px-1.5 py-0.2 rounded-full border border-red-200 shrink-0">
-              {holiday.name}
-            </span>
-          )}
-          <span className="text-xs text-[#70757a] shrink-0">· 일정 {dayItems.length}개</span>
-        </div>
-      </div>
-
-      {/* 2. 상단 종일 일정 슬롯 (높이 확장: 기존 헤더 높이만큼 넉넉하게 변경) */}
+      {/* 1. 상단 종일 일정 슬롯 */}
       <div className="flex border-b border-[#dadce0] bg-[#fafafa] shrink-0 min-h-[58px]">
         <div className="w-16 sm:w-20 shrink-0 flex items-center justify-center text-[10px] text-[#70757a] border-r border-[#dadce0] font-medium">
           종일
