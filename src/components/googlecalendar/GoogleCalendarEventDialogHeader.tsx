@@ -75,49 +75,47 @@ export const GoogleCalendarEventDialogHeader: React.FC<GoogleCalendarEventDialog
         </div>
       </div>
 
-      {/* 2. 모바일 전용 탭 전환 바 (수정 모드가 아닐 때만 표시, md 이상에서는 숨김) */}
-      {!isEditing && (
-        <div className="md:hidden flex border-t border-[#dadce0] bg-white text-xs">
-          <button
-            type="button"
-            onClick={() => onSelectMobileTab('detail')}
-            className={`flex-1 py-2.5 flex items-center justify-center gap-1.5 transition-colors border-b-2 cursor-pointer ${
-              mobileTab === 'detail'
-                ? 'border-[#1a73e8] text-[#1a73e8] font-bold bg-blue-50/40'
-                : 'border-transparent text-slate-500 font-medium hover:text-slate-800'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>세부정보</span>
-          </button>
+      {/* 2. 모바일 전용 탭 전환 바 (md 이상에서는 숨김) */}
+      <div className="md:hidden flex border-t border-[#dadce0] bg-white text-xs">
+        <button
+          type="button"
+          onClick={() => onSelectMobileTab('detail')}
+          className={`flex-1 py-2.5 flex items-center justify-center gap-1.5 transition-colors border-b-2 cursor-pointer ${
+            mobileTab === 'detail'
+              ? 'border-[#1a73e8] text-[#1a73e8] font-bold bg-blue-50/40'
+              : 'border-transparent text-slate-500 font-medium hover:text-slate-800'
+          }`}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>{isEditing ? '수정' : '세부정보'}</span>
+        </button>
 
-          <button
-            type="button"
-            onClick={() => onSelectMobileTab('checklist')}
-            className={`flex-1 py-2.5 flex items-center justify-center gap-1.5 transition-colors border-b-2 cursor-pointer ${
-              mobileTab === 'checklist'
-                ? 'border-[#1a73e8] text-[#1a73e8] font-bold bg-blue-50/40'
-                : 'border-transparent text-slate-500 font-medium hover:text-slate-800'
-            }`}
-          >
-            <CheckSquare className="w-3.5 h-3.5" />
-            <span>체크리스트</span>
-            {checklistCount > 0 && (
-              <span
-                className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
-                  mobileTab === 'checklist'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-slate-100 text-slate-600'
-                }`}
-              >
-                {completedChecklistCount > 0
-                  ? `${completedChecklistCount}/${checklistCount}`
-                  : checklistCount}
-              </span>
-            )}
-          </button>
-        </div>
-      )}
+        <button
+          type="button"
+          onClick={() => onSelectMobileTab('checklist')}
+          className={`flex-1 py-2.5 flex items-center justify-center gap-1.5 transition-colors border-b-2 cursor-pointer ${
+            mobileTab === 'checklist'
+              ? 'border-[#1a73e8] text-[#1a73e8] font-bold bg-blue-50/40'
+              : 'border-transparent text-slate-500 font-medium hover:text-slate-800'
+          }`}
+        >
+          <CheckSquare className="w-3.5 h-3.5" />
+          <span>체크리스트</span>
+          {checklistCount > 0 && (
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
+                mobileTab === 'checklist'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-slate-100 text-slate-600'
+              }`}
+            >
+              {completedChecklistCount > 0
+                ? `${completedChecklistCount}/${checklistCount}`
+                : checklistCount}
+            </span>
+          )}
+        </button>
+      </div>
     </div>
   );
 };

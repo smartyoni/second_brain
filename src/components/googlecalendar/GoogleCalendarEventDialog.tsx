@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CalendarScheduleItem, CategoryItem, SubItem } from '../../types';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { GoogleCalendarEventEditForm } from './GoogleCalendarEventEditForm';
 import { GoogleCalendarEventDialogHeader } from './GoogleCalendarEventDialogHeader';
 import { GoogleCalendarEventDetailView } from './GoogleCalendarEventDetailView';
+import { EventInlineUpdateData } from './GoogleCalendarEventInlineEdit';
+import { GOOGLE_RED_COLOR } from '../../utils/googleCalendarUtils';
 
 interface GoogleCalendarEventDialogProps {
   item: CalendarScheduleItem;
@@ -71,10 +72,8 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     // 800ms 이내, 가로 이동이 세로 이동의 1.3배 이상이며 최소 40px 이동 시 스와이프 전환
     if (duration < 800 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3 && Math.abs(deltaX) > 40) {
       if (deltaX < 0) {
-        // 오른쪽에서 왼쪽으로 스와이프 -> 체크리스트 탭으로
         setMobileTab('checklist');
       } else {
-        // 왼쪽에서 오른쪽으로 스와이프 -> 세부정보 탭으로
         setMobileTab('detail');
       }
     }
@@ -103,18 +102,16 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     }
   };
 
-  const handleSaveForm = (updates: {
-    title: string;
-    dueDate: string;
-    endDate?: string;
-    dueTime?: string;
-    categoryId: string;
-    description?: string;
-    isInProgress?: boolean;
-    isCompleted?: boolean;
-  }) => {
+  const handleSaveForm = (updates: EventInlineUpdateData) => {
+    const isOngoing = updates.isInProgress && !updates.isCompleted;
+    // 진행중 일정은 빨간색으로 고정, 아니면 기존 categoryId 유지
+    const resolvedCategoryId = isOngoing ? GOOGLE_RED_COLOR.id : currentItem.categoryId;
+
     if (isCalendarOwnEvent) {
-      updateCalendarEvent(currentItem.id, updates);
+      updateCalendarEvent(currentItem.id, {
+        ...updates,
+        categoryId: resolvedCategoryId,
+      });
     } else if (currentItem.sourceType === 'checklist') {
       setChecklistGroups((prev) =>
         prev.map((g) =>
@@ -130,7 +127,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                         endDate: updates.endDate,
                         dueTime: updates.dueTime,
                         memo: updates.description,
-                        colorId: updates.categoryId,
+                        colorId: resolvedCategoryId,
                         isInProgress: updates.isInProgress,
                         isCompleted: updates.isCompleted ?? i.isCompleted,
                       }
@@ -157,7 +154,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                     endDate: updates.endDate,
                     dueTime: updates.dueTime,
                     memo: updates.description,
-                    colorId: updates.categoryId,
+                    colorId: resolvedCategoryId,
                     isInProgress: updates.isInProgress,
                     isCompleted: updates.isCompleted,
                   };
@@ -193,6 +190,11 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     }
   };
 
+  const handleStartEdit = () => {
+    setIsEditing(true);
+    setMobileTab('detail');
+  };
+
   return (
     <div
       onClick={onClose}
@@ -211,34 +213,27 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           checklistCount={checklistCount}
           completedChecklistCount={completedChecklistCount}
           onSelectMobileTab={setMobileTab}
-          onStartEdit={() => setIsEditing(true)}
+          onStartEdit={handleStartEdit}
           onDelete={handleDelete}
           onClose={onClose}
         />
 
-        {/* 본문 (수정 폼 vs 조회 뷰: 모바일에서는 탭 전환 & 터치 스와이프 지원) */}
-        {isEditing ? (
-          <div className="flex-1 overflow-y-auto">
-            <GoogleCalendarEventEditForm
-              item={currentItem}
-              onSave={handleSaveForm}
-              onCancel={() => setIsEditing(false)}
-            />
-          </div>
-        ) : (
-          <GoogleCalendarEventDetailView
-            item={currentItem}
-            subItem={subItem}
-            mobileTab={mobileTab}
-            checklist={checklist}
-            onUpdateChecklist={(updater) => updateItemChecklist(currentItem, updater)}
-            onToggleComplete={handleToggle}
-            onStartEdit={() => setIsEditing(true)}
-            onOpenSource={handleOpenSource}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-          />
-        )}
+        {/* 본문: 일정 기본정보/인라인 수정폼 (좌측) + 하위할일 체크리스트 (우측) 항상 유지 */}
+        <GoogleCalendarEventDetailView
+          item={currentItem}
+          subItem={subItem}
+          isEditing={isEditing}
+          mobileTab={mobileTab}
+          checklist={checklist}
+          onUpdateChecklist={(updater) => updateItemChecklist(currentItem, updater)}
+          onToggleComplete={handleToggle}
+          onStartEdit={handleStartEdit}
+          onCancelEdit={() => setIsEditing(false)}
+          onSaveEdit={handleSaveForm}
+          onOpenSource={handleOpenSource}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        />
       </div>
     </div>
   );
