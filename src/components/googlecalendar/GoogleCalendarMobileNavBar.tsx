@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Calendar, CalendarDays, Clock, List, ListTodo } from 'lucide-react';
 import { CalendarSideViewType } from './GoogleCalendarRightPanel';
 
@@ -18,6 +18,11 @@ export const GoogleCalendarMobileNavBar: React.FC<GoogleCalendarMobileNavBarProp
   onSideViewTypeChange,
 }) => {
   const isMonthActive = activePanel === 'month';
+
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const mouseStartXRef = useRef<number | null>(null);
+  const swipedRef = useRef<boolean>(false);
 
   const handleSelectMonth = () => {
     onChangePanel('month');
@@ -66,13 +71,113 @@ export const GoogleCalendarMobileNavBar: React.FC<GoogleCalendarMobileNavBarProp
     },
   ];
 
+  // 현재 활성 뷰 인덱스 구하기 (0: 월간, 1: 일, 2: 3일, 3: TODO, 4: 일정)
+  const getActiveIndex = (): number => {
+    if (isMonthActive) return 0;
+    if (sideViewType === 'day') return 1;
+    if (sideViewType === 'threeDay') return 2;
+    if (sideViewType === 'todo') return 3;
+    if (sideViewType === 'schedule') return 4;
+    return 0;
+  };
+
+  const switchToIndex = (index: number) => {
+    if (index < 0 || index >= navItems.length) return;
+    navItems[index].onClick();
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(10);
+      } catch {
+        // ignore vibrate error on unsupported devices
+      }
+    }
+  };
+
+  // 터치 스와이프 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartXRef.current = touch.clientX;
+    touchStartYRef.current = touch.clientY;
+    swipedRef.current = false;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartXRef.current;
+    const deltaY = touch.clientY - touchStartYRef.current;
+
+    const SWIPE_THRESHOLD = 30;
+    if (Math.abs(deltaX) >= SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      swipedRef.current = true;
+      const currentIdx = getActiveIndex();
+      if (deltaX < 0) {
+        // 왼쪽으로 스와이프 -> 다음 뷰 전환
+        if (currentIdx < navItems.length - 1) {
+          switchToIndex(currentIdx + 1);
+        }
+      } else {
+        // 오른쪽으로 스와이프 -> 이전 뷰 전환
+        if (currentIdx > 0) {
+          switchToIndex(currentIdx - 1);
+        }
+      }
+      setTimeout(() => {
+        swipedRef.current = false;
+      }, 200);
+    }
+
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
+  // 마우스 드래그 스와이프 핸들러 (PC 모바일 에뮬레이션 지원)
+  const handleMouseDown = (e: React.MouseEvent) => {
+    mouseStartXRef.current = e.clientX;
+    swipedRef.current = false;
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (mouseStartXRef.current === null) return;
+    const deltaX = e.clientX - mouseStartXRef.current;
+    const SWIPE_THRESHOLD = 30;
+
+    if (Math.abs(deltaX) >= SWIPE_THRESHOLD) {
+      swipedRef.current = true;
+      const currentIdx = getActiveIndex();
+      if (deltaX < 0) {
+        if (currentIdx < navItems.length - 1) {
+          switchToIndex(currentIdx + 1);
+        }
+      } else {
+        if (currentIdx > 0) {
+          switchToIndex(currentIdx - 1);
+        }
+      }
+      setTimeout(() => {
+        swipedRef.current = false;
+      }, 200);
+    }
+
+    mouseStartXRef.current = null;
+  };
+
   return (
-    <nav className="h-12 bg-white border-t border-[#dadce0] flex items-center justify-around px-1 shrink-0 select-none z-20 shadow-xs lg:hidden">
+    <nav
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      className="h-12 bg-white border-t border-[#dadce0] flex items-center justify-around px-1 shrink-0 select-none z-20 shadow-xs lg:hidden touch-pan-y"
+    >
       {navItems.map(({ id, label, Icon, isActive, onClick }) => (
         <button
           key={id}
           type="button"
-          onClick={onClick}
+          onClick={() => {
+            if (swipedRef.current) return;
+            onClick();
+          }}
           className={`flex-1 h-full flex flex-col items-center justify-center transition-all cursor-pointer relative ${
             isActive
               ? 'text-[#1a73e8] font-bold'
