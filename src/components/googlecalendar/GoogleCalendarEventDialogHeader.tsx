@@ -4,7 +4,9 @@ import { X, Trash2, Pencil, CheckSquare, FileText } from 'lucide-react';
 interface GoogleCalendarEventDialogHeaderProps {
   isEditing: boolean;
   isCalendarOwnEvent: boolean;
-  sourceType: 'calendar' | 'checklist' | 'text';
+  sourceType?: 'calendar' | 'checklist' | 'text';
+  isInProgress?: boolean;
+  isCompleted?: boolean;
   mobileTab: 'detail' | 'checklist';
   checklistCount: number;
   completedChecklistCount: number;
@@ -17,7 +19,9 @@ interface GoogleCalendarEventDialogHeaderProps {
 export const GoogleCalendarEventDialogHeader: React.FC<GoogleCalendarEventDialogHeaderProps> = ({
   isEditing,
   isCalendarOwnEvent,
-  sourceType,
+  sourceType: _sourceType,
+  isInProgress = false,
+  isCompleted = false,
   mobileTab,
   checklistCount,
   completedChecklistCount,
@@ -28,19 +32,22 @@ export const GoogleCalendarEventDialogHeader: React.FC<GoogleCalendarEventDialog
 }) => {
   return (
     <div className="bg-[#f8f9fa] border-b border-[#dadce0] select-none shrink-0">
-      {/* 1. 상단 툴바: [타이틀 + 뱃지] ... [수정] [삭제] [닫기] */}
+      {/* 1. 상단 툴바: [타이틀 + 진행중/완료 뱃지] ... [수정] [삭제] [닫기] */}
       <div className="px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-xs font-semibold text-[#5f6368] shrink-0">
             {isEditing ? '일정 수정' : '일정 세부정보'}
           </span>
-          <span className="text-[11px] font-medium text-[#1a73e8] bg-[#e8f0fe] px-2 py-0.5 rounded-full border border-blue-100 shrink-0">
-            {isCalendarOwnEvent
-              ? '캘린더 일정'
-              : sourceType === 'checklist'
-              ? '체크리스트 할 일'
-              : '텍스트 메모'}
-          </span>
+          {isInProgress && !isCompleted && (
+            <span className="text-[11px] font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200 shrink-0">
+              진행중 (종일 상시 노출)
+            </span>
+          )}
+          {isCompleted && (
+            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+              완료됨
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1 shrink-0">

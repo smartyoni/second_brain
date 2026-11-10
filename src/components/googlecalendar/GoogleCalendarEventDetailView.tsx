@@ -72,7 +72,7 @@ export const GoogleCalendarEventDetailView: React.FC<GoogleCalendarEventDetailVi
               </div>
             </div>
 
-            {/* 일시 및 진행중/완료 상태 뱃지 */}
+            {/* 일시 정보 */}
             <div className="flex items-center gap-3 text-xs text-[#3c4043] flex-wrap">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4 text-[#5f6368] shrink-0" />
@@ -82,16 +82,6 @@ export const GoogleCalendarEventDetailView: React.FC<GoogleCalendarEventDetailVi
                   {item.dueTime ? `· ${item.dueTime}` : '· 종일'}
                 </span>
               </div>
-              {item.isInProgress && !item.isCompleted && (
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700 border border-blue-200">
-                  진행중 (종일 상시 노출)
-                </span>
-              )}
-              {item.isCompleted && (
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                  완료됨
-                </span>
-              )}
             </div>
 
             {/* 상세 설명(메모) */}

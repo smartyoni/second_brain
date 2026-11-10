@@ -215,6 +215,8 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           isEditing={isEditing}
           isCalendarOwnEvent={isCalendarOwnEvent}
           sourceType={currentItem.sourceType}
+          isInProgress={currentItem.isInProgress}
+          isCompleted={currentItem.isCompleted}
           mobileTab={mobileTab}
           checklistCount={checklistCount}
           completedChecklistCount={completedChecklistCount}
