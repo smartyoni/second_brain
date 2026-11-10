@@ -12,33 +12,17 @@ import { useCalendarSchedule } from '../hooks/useCalendarSchedule';
 import { useWorkspaceData } from '../hooks/useWorkspaceData';
 import { useQuickMemoData } from '../hooks/useQuickMemoData';
 import { useFirebaseSync } from '../hooks/useFirebaseSync';
-
-const defaultPanelState: PanelDetailState = {
-  topCategoryId: 'top-1',
-  categoryId: null,
-  subItemId: null,
-  activeTab: 'check',
-};
-
-const loadPanelState = (key: string): PanelDetailState => {
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && parsed.topCategoryId) return { ...parsed, activeTab: 'check' };
-    }
-  } catch {}
-  return defaultPanelState;
-};
+import {
+  loadPanelState,
+  loadAppMode,
+  loadActivePanel,
+  loadMobileStep,
+  saveWorkspaceLocalState,
+} from '../utils/workspaceStorage';
 
 const WorkspaceContext = createContext<WorkspaceContextType | null>(null);
 
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [appMode, setAppMode] = useState<AppMode>('workspace');
-  const [jumpedFromCalendar, setJumpedFromCalendar] = useState<boolean>(false);
-  const [mobileStep, setMobileStep] = useState<MobileStep>('category');
-  const [activePanel, setActivePanel] = useState<ActivePanel>('panel-3');
-
   const [panel3State, setPanel3State] = useState<PanelDetailState>(() =>
     loadPanelState('sb_panel3_state_v2')
   );
@@ -47,17 +31,14 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     loadPanelState('sb_panel4_state_v2')
   );
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('sb_panel3_state_v2', JSON.stringify(panel3State));
-    } catch {}
-  }, [panel3State]);
+  const [appMode, setAppMode] = useState<AppMode>(loadAppMode);
+  const [jumpedFromCalendar, setJumpedFromCalendar] = useState<boolean>(false);
+  const [mobileStep, setMobileStep] = useState<MobileStep>(() => loadMobileStep(panel3State));
+  const [activePanel, setActivePanel] = useState<ActivePanel>(loadActivePanel);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('sb_panel4_state_v2', JSON.stringify(panel4State));
-    } catch {}
-  }, [panel4State]);
+    saveWorkspaceLocalState(panel3State, panel4State, appMode, mobileStep, activePanel);
+  }, [panel3State, panel4State, appMode, mobileStep, activePanel]);
 
   const getCurrentActiveState = () => (activePanel === 'panel-3' ? panel3State : panel4State);
 

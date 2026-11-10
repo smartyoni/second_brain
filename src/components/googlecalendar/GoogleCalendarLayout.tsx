@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFullCalendar } from '../../hooks/useFullCalendar';
 import { useCalendarDragDrop } from '../../hooks/useCalendarDragDrop';
 import { GoogleCalendarHeader } from './GoogleCalendarHeader';
-import { CategoryPanel } from '../panels/CategoryPanel';
-import { GoogleCalendarMonthView } from './GoogleCalendarMonthView';
+import { GoogleCalendarDesktopView } from './GoogleCalendarDesktopView';
 import { CalendarSideViewType } from './GoogleCalendarRightPanel';
 import { GoogleCalendarEventDialog } from './GoogleCalendarEventDialog';
 import { GoogleCalendarQuickCreateModal, QuickCreateState } from './GoogleCalendarQuickCreateModal';
@@ -15,13 +14,31 @@ import { GoogleCalendarMobileView } from './GoogleCalendarMobileView';
 import { getGoogleCalendarHeaderTitle, getTodayDateStr } from '../../utils/googleCalendarUtils';
 
 export const GoogleCalendarLayout: React.FC = () => {
+  const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 1024;
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [sideViewType, setSideViewType] = useState<CalendarSideViewType>('day');
   const [isRightPanelOpen, setIsRightPanelOpen] = useState<boolean>(true);
   const [initialEditDialogMode, setInitialEditDialogMode] = useState<boolean>(false);
-  // 모바일(1024px 미만) 진입 시 기본 뷰는 일간뷰(detail + day)
-  const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 1024;
-  const [mobilePanel, setMobilePanel] = useState<CalendarMobilePanel>(isMobileInit ? 'detail' : 'month');
+  const [sideViewType, setSideViewType] = useState<CalendarSideViewType>(() => {
+    try {
+      const s = localStorage.getItem('sb_cal_side_view_type') as CalendarSideViewType;
+      if (['day', 'threeDay', 'todo', 'schedule'].includes(s)) return s;
+    } catch {}
+    return 'day';
+  });
+  const [mobilePanel, setMobilePanel] = useState<CalendarMobilePanel>(() => {
+    try {
+      const m = localStorage.getItem('sb_cal_mobile_panel') as CalendarMobilePanel;
+      if (['month', 'detail', 'sidebar'].includes(m)) return m;
+    } catch {}
+    return isMobileInit ? 'detail' : 'month';
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sb_cal_side_view_type', sideViewType);
+      localStorage.setItem('sb_cal_mobile_panel', mobilePanel);
+    } catch {}
+  }, [sideViewType, mobilePanel]);
 
   // 우클릭 컨텍스트 메뉴 상태
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
@@ -151,58 +168,42 @@ export const GoogleCalendarLayout: React.FC = () => {
       </div>
 
       {/* 2. 데스크탑 뷰 (lg 이상): 1번 패널(지식보관소 카테고리 + 하단 미니달력) + 2·3·4번 패널(캘린더 헤더 및 메인 뷰) */}
-      <div className="hidden lg:flex flex-1 overflow-hidden">
-        {isSidebarOpen && (
-          <aside className="w-[331px] shrink-0 h-full border-r border-[#dadce0] overflow-hidden bg-white">
-            <CategoryPanel showMiniCalendar />
-          </aside>
-        )}
-
-        <main className="flex-1 min-w-0 flex flex-col h-full overflow-hidden bg-white">
-          <GoogleCalendarHeader
-            onToggleSidebar={handleHeaderMenuToggle}
-            title={headerTitle}
-            onPrev={goToPrev}
-            onNext={goToNext}
-            onToday={goToToday}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <GoogleCalendarMonthView
-              currentDateObj={currentDateObj}
-              selectedDate={selectedCalendarDate}
-              items={filteredItems}
-              sideViewType={sideViewType}
-              onSideViewTypeChange={(type) => {
-                setSideViewType(type);
-                setViewType(type);
-              }}
-              isRightPanelOpen={isRightPanelOpen}
-              onToggleRightPanel={(isOpen) => {
-                setIsRightPanelOpen(isOpen);
-                setViewType(isOpen ? sideViewType : 'month');
-              }}
-              onSelectDate={setDateByString}
-              onSelectItem={setSelectedScheduleItem}
-              onCellClick={(date, time, isAllDay) =>
-                handleOpenQuickCreate(date, time || '10:00', isAllDay || false)
-              }
-              draggedItem={draggedItem}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDropOnDate={handleDropOnDate}
-              onDropOnTime={handleDropOnTime}
-              onDropAllDay={handleDropAllDay}
-              onDragEnd={handleDragEnd}
-              onContextMenu={handleContextMenu}
-              onPrevMonth={goToPrev}
-              onNextMonth={goToNext}
-            />
-          </div>
-        </main>
-      </div>
+      <GoogleCalendarDesktopView
+        isSidebarOpen={isSidebarOpen}
+        headerTitle={headerTitle}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onToggleSidebar={handleHeaderMenuToggle}
+        onPrev={goToPrev}
+        onNext={goToNext}
+        onToday={goToToday}
+        currentDateObj={currentDateObj}
+        selectedCalendarDate={selectedCalendarDate}
+        filteredItems={filteredItems}
+        sideViewType={sideViewType}
+        onSideViewTypeChange={(type) => {
+          setSideViewType(type);
+          setViewType(type);
+        }}
+        isRightPanelOpen={isRightPanelOpen}
+        onToggleRightPanel={(isOpen) => {
+          setIsRightPanelOpen(isOpen);
+          setViewType(isOpen ? sideViewType : 'month');
+        }}
+        setDateByString={setDateByString}
+        onSelectItem={setSelectedScheduleItem}
+        onCellClick={(date, time, isAllDay) =>
+          handleOpenQuickCreate(date, time || '10:00', isAllDay || false)
+        }
+        draggedItem={draggedItem}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDropOnDate={handleDropOnDate}
+        onDropOnTime={handleDropOnTime}
+        onDropAllDay={handleDropAllDay}
+        onDragEnd={handleDragEnd}
+        onContextMenu={handleContextMenu}
+      />
 
       {/* 3. 모바일 뷰 (1024px 미만): 패널별 단일 뷰 드릴다운 & 탭 전환 */}
       <div className="flex lg:hidden flex-1 overflow-hidden">
