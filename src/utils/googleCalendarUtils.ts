@@ -253,7 +253,7 @@ export function getSidePanelDateLabel(
   if (!isValid) return selectedDate;
 
   if (sideViewType === 'todo') {
-    return 'TODO';
+    return '진행중';
   }
 
   if (sideViewType === 'threeDay') {

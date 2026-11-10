@@ -109,7 +109,7 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
           <div className="flex items-center justify-between gap-1 py-0.5">
             <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs text-[#3c4043] font-bold">
               <ListTodo className="w-4 h-4 text-[#1a73e8]" />
-              <span>TODO</span>
+              <span>진행중</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-100 text-red-700 font-bold">
                 {items.filter((i) => !!i.isInProgress && !i.isCompleted).length}
               </span>
@@ -198,14 +198,14 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
           </div>
         )}
 
-        {/* 서브 뷰 전환 세그먼트 탭 [ 일 | 3일 | 일정 | TODO ] (모바일에서는 하단 바로 이동하여 데스크탑에서만 표시) */}
+        {/* 서브 뷰 전환 세그먼트 탭 [ 일 | 3일 | 일정 | 진행중 ] (모바일에서는 하단 바로 이동하여 데스크탑에서만 표시) */}
         <div className="hidden lg:grid grid-cols-4 bg-[#f1f3f4] border border-[#dadce0] p-0.5 rounded-lg text-xs font-medium text-center">
           {(
             [
               { id: 'day', label: '일', Icon: Clock },
               { id: 'threeDay', label: '3일', Icon: CalendarDays },
               { id: 'schedule', label: '일정', Icon: List },
-              { id: 'todo', label: 'TODO', Icon: ListTodo },
+              { id: 'todo', label: '진행중', Icon: ListTodo },
             ] as const
           ).map(({ id, label, Icon }) => (
             <button

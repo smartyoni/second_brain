@@ -64,14 +64,14 @@ export const GoogleCalendarMobileNavBar: React.FC<GoogleCalendarMobileNavBarProp
     },
     {
       id: 'todo' as const,
-      label: 'TODO',
+      label: '진행중',
       Icon: ListTodo,
       isActive: !isMonthActive && sideViewType === 'todo',
       onClick: () => handleSelectSideView('todo'),
     },
   ];
 
-  // 현재 활성 뷰 인덱스 구하기 (0: 월간, 1: 일, 2: 3일, 3: 일정, 4: TODO)
+  // 현재 활성 뷰 인덱스 구하기 (0: 월간, 1: 일, 2: 3일, 3: 일정, 4: 진행중)
   const getActiveIndex = (): number => {
     if (isMonthActive) return 0;
     if (sideViewType === 'day') return 1;
