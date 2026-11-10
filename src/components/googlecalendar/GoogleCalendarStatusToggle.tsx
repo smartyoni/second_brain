@@ -43,7 +43,7 @@ export const GoogleCalendarStatusToggle: React.FC<GoogleCalendarStatusToggleProp
             ? 'bg-[#1a73e8] text-white shadow-2xs font-semibold'
             : 'text-[#5f6368] hover:text-[#202124] hover:bg-white/70'
         }`}
-        title="진행중으로 설정하면 완료되기 전까지 종일란에 항상 표시됩니다"
+        title="진행중으로 설정하면 완료되기 전까지 오늘 종일 영역에 항상 표시됩니다"
       >
         {isInProgress && <Check className="w-3 h-3 stroke-[2.5]" />}
         <span>진행중</span>

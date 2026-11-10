@@ -45,9 +45,10 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
 
     items.forEach((item) => {
       if (!item.dueDate) return;
-      const list = dayMap.get(item.dueDate) || [];
+      const targetDate = item.isInProgress && !item.isCompleted ? todayStr : item.dueDate;
+      const list = dayMap.get(targetDate) || [];
       list.push(item);
-      dayMap.set(item.dueDate, list);
+      dayMap.set(targetDate, list);
     });
 
     const sortedDates = Array.from(dayMap.keys()).sort();

@@ -63,17 +63,22 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
   const lastDate = new Date(year, month + 1, 0).getDate();
   const prevMonthLastDate = new Date(year, month, 0).getDate();
 
+  const todayStr = getTodayDateStr();
+
   const itemsByDate = React.useMemo(() => {
     const map = new Map<string, CalendarScheduleItem[]>();
     items.forEach((item) => {
-      getDatesInRange(item.dueDate, item.endDate).forEach((dStr) => {
+      const dates = item.isInProgress && !item.isCompleted
+        ? [todayStr]
+        : getDatesInRange(item.dueDate, item.endDate);
+      dates.forEach((dStr) => {
         const arr = map.get(dStr) || [];
         arr.push(item);
         map.set(dStr, arr);
       });
     });
     return map;
-  }, [items]);
+  }, [items, todayStr]);
 
   const days: { dateStr: string; dayNum: number; isCurrentMonth: boolean; monthNum: number }[] = [];
 
@@ -98,7 +103,6 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
     days.push({ dateStr, dayNum: d, isCurrentMonth: false, monthNum: m });
   }
 
-  const todayStr = getTodayDateStr();
   const totalWeeks = Math.ceil(days.length / 7);
 
   const handleCellSelect = (dateStr: string) => {
