@@ -10,26 +10,45 @@ export const GanttMemoPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'check' | 'text'>('check');
   const { selectedDetailItem, checklistGroups, textGroups } = useWorkspace();
 
-  // 현재 선택된 항목의 제목 조회
-  const targetTitle = useMemo(() => {
-    if (!selectedDetailItem) return '';
+  // 현재 선택된 항목의 제목 및 하위 항목 숫자(체크/텍스트) 계산
+  const { targetTitle, checkCount, textCount } = useMemo(() => {
+    if (!selectedDetailItem) {
+      return { targetTitle: '', checkCount: 0, textCount: 0 };
+    }
     const { type, groupId, itemId } = selectedDetailItem;
+
+    let title = '';
+    let checklistLen = 0;
+    let memoText = '';
+
     if (type === 'checklist') {
       const grp = checklistGroups.find((g) => g.id === groupId);
       const itm = grp?.items.find((i) => i.id === itemId);
-      return itm?.text || '';
+      title = itm?.text || '';
+      checklistLen = itm?.checklist?.length || 0;
+      memoText = itm?.memo || '';
     } else {
       const grp = textGroups.find((g) => g.id === groupId);
       const blk = grp?.blocks.find((b) => b.id === itemId);
-      return blk?.text.split('\n')[0] || grp?.name || '';
+      title = blk?.text.split('\n')[0] || grp?.name || '';
+      checklistLen = blk?.checklist?.length || 0;
+      memoText = blk?.memo || '';
     }
+
+    const hasMemo = memoText.trim().length > 0;
+
+    return {
+      targetTitle: title,
+      checkCount: checklistLen,
+      textCount: hasMemo ? 1 : 0,
+    };
   }, [selectedDetailItem, checklistGroups, textGroups]);
 
   return (
     <div className="flex flex-col h-full w-full bg-white border-l border-slate-200 overflow-hidden select-none">
       {/* 4번 패널 상단 헤더: 1·2·3번 패널과 일관된 높이 및 디자인 규격 */}
       <div className="h-11 lg:h-9 px-3 lg:px-2.5 bg-slate-100 border-b border-slate-300 flex items-center justify-between text-sm lg:text-xs shrink-0 select-none">
-        {/* 체크 / 텍스트 순서의 탭 전환 세그먼트 버튼 */}
+        {/* 체크 / 텍스트 순서의 탭 전환 세그먼트 버튼 (하위 항목 숫자 표기) */}
         <div className="flex items-center gap-1 bg-slate-200 p-0.5 rounded text-xs lg:text-[11px]">
           <button
             type="button"
@@ -39,10 +58,13 @@ export const GanttMemoPanel: React.FC = () => {
                 ? 'bg-white text-blue-600 font-bold shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
-            title="체크리스트 보기"
+            title={`체크리스트 보기 (${checkCount}개)`}
           >
             <CheckSquare className="w-3.5 h-3.5" />
             <span>체크</span>
+            <span className="text-[11px] lg:text-[10px] font-normal opacity-85">
+              ({checkCount})
+            </span>
           </button>
 
           <button
@@ -53,10 +75,13 @@ export const GanttMemoPanel: React.FC = () => {
                 ? 'bg-white text-blue-600 font-bold shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
-            title="텍스트 세부 메모 보기"
+            title={`텍스트 세부 메모 보기 (${textCount}개)`}
           >
             <FileText className="w-3.5 h-3.5" />
             <span>텍스트</span>
+            <span className="text-[11px] lg:text-[10px] font-normal opacity-85">
+              ({textCount})
+            </span>
           </button>
         </div>
 
