@@ -41,9 +41,7 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
   };
 
   const handleOpenScheduleCreate = () => {
-    if (appMode !== 'calendar') {
-      setAppMode('calendar');
-    }
+    // 지식보관소 모드를 벗어나지 않고 현재 화면을 유지한 채 일정 입력 모달 열기
     setIsScheduleModalOpen(true);
   };
 
