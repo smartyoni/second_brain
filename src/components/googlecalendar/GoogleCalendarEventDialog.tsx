@@ -202,7 +202,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-hidden sm:my-auto flex flex-col min-h-[440px]"
+        className="bg-white rounded-lg shadow-2xl border border-[#dadce0] w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-hidden sm:my-auto flex flex-col min-h-[440px] max-h-[92vh]"
       >
         {/* 상단 툴바 및 모바일 탭 헤더 */}
         <GoogleCalendarEventDialogHeader
