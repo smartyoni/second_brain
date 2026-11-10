@@ -35,8 +35,12 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
         className="w-2.5 h-2.5 rounded-full shrink-0 mr-2"
         style={{ backgroundColor: colorTheme.rawHex }}
       />
-      {/* 시간 또는 기간 표기 (예: "종일", "13~15", "09:00~10:00") */}
-      <span className="min-w-[64px] max-w-[96px] mr-2 text-xs text-[#3c4043] font-medium shrink-0 whitespace-nowrap">
+      {/* 시간 또는 기간 표기 (예: "진행중", "종일", "13~15", "09:00~10:00") */}
+      <span
+        className={`min-w-[64px] max-w-[96px] mr-2 text-xs font-medium shrink-0 whitespace-nowrap ${
+          item.isInProgress && !item.isCompleted ? 'text-[#d50000] font-semibold' : 'text-[#3c4043]'
+        }`}
+      >
         {timeText}
       </span>
       {/* 일정 제목 */}

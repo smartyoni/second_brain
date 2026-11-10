@@ -113,8 +113,9 @@ export const GoogleCalendarScheduleView: React.FC<GoogleCalendarScheduleViewProp
     }
   }, [todayStr, selectedDate, groupedDays]);
 
-  // 시간 또는 기간 포맷 (기간 일정: 13~15, 시간 일정: HH:mm~HH:mm, 종일: 종일)
+  // 시간 또는 기간 포맷 (진행중: 진행중, 기간 일정: 13~15, 시간 일정: HH:mm~HH:mm, 종일: 종일)
   const formatTimeRange = (item: CalendarScheduleItem) => {
+    if (item.isInProgress && !item.isCompleted) return '진행중';
     const periodText = formatSchedulePeriod(item.dueDate, item.endDate);
     if (periodText) {
       return item.dueTime ? `${periodText} ${item.dueTime}` : periodText;

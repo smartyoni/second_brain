@@ -188,7 +188,13 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
                 <div className="space-y-1 pt-1.5 border-t border-gray-100 text-[11px] text-[#5f6368]">
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-[#70757a] shrink-0" />
-                    <span>{isAllDay ? '종일' : schedule.dueTime}</span>
+                    <span className={schedule.isInProgress && !schedule.isCompleted ? 'text-[#d50000] font-semibold' : ''}>
+                      {schedule.isInProgress && !schedule.isCompleted
+                        ? '진행중'
+                        : isAllDay
+                        ? '종일'
+                        : schedule.dueTime}
+                    </span>
                   </div>
 
                   {schedule.description && (
