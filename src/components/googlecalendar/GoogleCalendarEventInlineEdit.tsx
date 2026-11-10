@@ -16,12 +16,14 @@ export interface EventInlineUpdateData {
 
 interface GoogleCalendarEventInlineEditProps {
   item: CalendarScheduleItem;
+  isInProgress: boolean;
   onSubmit: (updates: EventInlineUpdateData) => void;
   className?: string;
 }
 
 export const GoogleCalendarEventInlineEdit: React.FC<GoogleCalendarEventInlineEditProps> = ({
   item,
+  isInProgress,
   onSubmit,
   className = '',
 }) => {
@@ -29,19 +31,24 @@ export const GoogleCalendarEventInlineEdit: React.FC<GoogleCalendarEventInlineEd
   const [editDate, setEditDate] = useState(item.dueDate || '');
   const [editEndDate, setEditEndDate] = useState(item.endDate || '');
   const [editTime, setEditTime] = useState(item.dueTime || '10:00');
-  const [editIsAllDay, setEditIsAllDay] = useState(!item.dueTime || !!item.isInProgress);
-  const [editIsInProgress, setEditIsInProgress] = useState(!!item.isInProgress);
-  const [editIsCompleted, setEditIsCompleted] = useState(!!item.isCompleted);
+  const [editIsAllDay, setEditIsAllDay] = useState(!item.dueTime || !!isInProgress);
   const [editDescription, setEditDescription] = useState(
     item.description ?? item.memo ?? ''
   );
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const isOngoing = editIsInProgress && !editIsCompleted;
+  const isOngoing = isInProgress && !item.isCompleted;
   const activeColor = getGoogleCategoryColor(item.categoryId, isOngoing);
 
-  // 텍스트 내용의 실제 높이에 맞춰 textarea 높이를 자동 조절 (읽기 모드와 동일한 모달 높이 유지)
+  // 진행중이 활성화되면 종일로 자동 체크
+  useEffect(() => {
+    if (isInProgress) {
+      setEditIsAllDay(true);
+    }
+  }, [isInProgress]);
+
+  // 텍스트 내용의 실제 높이에 맞춰 textarea 높이를 자동 조절
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -66,8 +73,8 @@ export const GoogleCalendarEventInlineEdit: React.FC<GoogleCalendarEventInlineEd
       endDate: validEndDate,
       dueTime: editIsAllDay ? undefined : editTime,
       description: editDescription.trim() || undefined,
-      isInProgress: editIsInProgress,
-      isCompleted: editIsCompleted,
+      isInProgress,
+      isCompleted: item.isCompleted,
     });
   };
 
@@ -92,7 +99,7 @@ export const GoogleCalendarEventInlineEdit: React.FC<GoogleCalendarEventInlineEd
         </div>
       </div>
 
-      {/* 2. 시계 아이콘 + 날짜 / 종일 / 시간 / 진행중 버튼 (읽기 뷰와 동일한 1열 배치) */}
+      {/* 2. 시계 아이콘 + 날짜 / 종일 / 시간 (진행중 표시는 상단 헤더로 이동하여 기존 자리에서 제거) */}
       <div className="flex items-center gap-3 text-xs text-[#3c4043] flex-wrap">
         <div className="flex items-center gap-1.5">
           <Clock className="w-4 h-4 text-[#5f6368] shrink-0" />
@@ -132,26 +139,6 @@ export const GoogleCalendarEventInlineEdit: React.FC<GoogleCalendarEventInlineEd
             className="px-1.5 py-0.5 border border-[#dadce0] rounded text-xs bg-white text-[#3c4043] outline-none focus:border-[#1a73e8]"
           />
         )}
-
-        <button
-          type="button"
-          onClick={() => {
-            const next = !editIsInProgress;
-            setEditIsInProgress(next);
-            if (next) {
-              setEditIsCompleted(false);
-              setEditIsAllDay(true);
-            }
-          }}
-          className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
-            isOngoing
-              ? 'bg-blue-100 text-blue-700 border-blue-200'
-              : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
-          }`}
-          title="진행중으로 설정하면 완료 전까지 종일 영역에 항상 노출됩니다"
-        >
-          {isOngoing ? '진행중 (종일 상시 노출)' : '진행중 설정'}
-        </button>
       </div>
 
       {/* 3. 메모 아이콘 + 상세 설명 텍스트영역 (기존 메모 박스와 동일한 높이 및 스타일 유지) */}

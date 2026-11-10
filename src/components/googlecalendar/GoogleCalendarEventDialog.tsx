@@ -44,6 +44,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
 
   const isCalendarOwnEvent = currentItem.sourceType === 'calendar';
   const [isEditing, setIsEditing] = useState(initialEditMode);
+  const [editIsInProgress, setEditIsInProgress] = useState(!!currentItem.isInProgress);
   const [mobileTab, setMobileTab] = useState<'detail' | 'checklist'>('detail');
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
@@ -71,7 +72,6 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     const duration = Date.now() - touchStartRef.current.time;
     touchStartRef.current = null;
 
-    // 800ms 이내, 가로 이동이 세로 이동의 1.3배 이상이며 최소 40px 이동 시 스와이프 전환
     if (duration < 800 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3 && Math.abs(deltaX) > 40) {
       if (deltaX < 0) {
         setMobileTab('checklist');
@@ -83,7 +83,8 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
 
   useEffect(() => {
     setIsEditing(initialEditMode);
-  }, [item.id, initialEditMode]);
+    setEditIsInProgress(!!currentItem.isInProgress);
+  }, [item.id, initialEditMode, currentItem.isInProgress]);
 
   const handleDelete = () => {
     if (isCalendarOwnEvent) {
@@ -105,15 +106,18 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
   };
 
   const handleSaveForm = (updates: EventInlineUpdateData) => {
-    const isOngoing = updates.isInProgress && !updates.isCompleted;
+    const isOngoing = editIsInProgress && !updates.isCompleted;
     // 진행중 일정은 빨간색으로 고정, 아니면 기존 categoryId 유지
     const resolvedCategoryId = isOngoing ? GOOGLE_RED_COLOR.id : currentItem.categoryId;
 
+    const finalUpdates = {
+      ...updates,
+      isInProgress: editIsInProgress,
+      categoryId: resolvedCategoryId,
+    };
+
     if (isCalendarOwnEvent) {
-      updateCalendarEvent(currentItem.id, {
-        ...updates,
-        categoryId: resolvedCategoryId,
-      });
+      updateCalendarEvent(currentItem.id, finalUpdates);
     } else if (currentItem.sourceType === 'checklist') {
       setChecklistGroups((prev) =>
         prev.map((g) =>
@@ -130,7 +134,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                         dueTime: updates.dueTime,
                         memo: updates.description,
                         colorId: resolvedCategoryId,
-                        isInProgress: updates.isInProgress,
+                        isInProgress: editIsInProgress,
                         isCompleted: updates.isCompleted ?? i.isCompleted,
                       }
                     : i
@@ -157,7 +161,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
                     dueTime: updates.dueTime,
                     memo: updates.description,
                     colorId: resolvedCategoryId,
-                    isInProgress: updates.isInProgress,
+                    isInProgress: editIsInProgress,
                     isCompleted: updates.isCompleted,
                   };
                 }),
@@ -198,6 +202,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
 
   const handleStartEdit = () => {
     setIsEditing(true);
+    setEditIsInProgress(!!currentItem.isInProgress);
     setMobileTab('detail');
   };
 
@@ -215,8 +220,9 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           isEditing={isEditing}
           isCalendarOwnEvent={isCalendarOwnEvent}
           sourceType={currentItem.sourceType}
-          isInProgress={currentItem.isInProgress}
+          isInProgress={isEditing ? editIsInProgress : currentItem.isInProgress}
           isCompleted={currentItem.isCompleted}
+          onToggleInProgress={() => setEditIsInProgress((prev) => !prev)}
           mobileTab={mobileTab}
           checklistCount={checklistCount}
           completedChecklistCount={completedChecklistCount}
@@ -231,6 +237,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
           item={currentItem}
           subItem={subItem}
           isEditing={isEditing}
+          isInProgress={isEditing ? editIsInProgress : currentItem.isInProgress}
           mobileTab={mobileTab}
           checklist={checklist}
           onUpdateChecklist={(updater) => updateItemChecklist(currentItem, updater)}

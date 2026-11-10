@@ -7,6 +7,7 @@ interface GoogleCalendarEventDialogHeaderProps {
   sourceType?: 'calendar' | 'checklist' | 'text';
   isInProgress?: boolean;
   isCompleted?: boolean;
+  onToggleInProgress?: () => void;
   mobileTab: 'detail' | 'checklist';
   checklistCount: number;
   completedChecklistCount: number;
@@ -22,6 +23,7 @@ export const GoogleCalendarEventDialogHeader: React.FC<GoogleCalendarEventDialog
   sourceType: _sourceType,
   isInProgress = false,
   isCompleted = false,
+  onToggleInProgress,
   mobileTab,
   checklistCount,
   completedChecklistCount,
@@ -38,15 +40,35 @@ export const GoogleCalendarEventDialogHeader: React.FC<GoogleCalendarEventDialog
           <span className="text-xs font-semibold text-[#5f6368] shrink-0">
             {isEditing ? '일정 수정' : '일정 세부정보'}
           </span>
-          {isInProgress && !isCompleted && (
-            <span className="text-[11px] font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200 shrink-0">
-              진행중 (종일 상시 노출)
-            </span>
-          )}
-          {isCompleted && (
-            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
-              완료됨
-            </span>
+
+          {/* 수정 모드일 때: 헤더에서 직접 진행중 상태 토글 가능 */}
+          {isEditing ? (
+            <button
+              type="button"
+              onClick={onToggleInProgress}
+              className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none shrink-0 ${
+                isInProgress
+                  ? 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200 shadow-2xs'
+                  : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+              }`}
+              title="클릭하여 진행중 상태를 설정하거나 해제합니다 (진행중 설정 시 당일 종일 영역에 노출)"
+            >
+              {isInProgress ? '진행중 (종일 상시 노출) ✓' : '+ 진행중 설정'}
+            </button>
+          ) : (
+            /* 읽기 모드일 때 */
+            <>
+              {isInProgress && !isCompleted && (
+                <span className="text-[11px] font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200 shrink-0">
+                  진행중 (종일 상시 노출)
+                </span>
+              )}
+              {isCompleted && (
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                  완료됨
+                </span>
+              )}
+            </>
           )}
         </div>
 

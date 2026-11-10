@@ -10,6 +10,7 @@ interface GoogleCalendarEventDetailViewProps {
   item: CalendarScheduleItem;
   subItem?: SubItem;
   isEditing: boolean;
+  isInProgress?: boolean;
   mobileTab: 'detail' | 'checklist';
   checklist: SubCheckItem[];
   onUpdateChecklist: (updater: (prev: SubCheckItem[]) => SubCheckItem[]) => void;
@@ -26,6 +27,7 @@ export const GoogleCalendarEventDetailView: React.FC<GoogleCalendarEventDetailVi
   item,
   subItem,
   isEditing,
+  isInProgress,
   mobileTab,
   checklist,
   onUpdateChecklist,
@@ -37,7 +39,9 @@ export const GoogleCalendarEventDetailView: React.FC<GoogleCalendarEventDetailVi
   onTouchStart,
   onTouchEnd,
 }) => {
-  const activeColor = getGoogleCategoryColor(item.categoryId, item.isInProgress && !item.isCompleted);
+  const currentIsInProgress = isInProgress !== undefined ? isInProgress : !!item.isInProgress;
+  const isOngoing = currentIsInProgress && !item.isCompleted;
+  const activeColor = getGoogleCategoryColor(item.categoryId, isOngoing);
 
   return (
     <>
@@ -50,6 +54,7 @@ export const GoogleCalendarEventDetailView: React.FC<GoogleCalendarEventDetailVi
         {isEditing ? (
           <GoogleCalendarEventInlineEdit
             item={item}
+            isInProgress={currentIsInProgress}
             onSubmit={onSaveEdit}
             className={mobileTab === 'detail' ? 'block' : 'hidden md:block'}
           />
