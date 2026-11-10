@@ -56,28 +56,28 @@ export const GoogleCalendarMobileNavBar: React.FC<GoogleCalendarMobileNavBarProp
       onClick: () => handleSelectSideView('threeDay'),
     },
     {
-      id: 'todo' as const,
-      label: 'TODO',
-      Icon: ListTodo,
-      isActive: !isMonthActive && sideViewType === 'todo',
-      onClick: () => handleSelectSideView('todo'),
-    },
-    {
       id: 'schedule' as const,
       label: '일정',
       Icon: List,
       isActive: !isMonthActive && sideViewType === 'schedule',
       onClick: () => handleSelectSideView('schedule'),
     },
+    {
+      id: 'todo' as const,
+      label: 'TODO',
+      Icon: ListTodo,
+      isActive: !isMonthActive && sideViewType === 'todo',
+      onClick: () => handleSelectSideView('todo'),
+    },
   ];
 
-  // 현재 활성 뷰 인덱스 구하기 (0: 월간, 1: 일, 2: 3일, 3: TODO, 4: 일정)
+  // 현재 활성 뷰 인덱스 구하기 (0: 월간, 1: 일, 2: 3일, 3: 일정, 4: TODO)
   const getActiveIndex = (): number => {
     if (isMonthActive) return 0;
     if (sideViewType === 'day') return 1;
     if (sideViewType === 'threeDay') return 2;
-    if (sideViewType === 'todo') return 3;
-    if (sideViewType === 'schedule') return 4;
+    if (sideViewType === 'schedule') return 3;
+    if (sideViewType === 'todo') return 4;
     return 0;
   };
 

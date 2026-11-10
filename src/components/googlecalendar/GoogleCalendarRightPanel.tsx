@@ -200,14 +200,14 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
           </div>
         )}
 
-        {/* 서브 뷰 전환 세그먼트 탭 [ 일 | 3일 | TODO | 일정 ] (모바일에서는 하단 바로 이동하여 데스크탑에서만 표시) */}
+        {/* 서브 뷰 전환 세그먼트 탭 [ 일 | 3일 | 일정 | TODO ] (모바일에서는 하단 바로 이동하여 데스크탑에서만 표시) */}
         <div className="hidden lg:grid grid-cols-4 bg-[#f1f3f4] border border-[#dadce0] p-0.5 rounded-lg text-xs font-medium text-center">
           {(
             [
               { id: 'day', label: '일', Icon: Clock },
               { id: 'threeDay', label: '3일', Icon: CalendarDays },
-              { id: 'todo', label: 'TODO', Icon: ListTodo },
               { id: 'schedule', label: '일정', Icon: List },
+              { id: 'todo', label: 'TODO', Icon: ListTodo },
             ] as const
           ).map(({ id, label, Icon }) => (
             <button
