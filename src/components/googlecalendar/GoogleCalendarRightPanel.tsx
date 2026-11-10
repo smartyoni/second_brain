@@ -11,12 +11,10 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
-import { useWorkspace } from '../../context/WorkspaceContext';
-import { SubItemPanel } from '../panels/SubItemPanel';
-import { ProjectTaskPanel } from '../project/ProjectTaskPanel';
 import { GoogleCalendarDayView } from './GoogleCalendarDayView';
 import { GoogleCalendarThreeDayView } from './GoogleCalendarThreeDayView';
 import { GoogleCalendarScheduleView } from './GoogleCalendarScheduleView';
+import { GoogleCalendarTodoView } from './GoogleCalendarTodoView';
 import {
   shiftDateBySideView,
   getSidePanelDateLabel,
@@ -65,9 +63,6 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
-  const { getCurrentActiveState } = useWorkspace();
-  const isProjectTab = getCurrentActiveState().topCategoryId === 'top-3';
-
   const formattedDate = getSidePanelDateLabel(sideViewType, currentDateObj, selectedDate);
   const todayStr = getTodayDateStr();
   const isToday = selectedDate === todayStr;
@@ -115,6 +110,9 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
             <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs text-[#3c4043] font-bold">
               <ListTodo className="w-4 h-4 text-[#1a73e8]" />
               <span>TODO</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-100 text-red-700 font-bold">
+                {items.filter((i) => !!i.isInProgress && !i.isCompleted).length}
+              </span>
             </div>
             <button
               type="button"
@@ -268,9 +266,12 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
         )}
 
         {sideViewType === 'todo' && (
-          <div className="flex-1 flex flex-col h-full overflow-hidden">
-            {isProjectTab ? <ProjectTaskPanel /> : <SubItemPanel />}
-          </div>
+          <GoogleCalendarTodoView
+            items={items}
+            onSelectItem={onSelectItem}
+            onContextMenu={onContextMenu}
+            onCellClick={(dateStr) => onCellClick(dateStr, '10:00', false)}
+          />
         )}
 
         {sideViewType === 'schedule' && (
