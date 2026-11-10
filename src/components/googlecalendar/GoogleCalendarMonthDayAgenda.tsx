@@ -118,28 +118,30 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
           )}
         </div>
 
-        <div className="mt-1.5 flex items-baseline justify-between">
-          <h2 className="text-lg font-bold text-[#202124] flex items-center gap-1.5">
-            <span>{formattedDate}</span>
-            {lunar && (
-              <span className="text-xs font-medium text-purple-600" title={lunar.fullText}>
-                ({lunar.text})
-              </span>
-            )}
-          </h2>
-          <span className="text-xs text-[#5f6368]">
-            일정 <strong className="text-[#1a73e8]">{items.length}</strong>건
-          </span>
-        </div>
+        <div className="mt-1.5 flex items-center justify-between gap-2">
+          <div className="flex items-baseline gap-2 min-w-0">
+            <h2 className="text-base sm:text-lg font-bold text-[#202124] flex items-center gap-1.5 shrink-0">
+              <span>{formattedDate}</span>
+              {lunar && (
+                <span className="text-xs font-medium text-purple-600" title={lunar.fullText}>
+                  ({lunar.text})
+                </span>
+              )}
+            </h2>
+            <span className="text-xs text-[#5f6368] shrink-0">
+              일정 <strong className="text-[#1a73e8]">{items.length}</strong>건
+            </span>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => onAddEvent(selectedDate)}
-          className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-[#1a73e8] hover:bg-[#1557b0] text-white text-xs font-semibold rounded-md shadow-xs transition-colors cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>새 일정 추가</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => onAddEvent(selectedDate)}
+            className="flex items-center gap-1 py-1.5 px-3 bg-[#1a73e8] hover:bg-[#1557b0] active:bg-[#174ea6] text-white text-xs font-semibold rounded shadow-xs transition-colors cursor-pointer shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>새일정</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. 일정 카드 리스트 */}
