@@ -1,11 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { ProjectDetailHeader } from './ProjectDetailHeader';
 import { TextGroupSection } from '../detail/TextGroupSection';
-import { ChecklistGroupSection } from '../detail/ChecklistGroupSection';
+import { ProjectChecklistGroupList } from './ProjectChecklistGroupList';
 import {
-  moveScopedItem, moveArrayItem, moveChecklistItem,
-  moveBlockToGroup, moveChecklistItemToGroup,
+  moveScopedItem, moveArrayItem, moveBlockToGroup,
 } from '../../utils/orderUtils';
 
 export const ProjectDetailPanel: React.FC = () => {
@@ -45,6 +44,74 @@ export const ProjectDetailPanel: React.FC = () => {
         : addChecklistGroup(panel3State.subItemId);
     if (newId) setEditingGroupId(newId);
   };
+
+  const handleAddBlockToGroup = (groupId: string): string => {
+    const newId = `b-${Date.now()}`;
+    setTextGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId
+          ? { ...g, isExpanded: true, blocks: [...g.blocks, { id: newId, text: '', order: g.blocks.length }] }
+          : g
+      )
+    );
+    setSelectedDetailItem({ type: 'text', groupId, itemId: newId });
+    return newId;
+  };
+
+  const handleAddItemToGroup = (groupId: string): string => {
+    const newId = `ci-${Date.now()}`;
+    setChecklistGroups((prev) =>
+      prev.map((g) => {
+        if (g.id !== groupId) return g;
+        const newItem = { id: newId, text: '', isCompleted: false, order: 0 };
+        const incomplete = g.items.filter((i) => !i.isCompleted);
+        const completed = g.items.filter((i) => i.isCompleted);
+        const nextItems = [...incomplete, newItem, ...completed].map(
+          (item, idx) => ({ ...item, order: idx })
+        );
+        return { ...g, isExpanded: true, items: nextItems };
+      })
+    );
+    setSelectedDetailItem({ type: 'checklist', groupId, itemId: newId });
+    return newId;
+  };
+
+  // 단축키: Shift + Enter로 현재 탭의 활성 그룹에 새 항목/블록 추가
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && e.shiftKey) {
+        const activeEl = document.activeElement;
+        const isInputField =
+          activeEl &&
+          (activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            (activeEl as HTMLElement).isContentEditable);
+        if (isInputField) return;
+
+        const hasOpenModal = document.querySelector('[role="dialog"], .fixed.inset-0');
+        if (hasOpenModal) return;
+
+        if (activeTab === 'text') {
+          if (currentTextGroups.length === 0) return;
+          const target = currentTextGroups.find((g) => g.id === selectedDetailItem?.groupId) || currentTextGroups[0];
+          if (target) {
+            e.preventDefault();
+            handleAddBlockToGroup(target.id);
+          }
+        } else {
+          if (currentChecklistGroups.length === 0) return;
+          const target = currentChecklistGroups.find((g) => g.id === selectedDetailItem?.groupId) || currentChecklistGroups[0];
+          if (target) {
+            e.preventDefault();
+            handleAddItemToGroup(target.id);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [activeTab, currentTextGroups, currentChecklistGroups, selectedDetailItem]);
 
   // 현재 체크리스트 전체 항목수와 완료수
   const checkStats = useMemo(() => {
@@ -115,28 +182,13 @@ export const ProjectDetailPanel: React.FC = () => {
                 onEndEditGroupName={() => {
                   if (editingGroupId === group.id) setEditingGroupId(null);
                 }}
-                onDeleteGroup={(id) =>
-                  setTextGroups((prev) => prev.filter((g) => g.id !== id))
-                }
-                onAddBlock={(id) => {
-                  const newId = `b-${Date.now()}`;
-                  setTextGroups((prev) =>
-                    prev.map((g) =>
-                      g.id === id
-                        ? { ...g, blocks: [...g.blocks, { id: newId, text: '', order: g.blocks.length }] }
-                        : g
-                    )
-                  );
-                  return newId;
-                }}
+                onDeleteGroup={(id) => setTextGroups((prev) => prev.filter((g) => g.id !== id))}
+                onAddBlock={handleAddBlockToGroup}
                 onUpdateBlockText={(gId, bId, text) =>
                   setTextGroups((prev) =>
                     prev.map((g) =>
                       g.id === gId
-                        ? {
-                            ...g,
-                            blocks: g.blocks.map((b) => (b.id === bId ? { ...b, text } : b)),
-                          }
+                        ? { ...g, blocks: g.blocks.map((b) => (b.id === bId ? { ...b, text } : b)) }
                         : g
                     )
                   )
@@ -144,9 +196,7 @@ export const ProjectDetailPanel: React.FC = () => {
                 onDeleteBlock={(gId, bId) =>
                   setTextGroups((prev) =>
                     prev.map((g) =>
-                      g.id === gId
-                        ? { ...g, blocks: g.blocks.filter((b) => b.id !== bId) }
-                        : g
+                      g.id === gId ? { ...g, blocks: g.blocks.filter((b) => b.id !== bId) } : g
                     )
                   )
                 }
@@ -166,120 +216,17 @@ export const ProjectDetailPanel: React.FC = () => {
             )}
           </div>
         ) : (
-          <div>
-            {currentChecklistGroups.map((group, idx) => (
-              <ChecklistGroupSection
-                key={group.id}
-                group={group}
-                canMoveUp={idx > 0}
-                canMoveDown={idx < currentChecklistGroups.length - 1}
-                onMoveGroup={(id, direction) =>
-                  setChecklistGroups((prev) =>
-                    moveScopedItem(prev, (g) => g.subItemId === group.subItemId, id, direction)
-                  )
-                }
-                groupTargets={checklistGroupTargets}
-                onMoveItemToGroup={(fromId, itemId, toId) => {
-                  setChecklistGroups((prev) => moveChecklistItemToGroup(prev, fromId, itemId, toId));
-                  keepSelection('checklist', fromId, itemId, toId);
-                }}
-                onMoveItem={(gId, itemId, direction) =>
-                  setChecklistGroups((prev) =>
-                    prev.map((g) =>
-                      g.id === gId
-                        ? { ...g, items: moveChecklistItem(g.items, itemId, direction) }
-                        : g
-                    )
-                  )
-                }
-                onToggleExpand={(id) =>
-                  setChecklistGroups((prev) =>
-                    prev.map((g) => (g.id === id ? { ...g, isExpanded: !g.isExpanded } : g))
-                  )
-                }
-                onUpdateGroupName={(id, name) =>
-                  setChecklistGroups((prev) =>
-                    prev.map((g) => (g.id === id ? { ...g, name } : g))
-                  )
-                }
-                isEditingGroupName={editingGroupId === group.id}
-                onStartEditGroupName={() => setEditingGroupId(group.id)}
-                onEndEditGroupName={() => {
-                  if (editingGroupId === group.id) setEditingGroupId(null);
-                }}
-                onDeleteGroup={(id) =>
-                  setChecklistGroups((prev) => prev.filter((g) => g.id !== id))
-                }
-                onAddItem={(id) => {
-                  const newId = `ci-${Date.now()}`;
-                  setChecklistGroups((prev) =>
-                    prev.map((g) => {
-                      if (g.id !== id) return g;
-                      const newItem = { id: newId, text: '', isCompleted: false, order: 0 };
-                      const incomplete = g.items.filter((i) => !i.isCompleted);
-                      const completed = g.items.filter((i) => i.isCompleted);
-                      const nextItems = [...incomplete, newItem, ...completed].map(
-                        (item, idx) => ({ ...item, order: idx })
-                      );
-                      return { ...g, items: nextItems };
-                    })
-                  );
-                  return newId;
-                }}
-                onToggleItemComplete={(gId, itemId) =>
-                  setChecklistGroups((prev) =>
-                    prev.map((g) => {
-                      if (g.id !== gId) return g;
-                      const toggled = g.items.map((i) =>
-                        i.id === itemId ? { ...i, isCompleted: !i.isCompleted } : i
-                      );
-                      const incomplete = toggled.filter((i) => !i.isCompleted);
-                      const completed = toggled.filter((i) => i.isCompleted);
-                      const nextItems = [
-                        ...incomplete,
-                        ...completed.filter((i) => i.id !== itemId),
-                        ...completed.filter((i) => i.id === itemId),
-                      ].map((item, idx) => ({ ...item, order: idx }));
-                      return { ...g, items: nextItems };
-                    })
-                  )
-                }
-                onUpdateItemText={(gId, itemId, text) =>
-                  setChecklistGroups((prev) =>
-                    prev.map((g) =>
-                      g.id === gId
-                        ? {
-                            ...g,
-                            items: g.items.map((i) => (i.id === itemId ? { ...i, text } : i)),
-                          }
-                        : g
-                    )
-                  )
-                }
-                onDeleteItem={(gId, itemId) =>
-                  setChecklistGroups((prev) =>
-                    prev.map((g) =>
-                      g.id === gId
-                        ? { ...g, items: g.items.filter((i) => i.id !== itemId) }
-                        : g
-                    )
-                  )
-                }
-              />
-            ))}
-            {currentChecklistGroups.length === 0 && (
-              <div className="p-8 text-center text-xs text-slate-400">
-                등록된 작업(TODO) 그룹이 없습니다.
-                <button
-                  type="button"
-                  onClick={handleAddGroup}
-                  className="block mx-auto mt-2 text-indigo-600 font-semibold hover:underline"
-                >
-                  + 작업(TODO) 그룹 추가
-                </button>
-              </div>
-            )}
-          </div>
+          <ProjectChecklistGroupList
+            groups={currentChecklistGroups}
+            groupTargets={checklistGroupTargets}
+            editingGroupId={editingGroupId}
+            onStartEditGroup={(id) => setEditingGroupId(id)}
+            onEndEditGroup={() => setEditingGroupId(null)}
+            onAddGroup={handleAddGroup}
+            onAddItem={handleAddItemToGroup}
+            setChecklistGroups={setChecklistGroups}
+            keepSelection={keepSelection}
+          />
         )}
       </div>
     </div>
