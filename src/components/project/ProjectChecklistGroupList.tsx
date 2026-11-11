@@ -17,6 +17,9 @@ interface ProjectChecklistGroupListProps {
   onAddItem: (groupId: string) => string;
   setChecklistGroups: React.Dispatch<React.SetStateAction<ChecklistGroupData[]>>;
   keepSelection: (type: 'checklist', fromId: string, itemId: string, toId: string) => void;
+  editingItemId?: string | null;
+  onStartEditItem?: (id: string) => void;
+  onEndEditItem?: () => void;
 }
 
 export const ProjectChecklistGroupList: React.FC<ProjectChecklistGroupListProps> = ({
@@ -29,6 +32,9 @@ export const ProjectChecklistGroupList: React.FC<ProjectChecklistGroupListProps>
   onAddItem,
   setChecklistGroups,
   keepSelection,
+  editingItemId,
+  onStartEditItem,
+  onEndEditItem,
 }) => {
   if (groups.length === 0) {
     return (
@@ -87,6 +93,9 @@ export const ProjectChecklistGroupList: React.FC<ProjectChecklistGroupListProps>
           onEndEditGroupName={onEndEditGroup}
           onDeleteGroup={(id) => setChecklistGroups((prev) => prev.filter((g) => g.id !== id))}
           onAddItem={onAddItem}
+          editingItemId={editingItemId}
+          onStartEditItem={onStartEditItem}
+          onEndEditItem={onEndEditItem}
           onToggleItemComplete={(gId, itemId) =>
             setChecklistGroups((prev) =>
               prev.map((g) => {

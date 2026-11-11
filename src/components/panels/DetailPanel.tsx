@@ -26,6 +26,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
   } = useWorkspace();
 
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   const currentState = panelId === 'panel-3' ? panel3State : panel4State;
   const currentSubItem = subItems.find((s) => s.id === currentState.subItemId);
@@ -76,6 +77,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
       })
     );
     setSelectedDetailItem({ type: 'checklist', groupId, itemId: newId });
+    setEditingItemId(newId);
     return newId;
   };
 
@@ -171,6 +173,9 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
               setChecklistGroups((prev) => prev.filter((g) => g.id !== id))
             }
             onAddItem={(id) => handleAddItemToGroup(id)}
+            editingItemId={editingItemId}
+            onStartEditItem={(id) => setEditingItemId(id)}
+            onEndEditItem={() => setEditingItemId(null)}
             onToggleItemComplete={(gId, itemId) =>
               setChecklistGroups((prev) =>
                 prev.map((g) => {

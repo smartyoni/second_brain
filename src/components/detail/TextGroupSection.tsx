@@ -24,6 +24,9 @@ interface TextGroupSectionProps {
   isEditingGroupName?: boolean;
   onStartEditGroupName?: () => void;
   onEndEditGroupName?: () => void;
+  editingBlockId?: string | null;
+  onStartEditBlock?: (id: string) => void;
+  onEndEditBlock?: () => void;
 }
 
 export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
@@ -41,6 +44,9 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
   isEditingGroupName: propIsEditingGroupName,
   onStartEditGroupName,
   onEndEditGroupName,
+  editingBlockId: propEditingBlockId,
+  onStartEditBlock,
+  onEndEditBlock,
 }) => {
   const { updateTextBlockDueDate, setSelectedCalendarDate } = useWorkspace();
   const [internalEditingGroupName, setInternalEditingGroupName] = useState(false);
@@ -57,7 +63,18 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
   };
 
   const [schedulingBlockId, setSchedulingBlockId] = useState<string | null>(null);
-  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const [internalEditingBlockId, setInternalEditingBlockId] = useState<string | null>(null);
+  const editingBlockId = propEditingBlockId !== undefined ? propEditingBlockId : internalEditingBlockId;
+
+  const setEditingBlock = (blockId: string | null) => {
+    if (blockId) {
+      if (onStartEditBlock) onStartEditBlock(blockId);
+      else setInternalEditingBlockId(blockId);
+    } else {
+      if (onEndEditBlock) onEndEditBlock();
+      else setInternalEditingBlockId(null);
+    }
+  };
 
   const handleAddBlockInternal = () => {
     if (!group.isExpanded) {
@@ -65,7 +82,7 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
     }
     const newId = onAddBlock(group.id);
     if (typeof newId === 'string') {
-      setEditingBlockId(newId);
+      setEditingBlock(newId);
     }
   };
 
@@ -151,10 +168,10 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
               onDeleteBlock={onDeleteBlock}
               onOpenSchedule={(blockId) => setSchedulingBlockId(blockId)}
               isEditing={editingBlockId === block.id}
-              onStartEdit={() => setEditingBlockId(block.id)}
+              onStartEdit={() => setEditingBlock(block.id)}
               onEndEdit={() => {
                 if (editingBlockId === block.id) {
-                  setEditingBlockId(null);
+                  setEditingBlock(null);
                 }
               }}
               onSaveAndAddNew={() => handleAddBlockInternal()}

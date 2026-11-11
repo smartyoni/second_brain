@@ -26,6 +26,9 @@ interface ChecklistGroupSectionProps {
   isEditingGroupName?: boolean;
   onStartEditGroupName?: () => void;
   onEndEditGroupName?: () => void;
+  editingItemId?: string | null;
+  onStartEditItem?: (itemId: string) => void;
+  onEndEditItem?: () => void;
 }
 
 export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
@@ -44,6 +47,9 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
   isEditingGroupName: propIsEditingGroupName,
   onStartEditGroupName,
   onEndEditGroupName,
+  editingItemId: propEditingItemId,
+  onStartEditItem,
+  onEndEditItem,
 }) => {
   const { updateCheckItemDueDate, setSelectedCalendarDate } = useWorkspace();
   const [internalEditingGroupName, setInternalEditingGroupName] = useState(false);
@@ -60,7 +66,18 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
   };
 
   const [schedulingItemId, setSchedulingItemId] = useState<string | null>(null);
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [internalEditingItemId, setInternalEditingItemId] = useState<string | null>(null);
+  const editingItemId = propEditingItemId !== undefined ? propEditingItemId : internalEditingItemId;
+
+  const setEditingItem = (itemId: string | null) => {
+    if (itemId) {
+      if (onStartEditItem) onStartEditItem(itemId);
+      else setInternalEditingItemId(itemId);
+    } else {
+      if (onEndEditItem) onEndEditItem();
+      else setInternalEditingItemId(null);
+    }
+  };
 
   const handleAddItem = () => {
     if (!group.isExpanded) {
@@ -68,7 +85,7 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
     }
     const newId = onAddItem(group.id);
     if (typeof newId === 'string') {
-      setEditingItemId(newId);
+      setEditingItem(newId);
     }
   };
 
@@ -167,10 +184,10 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
                 onDeleteItem={onDeleteItem}
                 onOpenSchedule={(itemId) => setSchedulingItemId(itemId)}
                 isEditing={editingItemId === item.id}
-                onStartEdit={() => setEditingItemId(item.id)}
+                onStartEdit={() => setEditingItem(item.id)}
                 onEndEdit={() => {
                   if (editingItemId === item.id) {
-                    setEditingItemId(null);
+                    setEditingItem(null);
                   }
                 }}
                 onSaveAndAddNew={() => handleAddItem()}

@@ -15,6 +15,7 @@ export const ProjectDetailPanel: React.FC = () => {
   } = useWorkspace();
 
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   const currentSubItem = subItems.find((s) => s.id === panel3State.subItemId);
   const activeTab = panel3State.activeTab;
@@ -55,6 +56,7 @@ export const ProjectDetailPanel: React.FC = () => {
       )
     );
     setSelectedDetailItem({ type: 'text', groupId, itemId: newId });
+    setEditingItemId(newId);
     return newId;
   };
 
@@ -73,6 +75,7 @@ export const ProjectDetailPanel: React.FC = () => {
       })
     );
     setSelectedDetailItem({ type: 'checklist', groupId, itemId: newId });
+    setEditingItemId(newId);
     return newId;
   };
 
@@ -182,6 +185,9 @@ export const ProjectDetailPanel: React.FC = () => {
                 onEndEditGroupName={() => {
                   if (editingGroupId === group.id) setEditingGroupId(null);
                 }}
+                editingBlockId={editingItemId}
+                onStartEditBlock={(id) => setEditingItemId(id)}
+                onEndEditBlock={() => setEditingItemId(null)}
                 onDeleteGroup={(id) => setTextGroups((prev) => prev.filter((g) => g.id !== id))}
                 onAddBlock={handleAddBlockToGroup}
                 onUpdateBlockText={(gId, bId, text) =>
@@ -226,6 +232,9 @@ export const ProjectDetailPanel: React.FC = () => {
             onAddItem={handleAddItemToGroup}
             setChecklistGroups={setChecklistGroups}
             keepSelection={keepSelection}
+            editingItemId={editingItemId}
+            onStartEditItem={(id) => setEditingItemId(id)}
+            onEndEditItem={() => setEditingItemId(null)}
           />
         )}
       </div>
