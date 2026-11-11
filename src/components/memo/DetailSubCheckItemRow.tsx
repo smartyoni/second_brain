@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckSquare, Square } from 'lucide-react';
+import { CheckSquare, Square, Calendar as CalendarIcon } from 'lucide-react';
 import { SubCheckItem } from '../../types';
 import { SmartText } from '../shared/SmartText';
 import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
@@ -16,6 +16,8 @@ interface DetailSubCheckItemRowProps {
   onToggleComplete: (id: string) => void;
   onUpdateText: (id: string, text: string) => void;
   onDelete: (id: string) => void;
+  onOpenSchedule?: (item: SubCheckItem) => void;
+  onSelectCalendarDate?: (date: string) => void;
   onDragStart: (id: string, e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (id: string, e: React.DragEvent) => void;
@@ -33,6 +35,8 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
   onToggleComplete,
   onUpdateText,
   onDelete,
+  onOpenSchedule,
+  onSelectCalendarDate,
   onDragStart,
   onDragOver,
   onDrop,
@@ -114,18 +118,57 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
             >
               <SmartText text={item.text} />
             </div>
+
+            {/* 하위할일 녹색 일정 뱃지: 클릭 시 해당 일정 날짜로 이동 */}
+            {item.dueDate && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectCalendarDate?.(item.dueDate!);
+                }}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs lg:text-[10px] rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0 font-semibold cursor-pointer transition-colors shadow-2xs self-start mt-0.5"
+                title={`일정: ${item.dueDate}${item.endDate ? ` ~ ${item.endDate}` : ''}${item.dueTime ? ` · ${item.dueTime}` : ''}`}
+              >
+                <CalendarIcon className="w-3.5 h-3.5 lg:w-3 lg:h-3 text-emerald-700" />
+                <span>
+                  {item.dueDate.slice(5)}
+                  {item.endDate && ` ~ ${item.endDate.slice(5)}`}
+                </span>
+                {item.dueTime && <span>{item.dueTime}</span>}
+              </button>
+            )}
           </div>
 
-          <ThreeDotMenu
-            onMove={onMove ? (dir) => onMove(item.id, dir) : undefined}
-            canMoveUp={canMoveUp}
-            canMoveDown={canMoveDown}
-            onEdit={() => setIsEditing(true)}
-            onCopy={() => navigator.clipboard.writeText(item.text)}
-            onDelete={() => onDelete(item.id)}
-            deleteTitle="이 체크 항목을 삭제하시겠습니까?"
-            buttonClassName="p-1.5 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
-          />
+          <div className="flex items-center gap-1 lg:gap-0.5 shrink-0">
+            <ThreeDotMenu
+              onMove={onMove ? (dir) => onMove(item.id, dir) : undefined}
+              canMoveUp={canMoveUp}
+              canMoveDown={canMoveDown}
+              onEdit={() => setIsEditing(true)}
+              onCopy={() => navigator.clipboard.writeText(item.text)}
+              onDelete={() => onDelete(item.id)}
+              deleteTitle="이 체크 항목을 삭제하시겠습니까?"
+              buttonClassName="p-1.5 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
+            />
+
+            {/* 3점 메뉴 우측 캘린더 일정 지정 버튼 */}
+            <button
+              type="button"
+              title={item.dueDate ? '일정 수정/해제' : '일정 등록'}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenSchedule?.(item);
+              }}
+              className={`p-1.5 lg:p-0.5 rounded transition-colors cursor-pointer ${
+                item.dueDate
+                  ? 'text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100'
+                  : 'text-slate-400 hover:text-emerald-700 hover:bg-slate-200/60'
+              }`}
+            >
+              <CalendarIcon className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
+            </button>
+          </div>
         </div>
       )}
     </div>

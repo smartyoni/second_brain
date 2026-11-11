@@ -37,6 +37,7 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
     getAllScheduleItems,
     setAppMode,
     updateItemChecklist,
+    updateSubCheckItem,
   } = useWorkspace();
 
   const currentItem =
@@ -93,6 +94,8 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
       updateCheckItemDueDate(currentItem.groupId, currentItem.id, undefined, undefined, undefined);
     } else if (currentItem.sourceType === 'text') {
       updateTextBlockDueDate(currentItem.groupId, currentItem.id, undefined, undefined, undefined);
+    } else if (currentItem.sourceType === 'subcheck') {
+      updateSubCheckItem(currentItem.id, (sub) => ({ ...sub, dueDate: undefined, dueTime: undefined, endDate: undefined }));
     }
     onClose();
   };
@@ -100,6 +103,8 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
   const handleToggle = () => {
     if (isCalendarOwnEvent) {
       toggleCalendarEventCompleted(currentItem.id);
+    } else if (currentItem.sourceType === 'subcheck') {
+      updateSubCheckItem(currentItem.id, (sub) => ({ ...sub, isCompleted: !sub.isCompleted }));
     } else {
       onToggleComplete();
     }
@@ -169,6 +174,15 @@ export const GoogleCalendarEventDialog: React.FC<GoogleCalendarEventDialogProps>
             : g
         )
       );
+    } else if (currentItem.sourceType === 'subcheck') {
+      updateSubCheckItem(currentItem.id, (sub) => ({
+        ...sub,
+        text: updates.title,
+        dueDate: updates.dueDate,
+        endDate: updates.endDate,
+        dueTime: updates.dueTime,
+        isCompleted: updates.isCompleted ?? sub.isCompleted,
+      }));
     }
     setIsEditing(false);
   };

@@ -49,6 +49,11 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
           item.isCompleted ? 'line-through text-slate-400' : ''
         }`}
       >
+        {item.sourceType === 'subcheck' && (
+          <span className="text-[10px] text-emerald-800 font-semibold mr-1.5 px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 shrink-0">
+            하위할일
+          </span>
+        )}
         <SmartText text={item.title} />
       </span>
       {/* 완료 상태 아이콘 */}

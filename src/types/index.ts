@@ -40,6 +40,9 @@ export interface SubCheckItem {
   text: string;
   isCompleted: boolean;
   order: number;
+  dueDate?: string; // YYYY-MM-DD
+  dueTime?: string; // HH:mm
+  endDate?: string; // YYYY-MM-DD
 }
 
 // 3번 패널: 텍스트 블록
@@ -110,13 +113,15 @@ export interface CalendarScheduleItem {
   endTime?: string;
   isCompleted?: boolean;
   isInProgress?: boolean; // 진행중 여부
-  sourceType: 'checklist' | 'text' | 'calendar';
+  sourceType: 'checklist' | 'text' | 'calendar' | 'subcheck';
   subItemId: string;
   groupId: string;
   categoryId: string;
   topCategoryId: string;
   description?: string;
   checklist?: SubCheckItem[]; // 4번 패널 하위할일(체크리스트)
+  parentItemId?: string;
+  parentItemTitle?: string;
 }
 
 // 4번 패널 하단 메모 연동용 선택 아이템 정보
@@ -222,6 +227,7 @@ export interface WorkspaceContextType {
   getAllScheduleItems: () => CalendarScheduleItem[];
   jumpToSourceItem: (item: CalendarScheduleItem) => void;
   updateItemChecklist: (item: CalendarScheduleItem, updater: (prev: SubCheckItem[]) => SubCheckItem[]) => void;
+  updateSubCheckItem: (subCheckId: string, updater: (sub: SubCheckItem) => SubCheckItem) => void;
 
   // 동기화 상태
   isLoaded?: boolean;

@@ -274,6 +274,11 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
                               진행
                             </span>
                           )}
+                          {schedule.sourceType === 'subcheck' && (
+                            <span className="text-[9px] font-bold text-emerald-800 shrink-0">
+                              ↳
+                            </span>
+                          )}
                           <SmartText text={schedule.title} />
                         </span>
                       </div>

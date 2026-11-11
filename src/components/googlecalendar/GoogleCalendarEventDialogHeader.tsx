@@ -4,7 +4,7 @@ import { X, Trash2, Pencil, CheckSquare, FileText } from 'lucide-react';
 interface GoogleCalendarEventDialogHeaderProps {
   isEditing: boolean;
   isCalendarOwnEvent: boolean;
-  sourceType?: 'calendar' | 'checklist' | 'text';
+  sourceType?: 'calendar' | 'checklist' | 'text' | 'subcheck';
   isInProgress?: boolean;
   isCompleted?: boolean;
   onToggleInProgress?: () => void;

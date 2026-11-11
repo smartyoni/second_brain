@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { ListChecks, Plus, CheckSquare } from 'lucide-react';
 import { CalendarScheduleItem, SubCheckItem } from '../../types';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { useDragSort } from '../../hooks/useDragSort';
 import { DetailSubCheckItemRow } from '../memo/DetailSubCheckItemRow';
+import { SchedulePickerPopover } from '../shared/SchedulePickerPopover';
 import { moveChecklistItem, getChecklistMoveBounds } from '../../utils/orderUtils';
 
 interface GoogleCalendarSubChecklistProps {
@@ -15,8 +17,10 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
   checklist,
   onUpdateChecklist,
 }) => {
+  const { setSelectedCalendarDate } = useWorkspace();
   const [newItemText, setNewItemText] = useState('');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [schedulingItem, setSchedulingItem] = useState<SubCheckItem | null>(null);
 
   // 미완료 상단, 완료 하단 정렬된 체크리스트 아이템
   const checklistItems = useMemo(() => {
@@ -121,6 +125,22 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
       const completed = reordered.filter((i) => i.isCompleted);
       return [...incomplete, ...completed].map((it, idx) => ({ ...it, order: idx }));
     });
+  };
+
+  // 일정 등록/수정 저장
+  const handleSaveSchedule = (date: string, time?: string, endDate?: string) => {
+    if (!schedulingItem) return;
+    onUpdateChecklist((prev) =>
+      prev.map((it) => (it.id === schedulingItem.id ? { ...it, dueDate: date, dueTime: time, endDate } : it))
+    );
+  };
+
+  // 일정 해제
+  const handleRemoveSchedule = () => {
+    if (!schedulingItem) return;
+    onUpdateChecklist((prev) =>
+      prev.map((it) => (it.id === schedulingItem.id ? { ...it, dueDate: undefined, dueTime: undefined, endDate: undefined } : it))
+    );
   };
 
   const {
@@ -235,6 +255,8 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
                   onToggleComplete={handleToggleComplete}
                   onUpdateText={handleUpdateText}
                   onDelete={handleDeleteItem}
+                  onOpenSchedule={setSchedulingItem}
+                  onSelectCalendarDate={setSelectedCalendarDate}
                   onDragStart={handleDragStart}
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
@@ -261,6 +283,19 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
         <span>{totalCount}개 중 {completedCount}개 완료</span>
         <span>더블클릭 인라인 편집 · 드래그 순서 변경</span>
       </div>
+
+      {/* 일정 선택 팝오버 */}
+      {schedulingItem && (
+        <SchedulePickerPopover
+          isOpen={!!schedulingItem}
+          initialDate={schedulingItem.dueDate}
+          initialTime={schedulingItem.dueTime}
+          initialEndDate={schedulingItem.endDate}
+          onSave={handleSaveSchedule}
+          onRemove={handleRemoveSchedule}
+          onClose={() => setSchedulingItem(null)}
+        />
+      )}
     </div>
   );
 };

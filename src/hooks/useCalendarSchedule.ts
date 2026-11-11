@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getTodayDateStr } from '../utils/calendarUtils';
+import { extractAllScheduleItems } from '../utils/calendarScheduleExtractor';
 import {
   CalendarScheduleItem,
   ChecklistGroupData,
@@ -154,84 +155,13 @@ export const useCalendarSchedule = (
   };
 
   const getAllScheduleItems = (): CalendarScheduleItem[] => {
-    const list: CalendarScheduleItem[] = [];
-
-    // 1. 체크리스트 항목들 수집
-    checklistGroups.forEach((group) => {
-      const subItem = subItems.find((s) => s.id === group.subItemId);
-      const category = subItem ? categoryItems.find((c) => c.id === subItem.categoryId) : null;
-      group.items.forEach((item) => {
-        if (item.dueDate) {
-          list.push({
-            id: item.id,
-            title: item.text,
-            dueDate: item.dueDate,
-            dueTime: item.dueTime,
-            endDate: item.endDate,
-            memo: item.memo,
-            isCompleted: item.isCompleted,
-            isInProgress: item.isInProgress,
-            sourceType: 'checklist',
-            subItemId: group.subItemId,
-            groupId: group.id,
-            categoryId: item.colorId || category?.id || '',
-            topCategoryId: category?.topCategoryId || '',
-            checklist: item.checklist || [],
-          });
-        }
-      });
+    return extractAllScheduleItems({
+      checklistGroups,
+      textGroups,
+      calendarEvents,
+      subItems,
+      categoryItems,
     });
-
-    // 2. 텍스트 블록 항목들 수집
-    textGroups.forEach((group) => {
-      const subItem = subItems.find((s) => s.id === group.subItemId);
-      const category = subItem ? categoryItems.find((c) => c.id === subItem.categoryId) : null;
-      group.blocks.forEach((block) => {
-        if (block.dueDate) {
-          const firstLine = block.text.split('\n')[0].trim();
-          list.push({
-            id: block.id,
-            title: firstLine || group.name,
-            dueDate: block.dueDate,
-            dueTime: block.dueTime,
-            endDate: block.endDate,
-            memo: block.memo,
-            isCompleted: block.isCompleted,
-            isInProgress: block.isInProgress,
-            sourceType: 'text',
-            subItemId: group.subItemId,
-            groupId: group.id,
-            categoryId: block.colorId || category?.id || '',
-            topCategoryId: category?.topCategoryId || '',
-            checklist: block.checklist || [],
-          });
-        }
-      });
-    });
-
-    // 3. 캘린더 자체 독립 일정들 수집
-    calendarEvents.forEach((evt) => {
-      const category = categoryItems.find((c) => c.id === evt.categoryId);
-      list.push({
-        id: evt.id,
-        title: evt.title,
-        dueDate: evt.dueDate,
-        dueTime: evt.dueTime,
-        endDate: evt.endDate,
-        endTime: evt.endTime,
-        isCompleted: evt.isCompleted,
-        isInProgress: evt.isInProgress,
-        sourceType: 'calendar',
-        subItemId: '',
-        groupId: '',
-        categoryId: evt.categoryId || categoryItems[0]?.id || '',
-        topCategoryId: category?.topCategoryId || '',
-        description: evt.description,
-        checklist: evt.checklist || [],
-      });
-    });
-
-    return list.sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
   };
 
   const jumpToSourceItem = (item: CalendarScheduleItem) => {
@@ -267,6 +197,40 @@ export const useCalendarSchedule = (
     }
   };
 
+  // 특정 하위할일(SubCheckItem) 직접 업데이트 헬퍼 (완료 토글, 일정 변경, 수정 등)
+  const updateSubCheckItem = (
+    subCheckId: string,
+    updater: (sub: SubCheckItem) => SubCheckItem
+  ) => {
+    setCalendarEvents((prev) =>
+      prev.map((e) =>
+        e.checklist?.some((c) => c.id === subCheckId)
+          ? { ...e, checklist: e.checklist.map((c) => (c.id === subCheckId ? updater(c) : c)) }
+          : e
+      )
+    );
+    setChecklistGroups((prev) =>
+      prev.map((g) => ({
+        ...g,
+        items: g.items.map((i) =>
+          i.checklist?.some((c) => c.id === subCheckId)
+            ? { ...i, checklist: i.checklist.map((c) => (c.id === subCheckId ? updater(c) : c)) }
+            : i
+        ),
+      }))
+    );
+    setTextGroups((prev) =>
+      prev.map((g) => ({
+        ...g,
+        blocks: g.blocks.map((b) =>
+          b.checklist?.some((c) => c.id === subCheckId)
+            ? { ...b, checklist: b.checklist.map((c) => (c.id === subCheckId ? updater(c) : c)) }
+            : b
+        ),
+      }))
+    );
+  };
+
   return {
     selectedDetailItem,
     setSelectedDetailItem,
@@ -286,5 +250,6 @@ export const useCalendarSchedule = (
     getAllScheduleItems,
     jumpToSourceItem,
     updateItemChecklist,
+    updateSubCheckItem,
   };
 };
