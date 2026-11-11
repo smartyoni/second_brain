@@ -129,7 +129,7 @@ export const GoogleCalendarEventDialogHeader: React.FC<GoogleCalendarEventDialog
           }`}
         >
           <CheckSquare className="w-3.5 h-3.5" />
-          <span>체크리스트</span>
+          <span>하위할일</span>
           {checklistCount > 0 && (
             <span
               className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${

@@ -141,7 +141,7 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
           </span>
           <div className="min-w-0 flex items-center gap-1.5">
             <span className="text-xs font-bold text-pink-950 truncate">
-              체크리스트
+              하위할일
             </span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-pink-200/80 text-pink-900 font-semibold shrink-0">
               {completedCount}/{totalCount}
@@ -174,7 +174,7 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
               }
             }}
             rows={2}
-            placeholder="새 체크리스트 입력 (Enter 줄바꿈, Ctrl+Enter 추가)..."
+            placeholder="새 하위할일 입력 (Enter 줄바꿈, Ctrl+Enter 추가)..."
             className="flex-1 min-h-[50px] max-h-[140px] px-2.5 py-1.5 text-xs text-slate-800 bg-white border border-slate-200 rounded-md outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-100 placeholder:text-slate-400 resize-y leading-relaxed font-sans"
           />
           <div className="flex flex-col gap-1 shrink-0">
@@ -247,7 +247,7 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
           <div className="h-full flex flex-col items-center justify-center p-6 text-center text-slate-400">
             <CheckSquare className="w-6 h-6 text-slate-300 mb-1.5" />
             <p className="text-xs text-slate-500 font-medium">
-              등록된 체크리스트가 없습니다.
+              등록된 하위할일이 없습니다.
             </p>
             <p className="text-[11px] text-slate-400 mt-0.5">
               상단 입력창이나 [+ 항목 추가] 버튼으로 할 일을 추가하세요.
