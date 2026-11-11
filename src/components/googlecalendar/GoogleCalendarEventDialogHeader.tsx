@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Trash2, Pencil, CheckSquare, FileText } from 'lucide-react';
+import { X, Trash2, Pencil, CheckSquare, FileText, CornerUpLeft } from 'lucide-react';
 
 interface GoogleCalendarEventDialogHeaderProps {
   isEditing: boolean;
@@ -7,6 +7,8 @@ interface GoogleCalendarEventDialogHeaderProps {
   sourceType?: 'calendar' | 'checklist' | 'text' | 'subcheck';
   isInProgress?: boolean;
   isCompleted?: boolean;
+  parentItemTitle?: string;
+  onOpenParent?: () => void;
   onToggleInProgress?: () => void;
   mobileTab: 'detail' | 'checklist';
   checklistCount: number;
@@ -23,6 +25,8 @@ export const GoogleCalendarEventDialogHeader: React.FC<GoogleCalendarEventDialog
   sourceType: _sourceType,
   isInProgress = false,
   isCompleted = false,
+  parentItemTitle,
+  onOpenParent,
   onToggleInProgress,
   mobileTab,
   checklistCount,
@@ -34,12 +38,26 @@ export const GoogleCalendarEventDialogHeader: React.FC<GoogleCalendarEventDialog
 }) => {
   return (
     <div className="bg-[#f8f9fa] border-b border-[#dadce0] select-none shrink-0">
-      {/* 1. 상단 툴바: [타이틀 + 진행중/완료 뱃지] ... [수정] [삭제] [닫기] */}
-      <div className="px-4 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0">
+      {/* 1. 상단 툴바: [타이틀 + 상위일정 링크 + 진행중/완료 뱃지] ... [수정] [삭제] [닫기] */}
+      <div className="px-4 py-2.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-wrap">
           <span className="text-xs font-semibold text-[#5f6368] shrink-0">
             {isEditing ? '일정 수정' : '일정 세부정보'}
           </span>
+
+          {/* 상위 일정 제목 링크 버튼: 클릭 시 상위 일정 모달로 즉시 이동 */}
+          {parentItemTitle && onOpenParent && (
+            <button
+              type="button"
+              onClick={onOpenParent}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition-colors cursor-pointer truncate max-w-[180px] sm:max-w-[280px] shadow-2xs"
+              title={`상위 일정: ${parentItemTitle} (클릭 시 상위 일정 모달로 이동)`}
+            >
+              <CornerUpLeft className="w-3 h-3 text-emerald-700 shrink-0" />
+              <span className="text-[10px] text-emerald-600 font-normal shrink-0">상위:</span>
+              <span className="truncate">{parentItemTitle}</span>
+            </button>
+          )}
 
           {/* 수정 모드일 때: 헤더에서 직접 진행중 상태 토글 가능 */}
           {isEditing ? (

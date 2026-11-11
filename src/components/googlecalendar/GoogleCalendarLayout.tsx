@@ -259,6 +259,7 @@ export const GoogleCalendarLayout: React.FC = () => {
             setSelectedScheduleItem(null);
             setInitialEditDialogMode(false);
           }}
+          onSelectScheduleItem={setSelectedScheduleItem}
           onToggleComplete={() =>
             toggleCheckItemCompleted(
               selectedScheduleItem.groupId || '',

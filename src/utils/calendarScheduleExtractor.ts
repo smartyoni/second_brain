@@ -179,3 +179,104 @@ export const extractAllScheduleItems = ({
 
   return list.sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
 };
+
+interface FindParentParams {
+  parentItemId?: string;
+  allScheduleItems: CalendarScheduleItem[];
+  checklistGroups: ChecklistGroupData[];
+  textGroups: TextGroupData[];
+  calendarEvents: CalendarEvent[];
+  subItems: SubItem[];
+  categoryItems: CategoryItem[];
+}
+
+export const findParentScheduleItem = ({
+  parentItemId,
+  allScheduleItems,
+  checklistGroups,
+  textGroups,
+  calendarEvents,
+  subItems,
+  categoryItems,
+}: FindParentParams): CalendarScheduleItem | null => {
+  if (!parentItemId) return null;
+
+  // 1. 전체 스케줄 목록에서 검색
+  const foundInSchedule = allScheduleItems.find((i) => i.id === parentItemId);
+  if (foundInSchedule) return foundInSchedule;
+
+  // 2. 체크리스트 그룹에서 검색
+  for (const group of checklistGroups) {
+    const chk = group.items.find((i) => i.id === parentItemId);
+    if (chk) {
+      const sub = subItems.find((s) => s.id === group.subItemId);
+      const cat = sub ? categoryItems.find((c) => c.id === sub.categoryId) : null;
+      return {
+        id: chk.id,
+        title: chk.text,
+        dueDate: chk.dueDate || '',
+        dueTime: chk.dueTime,
+        endDate: chk.endDate,
+        memo: chk.memo,
+        isCompleted: chk.isCompleted,
+        isInProgress: chk.isInProgress,
+        sourceType: 'checklist',
+        subItemId: group.subItemId,
+        groupId: group.id,
+        categoryId: chk.colorId || cat?.id || '',
+        topCategoryId: cat?.topCategoryId || '',
+        checklist: chk.checklist || [],
+      };
+    }
+  }
+
+  // 3. 텍스트 그룹에서 검색
+  for (const group of textGroups) {
+    const block = group.blocks.find((b) => b.id === parentItemId);
+    if (block) {
+      const sub = subItems.find((s) => s.id === group.subItemId);
+      const cat = sub ? categoryItems.find((c) => c.id === sub.categoryId) : null;
+      return {
+        id: block.id,
+        title: block.text.split('\n')[0].trim() || group.name,
+        dueDate: block.dueDate || '',
+        dueTime: block.dueTime,
+        endDate: block.endDate,
+        memo: block.memo,
+        isCompleted: block.isCompleted,
+        isInProgress: block.isInProgress,
+        sourceType: 'text',
+        subItemId: group.subItemId,
+        groupId: group.id,
+        categoryId: block.colorId || cat?.id || '',
+        topCategoryId: cat?.topCategoryId || '',
+        checklist: block.checklist || [],
+      };
+    }
+  }
+
+  // 4. 캘린더 독립 일정에서 검색
+  const evt = calendarEvents.find((e) => e.id === parentItemId);
+  if (evt) {
+    const cat = categoryItems.find((c) => c.id === evt.categoryId);
+    return {
+      id: evt.id,
+      title: evt.title,
+      dueDate: evt.dueDate,
+      dueTime: evt.dueTime,
+      endDate: evt.endDate,
+      endTime: evt.endTime,
+      isCompleted: evt.isCompleted,
+      isInProgress: evt.isInProgress,
+      sourceType: 'calendar',
+      subItemId: '',
+      groupId: '',
+      categoryId: evt.categoryId || '',
+      topCategoryId: cat?.topCategoryId || '',
+      description: evt.description,
+      checklist: evt.checklist || [],
+    };
+  }
+
+  return null;
+};
