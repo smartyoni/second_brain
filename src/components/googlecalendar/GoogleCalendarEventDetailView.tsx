@@ -92,7 +92,7 @@ export const GoogleCalendarEventDetailView: React.FC<GoogleCalendarEventDetailVi
             {/* 상세 설명(메모) (좌측 삼선 제거 및 너비 극대화) */}
             {(item.description || item.memo) && (
               <div className="w-full text-xs text-[#3c4043]">
-                <div className="w-full whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-100 box-border">
+                <div className="w-full whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-100 box-border font-sans text-xs leading-normal">
                   <SmartText text={item.description || item.memo || ''} />
                 </div>
               </div>

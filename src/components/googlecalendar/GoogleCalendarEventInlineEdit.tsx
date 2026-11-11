@@ -151,7 +151,7 @@ export const GoogleCalendarEventInlineEdit: React.FC<GoogleCalendarEventInlineEd
             adjustTextareaHeight();
           }}
           placeholder="설명(메모) 추가..."
-          className="w-full whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-200 focus:border-[#1a73e8] focus:bg-white outline-none resize-none transition-colors font-sans text-xs leading-relaxed block box-border"
+          className="w-full whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-200 focus:border-[#1a73e8] focus:bg-white outline-none resize-none transition-colors font-sans text-xs leading-normal block box-border"
           style={{ overflow: 'hidden' }}
         />
       </div>
