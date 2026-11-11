@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, LogOut, User, Cloud, AlertCircle, RefreshCw } from 'lucide-react';
+import { Settings, LogOut, Cloud, AlertCircle, RefreshCw } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
 export const AccountBar: React.FC = () => {
@@ -8,7 +8,7 @@ export const AccountBar: React.FC = () => {
   return (
     <div className="h-9 px-2.5 bg-slate-100 border-b border-slate-300 flex items-center justify-between text-xs text-slate-700 shrink-0">
       <div className="flex items-center gap-1.5 truncate">
-        <User className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+        <img src="/favicon.svg" alt="세컨드브레인" className="w-4 h-4 rounded-xs shrink-0 shadow-2xs" />
         <span className="truncate font-semibold text-slate-800">관리자 (sin***@gmail.com)</span>
       </div>
       <div className="flex items-center gap-1.5 shrink-0">

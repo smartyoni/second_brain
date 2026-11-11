@@ -1,41 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- 배경 원형 그라데이션 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
+    <!-- 인디고 & 로열 블루 프리미엄 그라데이션 -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2563eb" />
-      <stop offset="100%" stop-color="#059669" />
+      <stop offset="0%" stop-color="#1E1B4B" />
+      <stop offset="60%" stop-color="#1E3A8A" />
+      <stop offset="100%" stop-color="#0284C7" />
     </linearGradient>
-    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
-      <stop offset="100%" stop-color="#dbeafe" stop-opacity="0.8" />
+
+    <!-- 1행 글자 그라데이션 ('세컨드' - 스마트 실버 화이트) -->
+    <linearGradient id="row1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#CBD5E1" />
     </linearGradient>
+
+    <!-- 2행 글자 그라데이션 ('브레인' - 민트 시안 포인트) -->
+    <linearGradient id="row2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#34D399" />
+    </linearGradient>
+
+    <filter id="shadowEffect" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.5" />
+    </filter>
   </defs>
 
-  <rect width="64" height="64" rx="14" fill="url(#bgGrad)" />
+  <!-- 메인 아이콘 바디 -->
+  <rect width="512" height="512" rx="116" fill="url(#bgGrad)" />
+  <rect width="508" height="508" x="2" y="2" rx="114" fill="none" stroke="#FFFFFF" stroke-opacity="0.2" stroke-width="2" />
 
-  <!-- 세컨드브레인 네트워크 노드 심볼 -->
-  <g transform="translate(8, 8)" stroke="url(#glowGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <!-- 뇌 좌측 로브 -->
-    <path d="M24 10 C16 10, 10 16, 10 24 C10 32, 16 38, 24 38" />
-    <path d="M16 16 C20 20, 20 28, 16 32" />
+  <!-- 3x2 그리드 구분선 (아주 얇고 세련된 그리드 가이드) -->
+  <g stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="1.5">
+    <line x1="192" y1="90" x2="192" y2="422" stroke-dasharray="6 6" />
+    <line x1="320" y1="90" x2="320" y2="422" stroke-dasharray="6 6" />
+    <line x1="90" y1="256" x2="422" y2="256" stroke-dasharray="6 6" />
+  </g>
 
-    <!-- 뇌 우측 로브 -->
-    <path d="M24 10 C32 10, 38 16, 38 24 C38 32, 32 38, 24 38" />
-    <path d="M32 16 C28 20, 28 28, 32 32" />
+  <!-- 타이포그래피 (3x2 배열: 세컨드 / 브레인) -->
+  <g font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif" 
+     font-weight="900" 
+     text-anchor="middle" 
+     dominant-baseline="central" 
+     filter="url(#shadowEffect)">
 
-    <!-- 중앙 연결선 -->
-    <line x1="24" y1="12" x2="24" y2="36" />
-    <line x1="12" y1="24" x2="36" y2="24" />
+    <!-- 1행: 세 컨 드 -->
+    <text x="128" y="172" font-size="94" fill="url(#row1Grad)" letter-spacing="-2">세</text>
+    <text x="256" y="172" font-size="94" fill="url(#row1Grad)" letter-spacing="-2">컨</text>
+    <text x="384" y="172" font-size="94" fill="url(#row1Grad)" letter-spacing="-2">드</text>
 
-    <!-- 노드 점들 -->
-    <circle cx="24" cy="10" r="2.5" fill="#ffffff" />
-    <circle cx="24" cy="24" r="3" fill="#ffffff" />
-    <circle cx="24" cy="38" r="2.5" fill="#ffffff" />
-    <circle cx="10" cy="24" r="2.5" fill="#ffffff" />
-    <circle cx="38" cy="24" r="2.5" fill="#ffffff" />
-    <circle cx="16" cy="16" r="2" fill="#ffffff" />
-    <circle cx="32" cy="16" r="2" fill="#ffffff" />
-    <circle cx="16" cy="32" r="2" fill="#ffffff" />
-    <circle cx="32" cy="32" r="2" fill="#ffffff" />
+    <!-- 2행: 브 레 인 -->
+    <text x="128" y="340" font-size="94" fill="url(#row2Grad)" letter-spacing="-2">브</text>
+    <text x="256" y="340" font-size="94" fill="url(#row2Grad)" letter-spacing="-2">레</text>
+    <text x="384" y="340" font-size="94" fill="url(#row2Grad)" letter-spacing="-2">인</text>
   </g>
 </svg>
