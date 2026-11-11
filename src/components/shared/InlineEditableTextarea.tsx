@@ -6,6 +6,7 @@ interface InlineEditableTextareaProps {
   isEditing: boolean;
   onSave: (newValue: string) => void;
   onCancel: () => void;
+  onSaveAndAddNew?: (newValue: string) => void; // Shift+Enter 시 저장 후 다음 항목 추가
   rows?: number;
   placeholder?: string;
   saveOnEnter?: boolean; // true면 Enter 즉시 저장(Shift+Enter 줄바꿈), false면 Ctrl+Enter 저장(Enter 줄바꿈)
@@ -18,6 +19,7 @@ export const InlineEditableTextarea: React.FC<InlineEditableTextareaProps> = ({
   isEditing,
   onSave,
   onCancel,
+  onSaveAndAddNew,
   rows = 3,
   placeholder = '',
   saveOnEnter = false,
@@ -45,6 +47,12 @@ export const InlineEditableTextarea: React.FC<InlineEditableTextareaProps> = ({
       e.stopPropagation();
       setDraft(value);
       onCancel();
+    } else if (e.key === 'Enter' && e.shiftKey) {
+      if (onSaveAndAddNew) {
+        e.preventDefault();
+        e.stopPropagation();
+        onSaveAndAddNew(draft);
+      }
     } else if (saveOnEnter && e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       e.stopPropagation();
@@ -89,7 +97,11 @@ export const InlineEditableTextarea: React.FC<InlineEditableTextareaProps> = ({
       />
       <div className="flex items-center justify-between gap-1 text-[11px] text-slate-600 px-0.5">
         <span className="text-[10px] text-slate-600">
-          {saveOnEnter ? 'Enter 저장 · Shift+Enter 줄바꿈 · Esc 취소' : 'Ctrl+Enter 저장 · Enter 줄바꿈 · Esc 취소'}
+          {saveOnEnter
+            ? 'Enter 저장 · Shift+Enter 줄바꿈 · Esc 취소'
+            : onSaveAndAddNew
+            ? 'Ctrl+Enter 저장 · Shift+Enter 항목 추가 · Esc 취소'
+            : 'Ctrl+Enter 저장 · Enter 줄바꿈 · Esc 취소'}
         </span>
         <div className="flex items-center gap-1.5">
           <button

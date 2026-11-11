@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { ActivePanel } from '../../types';
 import { DetailHeader } from '../detail/DetailHeader';
@@ -51,6 +51,70 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
     addChecklistGroup(currentState.subItemId);
   };
 
+  const handleAddItemToGroup = (groupId: string): string => {
+    const newId = `ci-${Date.now()}`;
+    setChecklistGroups((prev) =>
+      prev.map((g) => {
+        if (g.id !== groupId) return g;
+        const newItem = {
+          id: newId,
+          text: '새 할 일',
+          isCompleted: false,
+          order: 0,
+        };
+        const incomplete = g.items.filter((i) => !i.isCompleted);
+        const completed = g.items.filter((i) => i.isCompleted);
+        const nextItems = [...incomplete, newItem, ...completed].map(
+          (item, idx) => ({ ...item, order: idx })
+        );
+        return { ...g, isExpanded: true, items: nextItems };
+      })
+    );
+    setSelectedDetailItem({ type: 'checklist', groupId, itemId: newId });
+    return newId;
+  };
+
+  // 단축키: Shift + Enter 누를 시 그룹헤더의 항목 추가 발동
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && e.shiftKey) {
+        // 이미 텍스트 입력창(textarea, input)에서 편집 중인 경우 인라인 핸들러가 우선 처리하므로 중복 방지
+        const activeEl = document.activeElement;
+        const isInputField =
+          activeEl &&
+          (activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            (activeEl as HTMLElement).isContentEditable);
+
+        if (isInputField) {
+          return;
+        }
+
+        // 모달이나 팝오버 등이 열려있는 경우 제외
+        const hasOpenModal = document.querySelector('[role="dialog"], .fixed.inset-0');
+        if (hasOpenModal) {
+          return;
+        }
+
+        if (currentChecklistGroups.length === 0) {
+          return;
+        }
+
+        const targetGroup =
+          currentChecklistGroups.find((g) => g.id === selectedDetailItem?.groupId) ||
+          currentChecklistGroups[0];
+
+        if (targetGroup) {
+          e.preventDefault();
+          handleAddItemToGroup(targetGroup.id);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [currentChecklistGroups, selectedDetailItem]);
+
   return (
     <div className="flex flex-col h-full bg-slate-100 select-none">
       <DetailHeader subItem={currentSubItem} onAddGroup={handleAddGroup} />
@@ -94,25 +158,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
             onDeleteGroup={(id) =>
               setChecklistGroups((prev) => prev.filter((g) => g.id !== id))
             }
-            onAddItem={(id) =>
-              setChecklistGroups((prev) =>
-                prev.map((g) => {
-                  if (g.id !== id) return g;
-                  const newItem = {
-                    id: `ci-${Date.now()}`,
-                    text: '새 할 일',
-                    isCompleted: false,
-                    order: 0,
-                  };
-                  const incomplete = g.items.filter((i) => !i.isCompleted);
-                  const completed = g.items.filter((i) => i.isCompleted);
-                  const nextItems = [...incomplete, newItem, ...completed].map(
-                    (item, idx) => ({ ...item, order: idx })
-                  );
-                  return { ...g, items: nextItems };
-                })
-              )
-            }
+            onAddItem={(id) => handleAddItemToGroup(id)}
             onToggleItemComplete={(gId, itemId) =>
               setChecklistGroups((prev) =>
                 prev.map((g) => {

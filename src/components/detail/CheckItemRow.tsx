@@ -18,6 +18,10 @@ interface CheckItemRowProps {
   onUpdateText: (groupId: string, itemId: string, text: string) => void;
   onDeleteItem: (groupId: string, itemId: string) => void;
   onOpenSchedule: (itemId: string) => void;
+  isEditing?: boolean;
+  onStartEdit?: () => void;
+  onEndEdit?: () => void;
+  onSaveAndAddNew?: (newText: string) => void;
 }
 
 export const CheckItemRow: React.FC<CheckItemRowProps> = ({
@@ -30,10 +34,25 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
   onUpdateText,
   onDeleteItem,
   onOpenSchedule,
+  isEditing: propIsEditing,
+  onStartEdit,
+  onEndEdit,
+  onSaveAndAddNew,
 }) => {
   const { setSelectedCalendarDate, selectedDetailItem, setSelectedDetailItem } = useWorkspace();
-  const [isEditing, setIsEditing] = useState(false);
+  const [internalEditing, setInternalEditing] = useState(false);
+  const isEditing = propIsEditing !== undefined ? propIsEditing : internalEditing;
   const isSelected = selectedDetailItem?.itemId === item.id;
+
+  const handleStartEdit = () => {
+    if (onStartEdit) onStartEdit();
+    else setInternalEditing(true);
+  };
+
+  const handleEndEdit = () => {
+    if (onEndEdit) onEndEdit();
+    else setInternalEditing(false);
+  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -41,11 +60,17 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
 
   const handleSave = (newText: string) => {
     onUpdateText(groupId, item.id, newText);
-    setIsEditing(false);
+    handleEndEdit();
   };
 
   const handleCancel = () => {
-    setIsEditing(false);
+    handleEndEdit();
+  };
+
+  const handleSaveAndAddNew = (newText: string) => {
+    onUpdateText(groupId, item.id, newText);
+    handleEndEdit();
+    onSaveAndAddNew?.(newText);
   };
 
   return (
@@ -61,7 +86,7 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
       onDoubleClick={(e) => {
         e.stopPropagation();
         if (!isEditing) {
-          setIsEditing(true);
+          handleStartEdit();
         }
       }}
       className={`p-3.5 lg:p-2.5 hover:bg-slate-50 transition-colors group select-text text-sm lg:text-xs border-b border-slate-100 last:border-b-0 cursor-pointer ${
@@ -71,7 +96,7 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
         !isEditing
           ? item.dueDate
             ? `더블클릭: 인라인 편집 | 클릭: 등록된 일정(${item.dueDate})으로 이동`
-            : '더블클릭하여 내용 수정'
+            : '더블클릭하여 내용 수정 (Shift+Enter로 다음 항목 추가)'
           : undefined
       }
     >
@@ -81,6 +106,7 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
           isEditing={isEditing}
           onSave={handleSave}
           onCancel={handleCancel}
+          onSaveAndAddNew={onSaveAndAddNew ? handleSaveAndAddNew : undefined}
           rows={3}
           saveOnEnter={false}
           placeholder="(체크 항목을 입력하세요)"
@@ -156,7 +182,7 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
               onMoveToGroup={onMoveToGroup ? (gid) => onMoveToGroup(groupId, item.id, gid) : undefined}
               canMoveUp={canMoveUp}
               canMoveDown={canMoveDown}
-              onEdit={() => setIsEditing(true)}
+              onEdit={() => handleStartEdit()}
               onCopy={() => copyToClipboard(item.text)}
               onDelete={() => onDeleteItem(groupId, item.id)}
               deleteTitle="이 체크 항목을 삭제하시겠습니까?"

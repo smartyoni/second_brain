@@ -19,7 +19,7 @@ interface ChecklistGroupSectionProps {
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
-  onAddItem: (groupId: string) => void;
+  onAddItem: (groupId: string) => string | void;
   onToggleItemComplete: (groupId: string, itemId: string) => void;
   onUpdateItemText: (groupId: string, itemId: string, text: string) => void;
   onDeleteItem: (groupId: string, itemId: string) => void;
@@ -42,6 +42,17 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
   const { updateCheckItemDueDate, setSelectedCalendarDate } = useWorkspace();
   const [isEditingGroupName, setIsEditingGroupName] = useState(false);
   const [schedulingItemId, setSchedulingItemId] = useState<string | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+
+  const handleAddItem = () => {
+    if (!group.isExpanded) {
+      onToggleExpand(group.id);
+    }
+    const newId = onAddItem(group.id);
+    if (typeof newId === 'string') {
+      setEditingItemId(newId);
+    }
+  };
 
   const selectedSchedulingItem = group.items.find((i) => i.id === schedulingItemId);
   const completedCount = group.items.filter((i) => i.isCompleted).length;
@@ -89,10 +100,10 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
 
         <button
           type="button"
-          title="체크 항목 추가"
+          title="체크 항목 추가 (Shift+Enter)"
           onClick={(e) => {
             e.stopPropagation();
-            onAddItem(group.id);
+            handleAddItem();
           }}
           className="p-1.5 lg:p-1 hover:bg-white/20 rounded text-white transition-colors cursor-pointer"
         >
@@ -130,6 +141,14 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
                 onUpdateText={onUpdateItemText}
                 onDeleteItem={onDeleteItem}
                 onOpenSchedule={(itemId) => setSchedulingItemId(itemId)}
+                isEditing={editingItemId === item.id}
+                onStartEdit={() => setEditingItemId(item.id)}
+                onEndEdit={() => {
+                  if (editingItemId === item.id) {
+                    setEditingItemId(null);
+                  }
+                }}
+                onSaveAndAddNew={() => handleAddItem()}
               />
             );
           })}
