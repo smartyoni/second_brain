@@ -141,18 +141,7 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
           </div>
 
           <div className="flex items-center gap-1 lg:gap-0.5 shrink-0">
-            <ThreeDotMenu
-              onMove={onMove ? (dir) => onMove(item.id, dir) : undefined}
-              canMoveUp={canMoveUp}
-              canMoveDown={canMoveDown}
-              onEdit={() => setIsEditing(true)}
-              onCopy={() => navigator.clipboard.writeText(item.text)}
-              onDelete={() => onDelete(item.id)}
-              deleteTitle="이 체크 항목을 삭제하시겠습니까?"
-              buttonClassName="p-1.5 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
-            />
-
-            {/* 3점 메뉴 우측 캘린더 일정 지정 버튼 */}
+            {/* 3점 메뉴 좌측 캘린더 일정 지정 버튼 */}
             <button
               type="button"
               title={item.dueDate ? '일정 수정/해제' : '일정 등록'}
@@ -168,6 +157,17 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
             >
               <CalendarIcon className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
             </button>
+
+            <ThreeDotMenu
+              onMove={onMove ? (dir) => onMove(item.id, dir) : undefined}
+              canMoveUp={canMoveUp}
+              canMoveDown={canMoveDown}
+              onEdit={() => setIsEditing(true)}
+              onCopy={() => navigator.clipboard.writeText(item.text)}
+              onDelete={() => onDelete(item.id)}
+              deleteTitle="이 체크 항목을 삭제하시겠습니까?"
+              buttonClassName="p-1.5 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
+            />
           </div>
         </div>
       )}
