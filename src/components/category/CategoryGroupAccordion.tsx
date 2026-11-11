@@ -28,6 +28,12 @@ interface CategoryGroupAccordionProps {
   onCategoryDragOver: (e: React.DragEvent) => void;
   onCategoryDrop: (targetId: string, e: React.DragEvent) => void;
   onCategoryDragEnd: () => void;
+  isEditingGroupName?: boolean;
+  onStartEditGroupName?: () => void;
+  onEndEditGroupName?: () => void;
+  editingCategoryId?: string | null;
+  onStartEditCategory?: (id: string) => void;
+  onEndEditCategory?: () => void;
 }
 
 export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
@@ -51,8 +57,25 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
   onCategoryDragOver,
   onCategoryDrop,
   onCategoryDragEnd,
+  isEditingGroupName: propIsEditingGroupName,
+  onStartEditGroupName,
+  onEndEditGroupName,
+  editingCategoryId,
+  onStartEditCategory,
+  onEndEditCategory,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [internalEditing, setInternalEditing] = useState(false);
+  const isEditing = propIsEditingGroupName !== undefined ? propIsEditingGroupName : internalEditing;
+
+  const handleStartEdit = () => {
+    if (onStartEditGroupName) onStartEditGroupName();
+    else setInternalEditing(true);
+  };
+
+  const handleEndEdit = () => {
+    if (onEndEditGroupName) onEndEditGroupName();
+    else setInternalEditing(false);
+  };
 
   return (
     <div className="border-b border-slate-300">
@@ -61,7 +84,7 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
         onClick={() => onToggleExpand(group.id)}
         onDoubleClick={(e) => {
           e.stopPropagation();
-          setIsEditing(true);
+          handleStartEdit();
         }}
         className="h-11 lg:h-7 px-3 lg:px-2 bg-blue-100 hover:bg-blue-200/90 border-y border-blue-200 flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs text-blue-950 font-bold cursor-pointer select-none transition-colors pr-0"
       >
@@ -75,11 +98,17 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
           <InlineEditableText
             value={group.name}
             isEditing={isEditing}
+            placeholder="그룹명 입력..."
             onSave={(newName) => {
-              onUpdateGroupName(group.id, newName);
-              setIsEditing(false);
+              onUpdateGroupName(group.id, newName.trim() || '새 그룹');
+              handleEndEdit();
             }}
-            onCancel={() => setIsEditing(false)}
+            onCancel={() => {
+              if (!group.name.trim()) {
+                onUpdateGroupName(group.id, '새 그룹');
+              }
+              handleEndEdit();
+            }}
             className="text-sm lg:text-xs truncate block font-bold text-blue-950"
             inputClassName="text-sm lg:text-xs h-8 lg:h-6 py-0 px-1 font-semibold"
           />
@@ -105,7 +134,7 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
           onMove={onMoveGroup ? (dir) => onMoveGroup(group.id, dir) : undefined}
           canMoveUp={canMoveGroupUp}
           canMoveDown={canMoveGroupDown}
-          onEdit={() => setIsEditing(true)}
+          onEdit={() => handleStartEdit()}
           onDelete={() => onDeleteGroup(group.id)}
           deleteTitle={`'${group.name}' 그룹을 삭제하시겠습니까?`}
           buttonClassName="p-2 lg:p-0.5 text-blue-900 hover:bg-blue-200/60"
@@ -136,6 +165,13 @@ export const CategoryGroupAccordion: React.FC<CategoryGroupAccordionProps> = ({
               onDragOver={onCategoryDragOver}
               onDrop={(e) => onCategoryDrop(item.id, e)}
               onDragEnd={onCategoryDragEnd}
+              isEditing={editingCategoryId === item.id}
+              onStartEdit={() => onStartEditCategory?.(item.id)}
+              onEndEdit={() => {
+                if (editingCategoryId === item.id) {
+                  onEndEditCategory?.();
+                }
+              }}
             />
           ))}
           {items.length === 0 && (

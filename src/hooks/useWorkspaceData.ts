@@ -38,41 +38,45 @@ export const useWorkspaceData = (
     );
   };
 
-  const addCategoryItem = (topCategoryId: string, groupId?: string) => {
+  const addCategoryItem = (topCategoryId: string, groupId?: string): string => {
     const newItem: CategoryItem = {
       id: `cat-${Date.now()}`,
       topCategoryId,
       ...(groupId ? { groupId } : {}),
-      name: '새 카테고리',
+      name: '',
       itemCount: 0,
       order: categoryItems.length,
     };
     setCategoryItems((prev) => [...prev, newItem]);
     selectCategory(newItem.id);
+    return newItem.id;
   };
 
-  const addSubItem = (categoryId: string) => {
+  const addSubItem = (categoryId: string): string => {
     const newSub: SubItem = {
       id: `sub-${Date.now()}`,
       categoryId,
-      title: '새 항목',
+      title: '',
       order: subItems.length,
       isCompleted: false,
     };
     setSubItems((prev) => [...prev, newSub]);
     selectSubItem(newSub.id);
+    return newSub.id;
   };
 
-  const addTextGroup = (subItemId: string) => {
+  const addTextGroup = (subItemId: string): string => {
+    const groupId = `tg-${Date.now()}`;
     const newGroup: TextGroupData = {
-      id: `tg-${Date.now()}`,
+      id: groupId,
       subItemId,
-      name: '새 텍스트그룹',
+      name: '',
       isExpanded: true,
       order: textGroups.length,
-      blocks: [{ id: `b-${Date.now()}`, text: '', order: 0 }],
+      blocks: [],
     };
     setTextGroups((prev) => [...prev, newGroup]);
+    return groupId;
   };
 
   const addChecklistGroup = (subItemId: string): string => {

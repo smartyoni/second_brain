@@ -22,6 +22,9 @@ interface SubItemRowProps {
   onDragEnd: () => void;
   showCheckbox?: boolean;
   onToggleComplete?: (id: string) => void;
+  isEditing?: boolean;
+  onStartEdit?: () => void;
+  onEndEdit?: () => void;
 }
 
 export const SubItemRow: React.FC<SubItemRowProps> = ({
@@ -42,8 +45,22 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
   onDragEnd,
   showCheckbox = false,
   onToggleComplete,
+  isEditing: propIsEditing,
+  onStartEdit,
+  onEndEdit,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [internalEditing, setInternalEditing] = useState(false);
+  const isEditing = propIsEditing !== undefined ? propIsEditing : internalEditing;
+
+  const handleStartEdit = () => {
+    if (onStartEdit) onStartEdit();
+    else setInternalEditing(true);
+  };
+
+  const handleEndEdit = () => {
+    if (onEndEdit) onEndEdit();
+    else setInternalEditing(false);
+  };
 
   return (
     <div
@@ -61,7 +78,7 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
       onClick={onSelect}
       onDoubleClick={(e) => {
         e.stopPropagation();
-        setIsEditing(true);
+        handleStartEdit();
       }}
       className={`group relative h-11 lg:h-8 px-3 lg:px-2.5 flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs cursor-pointer select-none border-b border-slate-200 transition-colors pr-0 ${
         isSelected
@@ -101,11 +118,21 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
         <InlineEditableText
           value={item.title}
           isEditing={isEditing}
+          placeholder="항목 제목 입력..."
           onSave={(newTitle) => {
-            onUpdateTitle(item.id, newTitle);
-            setIsEditing(false);
+            if (!newTitle.trim() && !item.title.trim()) {
+              onDelete(item.id);
+            } else {
+              onUpdateTitle(item.id, newTitle.trim() || '새 항목');
+            }
+            handleEndEdit();
           }}
-          onCancel={() => setIsEditing(false)}
+          onCancel={() => {
+            if (!item.title.trim()) {
+              onDelete(item.id);
+            }
+            handleEndEdit();
+          }}
           className={`text-sm lg:text-xs truncate block ${
             item.isCompleted
               ? 'line-through text-slate-400 opacity-80 font-normal'
@@ -122,7 +149,7 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
         onMoveToTarget={onMoveToCategory}
         canMoveUp={canMoveUp}
         canMoveDown={canMoveDown}
-        onEdit={() => setIsEditing(true)}
+        onEdit={() => handleStartEdit()}
         onDelete={() => onDelete(item.id)}
         deleteTitle={`'${item.title}' 문서를 삭제하시겠습니까?`}
         buttonClassName="p-2 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"

@@ -1,40 +1,27 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { ProjectDetailHeader } from './ProjectDetailHeader';
 import { TextGroupSection } from '../detail/TextGroupSection';
 import { ChecklistGroupSection } from '../detail/ChecklistGroupSection';
 import {
-  moveScopedItem,
-  moveArrayItem,
-  moveChecklistItem,
-  moveBlockToGroup,
-  moveChecklistItemToGroup,
+  moveScopedItem, moveArrayItem, moveChecklistItem,
+  moveBlockToGroup, moveChecklistItemToGroup,
 } from '../../utils/orderUtils';
 
 export const ProjectDetailPanel: React.FC = () => {
   const {
-    panel3State,
-    setPanelDetailTab,
-    subItems,
-    textGroups,
-    setTextGroups,
-    checklistGroups,
-    setChecklistGroups,
-    addTextGroup,
-    addChecklistGroup,
-    selectedDetailItem,
-    setSelectedDetailItem,
+    panel3State, setPanelDetailTab, subItems,
+    textGroups, setTextGroups, checklistGroups, setChecklistGroups,
+    addTextGroup, addChecklistGroup, selectedDetailItem, setSelectedDetailItem,
   } = useWorkspace();
+
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
 
   const currentSubItem = subItems.find((s) => s.id === panel3State.subItemId);
   const activeTab = panel3State.activeTab;
 
-  const currentTextGroups = textGroups.filter(
-    (g) => g.subItemId === panel3State.subItemId
-  );
-  const currentChecklistGroups = checklistGroups.filter(
-    (g) => g.subItemId === panel3State.subItemId
-  );
+  const currentTextGroups = textGroups.filter((g) => g.subItemId === panel3State.subItemId);
+  const currentChecklistGroups = checklistGroups.filter((g) => g.subItemId === panel3State.subItemId);
 
   const textGroupTargets = currentTextGroups.map((g) => ({ id: g.id, name: g.name }));
   const checklistGroupTargets = currentChecklistGroups.map((g) => ({ id: g.id, name: g.name }));
@@ -52,11 +39,11 @@ export const ProjectDetailPanel: React.FC = () => {
 
   const handleAddGroup = () => {
     if (!panel3State.subItemId) return;
-    if (activeTab === 'text') {
-      addTextGroup(panel3State.subItemId);
-    } else {
-      addChecklistGroup(panel3State.subItemId);
-    }
+    const newId =
+      activeTab === 'text'
+        ? addTextGroup(panel3State.subItemId)
+        : addChecklistGroup(panel3State.subItemId);
+    if (newId) setEditingGroupId(newId);
   };
 
   // 현재 체크리스트 전체 항목수와 완료수
@@ -123,24 +110,25 @@ export const ProjectDetailPanel: React.FC = () => {
                     prev.map((g) => (g.id === id ? { ...g, name } : g))
                   )
                 }
+                isEditingGroupName={editingGroupId === group.id}
+                onStartEditGroupName={() => setEditingGroupId(group.id)}
+                onEndEditGroupName={() => {
+                  if (editingGroupId === group.id) setEditingGroupId(null);
+                }}
                 onDeleteGroup={(id) =>
                   setTextGroups((prev) => prev.filter((g) => g.id !== id))
                 }
-                onAddBlock={(id) =>
+                onAddBlock={(id) => {
+                  const newId = `b-${Date.now()}`;
                   setTextGroups((prev) =>
                     prev.map((g) =>
                       g.id === id
-                        ? {
-                            ...g,
-                            blocks: [
-                              ...g.blocks,
-                              { id: `b-${Date.now()}`, text: '', order: g.blocks.length },
-                            ],
-                          }
+                        ? { ...g, blocks: [...g.blocks, { id: newId, text: '', order: g.blocks.length }] }
                         : g
                     )
-                  )
-                }
+                  );
+                  return newId;
+                }}
                 onUpdateBlockText={(gId, bId, text) =>
                   setTextGroups((prev) =>
                     prev.map((g) =>
@@ -214,19 +202,20 @@ export const ProjectDetailPanel: React.FC = () => {
                     prev.map((g) => (g.id === id ? { ...g, name } : g))
                   )
                 }
+                isEditingGroupName={editingGroupId === group.id}
+                onStartEditGroupName={() => setEditingGroupId(group.id)}
+                onEndEditGroupName={() => {
+                  if (editingGroupId === group.id) setEditingGroupId(null);
+                }}
                 onDeleteGroup={(id) =>
                   setChecklistGroups((prev) => prev.filter((g) => g.id !== id))
                 }
-                onAddItem={(id) =>
+                onAddItem={(id) => {
+                  const newId = `ci-${Date.now()}`;
                   setChecklistGroups((prev) =>
                     prev.map((g) => {
                       if (g.id !== id) return g;
-                      const newItem = {
-                        id: `ci-${Date.now()}`,
-                        text: '새 할 일',
-                        isCompleted: false,
-                        order: 0,
-                      };
+                      const newItem = { id: newId, text: '', isCompleted: false, order: 0 };
                       const incomplete = g.items.filter((i) => !i.isCompleted);
                       const completed = g.items.filter((i) => i.isCompleted);
                       const nextItems = [...incomplete, newItem, ...completed].map(
@@ -234,8 +223,9 @@ export const ProjectDetailPanel: React.FC = () => {
                       );
                       return { ...g, items: nextItems };
                     })
-                  )
-                }
+                  );
+                  return newId;
+                }}
                 onToggleItemComplete={(gId, itemId) =>
                   setChecklistGroups((prev) =>
                     prev.map((g) => {

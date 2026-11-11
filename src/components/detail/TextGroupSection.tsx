@@ -18,9 +18,12 @@ interface TextGroupSectionProps {
   onToggleExpand: (groupId: string) => void;
   onUpdateGroupName: (groupId: string, name: string) => void;
   onDeleteGroup: (groupId: string) => void;
-  onAddBlock: (groupId: string) => void;
+  onAddBlock: (groupId: string) => string | void;
   onUpdateBlockText: (groupId: string, blockId: string, text: string) => void;
   onDeleteBlock: (groupId: string, blockId: string) => void;
+  isEditingGroupName?: boolean;
+  onStartEditGroupName?: () => void;
+  onEndEditGroupName?: () => void;
 }
 
 export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
@@ -35,10 +38,36 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
   onAddBlock,
   onUpdateBlockText,
   onDeleteBlock,
+  isEditingGroupName: propIsEditingGroupName,
+  onStartEditGroupName,
+  onEndEditGroupName,
 }) => {
   const { updateTextBlockDueDate, setSelectedCalendarDate } = useWorkspace();
-  const [isEditingGroupName, setIsEditingGroupName] = useState(false);
+  const [internalEditingGroupName, setInternalEditingGroupName] = useState(false);
+  const isEditingGroup = propIsEditingGroupName !== undefined ? propIsEditingGroupName : internalEditingGroupName;
+
+  const handleStartEditGroup = () => {
+    if (onStartEditGroupName) onStartEditGroupName();
+    else setInternalEditingGroupName(true);
+  };
+
+  const handleEndEditGroup = () => {
+    if (onEndEditGroupName) onEndEditGroupName();
+    else setInternalEditingGroupName(false);
+  };
+
   const [schedulingBlockId, setSchedulingBlockId] = useState<string | null>(null);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+
+  const handleAddBlockInternal = () => {
+    if (!group.isExpanded) {
+      onToggleExpand(group.id);
+    }
+    const newId = onAddBlock(group.id);
+    if (typeof newId === 'string') {
+      setEditingBlockId(newId);
+    }
+  };
 
   const selectedSchedulingBlock = group.blocks.find((b) => b.id === schedulingBlockId);
 
@@ -49,7 +78,7 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
         onClick={() => onToggleExpand(group.id)}
         onDoubleClick={(e) => {
           e.stopPropagation();
-          setIsEditingGroupName(true);
+          handleStartEditGroup();
         }}
         className="h-10 lg:h-8 px-2.5 lg:px-2 bg-[#5ea578] hover:bg-[#4f9569] text-white flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs font-bold cursor-pointer select-none transition-colors pr-0 border-b border-[#43835a]"
       >
@@ -61,15 +90,22 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
 
         <Folder className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white/95 shrink-0" />
 
-        <div className="flex-1 min-w-0" onClick={(e) => isEditingGroupName && e.stopPropagation()}>
+        <div className="flex-1 min-w-0" onClick={(e) => isEditingGroup && e.stopPropagation()}>
           <InlineEditableText
             value={group.name}
-            isEditing={isEditingGroupName}
+            isEditing={isEditingGroup}
+            placeholder="그룹 이름 입력..."
             onSave={(newName) => {
-              onUpdateGroupName(group.id, newName);
-              setIsEditingGroupName(false);
+              const finalName = newName.trim() || '새 텍스트그룹';
+              onUpdateGroupName(group.id, finalName);
+              handleEndEditGroup();
             }}
-            onCancel={() => setIsEditingGroupName(false)}
+            onCancel={() => {
+              if (!group.name.trim()) {
+                onUpdateGroupName(group.id, '새 텍스트그룹');
+              }
+              handleEndEditGroup();
+            }}
             className="text-sm lg:text-xs truncate block text-white font-bold"
             inputClassName="text-sm lg:text-xs h-7 lg:h-6 py-0 px-1 text-slate-900 font-semibold"
           />
@@ -77,10 +113,10 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
 
         <button
           type="button"
-          title="텍스트 블록 추가"
+          title="텍스트 블록 추가 (Shift+Enter)"
           onClick={(e) => {
             e.stopPropagation();
-            onAddBlock(group.id);
+            handleAddBlockInternal();
           }}
           className="p-1.5 lg:p-1 hover:bg-white/20 rounded text-white transition-colors cursor-pointer"
         >
@@ -91,7 +127,7 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
           onMove={onMoveGroup ? (dir) => onMoveGroup(group.id, dir) : undefined}
           canMoveUp={canMoveUp}
           canMoveDown={canMoveDown}
-          onEdit={() => setIsEditingGroupName(true)}
+          onEdit={() => handleStartEditGroup()}
           onDelete={() => onDeleteGroup(group.id)}
           deleteTitle="이 텍스트박스 그룹을 삭제하시겠습니까?"
           buttonClassName="p-2 lg:p-0.5 text-white/90 hover:text-white hover:bg-white/20"
@@ -114,6 +150,14 @@ export const TextGroupSection: React.FC<TextGroupSectionProps> = ({
               onUpdateText={onUpdateBlockText}
               onDeleteBlock={onDeleteBlock}
               onOpenSchedule={(blockId) => setSchedulingBlockId(blockId)}
+              isEditing={editingBlockId === block.id}
+              onStartEdit={() => setEditingBlockId(block.id)}
+              onEndEdit={() => {
+                if (editingBlockId === block.id) {
+                  setEditingBlockId(null);
+                }
+              }}
+              onSaveAndAddNew={() => handleAddBlockInternal()}
             />
           ))}
         </div>

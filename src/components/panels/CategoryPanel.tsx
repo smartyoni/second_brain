@@ -72,6 +72,9 @@ export const CategoryPanel: React.FC<CategoryPanelProps> = ({ showMiniCalendar }
     });
   });
 
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+
   const handleExpandAll = () => {
     setCategoryGroups((prev) => prev.map((g) => ({ ...g, isExpanded: true })));
   };
@@ -82,19 +85,24 @@ export const CategoryPanel: React.FC<CategoryPanelProps> = ({ showMiniCalendar }
 
   const handleAddGroup = () => {
     if (!currentTopId) return;
+    const newId = `grp-${Date.now()}`;
     const newGroup = {
-      id: `grp-${Date.now()}`,
+      id: newId,
       topCategoryId: currentTopId,
-      name: '새 그룹',
+      name: '',
       isExpanded: true,
       order: categoryGroups.length,
     };
     setCategoryGroups((prev) => [...prev, newGroup]);
+    setEditingGroupId(newId);
   };
 
   const handleAddCategory = () => {
     if (!currentTopId) return;
-    addCategoryItem(currentTopId);
+    const newId = addCategoryItem(currentTopId);
+    if (newId) {
+      setEditingCategoryId(newId);
+    }
   };
 
   const groupTargets = currentGroups.map((g) => ({ id: g.id, name: g.name }));
@@ -193,7 +201,12 @@ export const CategoryPanel: React.FC<CategoryPanelProps> = ({ showMiniCalendar }
               );
             }}
             onAddCategoryToGroup={(id) => {
-              if (currentTopId) addCategoryItem(currentTopId, id || undefined);
+              if (currentTopId) {
+                const newCatId = addCategoryItem(currentTopId, id || undefined);
+                if (newCatId) {
+                  setEditingCategoryId(newCatId);
+                }
+              }
             }}
             onSelectCategory={selectCategory}
             onUpdateCategoryName={(id, name) =>
@@ -209,6 +222,12 @@ export const CategoryPanel: React.FC<CategoryPanelProps> = ({ showMiniCalendar }
             onCategoryDragOver={onCategoryDragOver}
             onCategoryDrop={onCategoryDrop}
             onCategoryDragEnd={onCategoryDragEnd}
+            editingGroupId={editingGroupId}
+            onStartEditGroup={(id) => setEditingGroupId(id)}
+            onEndEditGroup={() => setEditingGroupId(null)}
+            editingCategoryId={editingCategoryId}
+            onStartEditCategory={(id) => setEditingCategoryId(id)}
+            onEndEditCategory={() => setEditingCategoryId(null)}
           />
         </>
       )}

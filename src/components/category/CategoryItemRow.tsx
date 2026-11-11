@@ -22,6 +22,9 @@ interface CategoryItemRowProps {
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onDragEnd: () => void;
+  isEditing?: boolean;
+  onStartEdit?: () => void;
+  onEndEdit?: () => void;
 }
 
 export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
@@ -39,8 +42,23 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
   onDragOver,
   onDrop,
   onDragEnd,
+  isEditing: propIsEditing,
+  onStartEdit,
+  onEndEdit,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [internalEditing, setInternalEditing] = useState(false);
+  const isEditing = propIsEditing !== undefined ? propIsEditing : internalEditing;
+
+  const handleStartEdit = () => {
+    if (onStartEdit) onStartEdit();
+    else setInternalEditing(true);
+  };
+
+  const handleEndEdit = () => {
+    if (onEndEdit) onEndEdit();
+    else setInternalEditing(false);
+  };
+
   const [isOverSubItem, setIsOverSubItem] = useState(false);
   const { subItems } = useWorkspace();
   const subItemCount = subItems.filter((s) => s.categoryId === item.id).length;
@@ -73,7 +91,7 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
       onClick={onSelect}
       onDoubleClick={(e) => {
         e.stopPropagation();
-        setIsEditing(true);
+        handleStartEdit();
       }}
       className={`group relative h-11 lg:h-7 px-3 lg:px-2 flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs cursor-pointer select-none border-b border-slate-200 transition-colors pr-0 ${
         isOverSubItem
@@ -94,11 +112,21 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
         <InlineEditableText
           value={item.name}
           isEditing={isEditing}
+          placeholder="카테고리명 입력..."
           onSave={(newName) => {
-            onUpdateName(item.id, newName);
-            setIsEditing(false);
+            if (!newName.trim() && !item.name.trim()) {
+              onDelete(item.id);
+            } else {
+              onUpdateName(item.id, newName.trim() || '새 카테고리');
+            }
+            handleEndEdit();
           }}
-          onCancel={() => setIsEditing(false)}
+          onCancel={() => {
+            if (!item.name.trim()) {
+              onDelete(item.id);
+            }
+            handleEndEdit();
+          }}
           className="text-sm lg:text-xs truncate block"
           inputClassName="text-sm lg:text-xs h-8 lg:h-6 py-0 px-1.5"
         />
@@ -114,7 +142,7 @@ export const CategoryItemRow: React.FC<CategoryItemRowProps> = ({
         onMoveToGroup={onMoveToGroup}
         canMoveUp={canMoveUp}
         canMoveDown={canMoveDown}
-        onEdit={() => setIsEditing(true)}
+        onEdit={() => handleStartEdit()}
         onDelete={() => onDelete(item.id)}
         deleteTitle={`'${item.name}' 카테고리를 삭제하시겠습니까?`}
         buttonClassName="p-2 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"

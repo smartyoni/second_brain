@@ -233,8 +233,8 @@ export interface WorkspaceContextType {
   deleteQuickMemo: (id: string) => void;
   updateTopCategoryName: (id: string, name: string) => void;
   toggleGroupExpanded: (groupId: string) => void;
-  addCategoryItem: (topCategoryId: string, groupId?: string) => void;
-  addSubItem: (categoryId: string) => void;
-  addTextGroup: (subItemId: string) => void;
+  addCategoryItem: (topCategoryId: string, groupId?: string) => string;
+  addSubItem: (categoryId: string) => string;
+  addTextGroup: (subItemId: string) => string;
   addChecklistGroup: (subItemId: string) => string;
 }

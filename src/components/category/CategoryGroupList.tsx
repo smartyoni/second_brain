@@ -26,6 +26,12 @@ interface CategoryGroupListProps {
   onCategoryDragOver: (e: React.DragEvent) => void;
   onCategoryDrop: (targetId: string, e: React.DragEvent) => void;
   onCategoryDragEnd: () => void;
+  editingGroupId?: string | null;
+  onStartEditGroup?: (id: string) => void;
+  onEndEditGroup?: () => void;
+  editingCategoryId?: string | null;
+  onStartEditCategory?: (id: string) => void;
+  onEndEditCategory?: () => void;
 }
 
 export const CategoryGroupList: React.FC<CategoryGroupListProps> = ({
@@ -51,6 +57,12 @@ export const CategoryGroupList: React.FC<CategoryGroupListProps> = ({
   onCategoryDragOver,
   onCategoryDrop,
   onCategoryDragEnd,
+  editingGroupId,
+  onStartEditGroup,
+  onEndEditGroup,
+  editingCategoryId,
+  onStartEditCategory,
+  onEndEditCategory,
 }) => {
   return (
     <div className="flex-1 overflow-y-auto">
@@ -81,6 +93,16 @@ export const CategoryGroupList: React.FC<CategoryGroupListProps> = ({
             onCategoryDragOver={onCategoryDragOver}
             onCategoryDrop={onCategoryDrop}
             onCategoryDragEnd={onCategoryDragEnd}
+            isEditingGroupName={editingGroupId === group.id}
+            onStartEditGroupName={() => onStartEditGroup?.(group.id)}
+            onEndEditGroupName={() => {
+              if (editingGroupId === group.id) {
+                onEndEditGroup?.();
+              }
+            }}
+            editingCategoryId={editingCategoryId}
+            onStartEditCategory={onStartEditCategory}
+            onEndEditCategory={onEndEditCategory}
           />
         );
       })}
@@ -113,6 +135,9 @@ export const CategoryGroupList: React.FC<CategoryGroupListProps> = ({
           onCategoryDragOver={onCategoryDragOver}
           onCategoryDrop={onCategoryDrop}
           onCategoryDragEnd={onCategoryDragEnd}
+          editingCategoryId={editingCategoryId}
+          onStartEditCategory={onStartEditCategory}
+          onEndEditCategory={onEndEditCategory}
         />
       )}
 
