@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, CheckCircle, Clock, AlignLeft, Pencil, Check } from 'lucide-react';
+import { ExternalLink, CheckCircle, Clock, Pencil, Check } from 'lucide-react';
 import { CalendarScheduleItem, SubCheckItem, SubItem } from '../../types';
 import { GoogleCalendarSubChecklist } from './GoogleCalendarSubChecklist';
 import { GoogleCalendarEventInlineEdit, EventInlineUpdateData } from './GoogleCalendarEventInlineEdit';
@@ -60,7 +60,7 @@ export const GoogleCalendarEventDetailView: React.FC<GoogleCalendarEventDetailVi
           />
         ) : (
           <div
-            className={`p-5 sm:p-6 space-y-4 overflow-y-auto ${
+            className={`px-3 py-4 sm:px-4 sm:py-5 space-y-4 overflow-y-auto ${
               mobileTab === 'detail' ? 'block' : 'hidden md:block'
             }`}
           >
@@ -89,11 +89,10 @@ export const GoogleCalendarEventDetailView: React.FC<GoogleCalendarEventDetailVi
               </div>
             </div>
 
-            {/* 상세 설명(메모) */}
+            {/* 상세 설명(메모) (좌측 삼선 제거 및 너비 극대화) */}
             {(item.description || item.memo) && (
-              <div className="flex items-start gap-4 text-xs text-[#3c4043]">
-                <AlignLeft className="w-4 h-4 text-[#5f6368] shrink-0 mt-0.5" />
-                <div className="flex-1 whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-100">
+              <div className="w-full text-xs text-[#3c4043]">
+                <div className="w-full whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-100 box-border">
                   <SmartText text={item.description || item.memo || ''} />
                 </div>
               </div>

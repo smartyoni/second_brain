@@ -64,7 +64,7 @@ export const GoogleCalendarEventEditForm: React.FC<GoogleCalendarEventEditFormPr
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+    <form onSubmit={handleSubmit} className="px-3 py-4 sm:px-4 sm:py-5 space-y-4 text-xs">
       {/* 제목 입력 */}
       <div>
         <input

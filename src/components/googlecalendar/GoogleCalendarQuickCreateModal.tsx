@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Clock, AlignLeft, Check, Palette } from 'lucide-react';
+import { X, Clock, Check, Palette } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { getGoogleCategoryColor, SELECTABLE_GOOGLE_COLORS, GOOGLE_RED_COLOR } from '../../utils/googleCalendarUtils';
 import { TimePicker24h } from '../shared/TimePicker24h';
@@ -128,7 +128,7 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
         </div>
 
         {/* 폼 */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="px-4 py-5 sm:px-5 sm:py-6 space-y-4 text-xs">
           {/* 제목 추가 인풋 */}
           <div>
             <input
@@ -237,15 +237,14 @@ export const GoogleCalendarQuickCreateModal: React.FC<GoogleCalendarQuickCreateM
             )}
           </div>
 
-          {/* 설명 추가 */}
-          <div className="flex items-start gap-3 text-[#3c4043]">
-            <AlignLeft className="w-4 h-4 text-[#5f6368] shrink-0 mt-2" />
+          {/* 설명 추가 (좌측 삼선 제거 및 너비 극대화) */}
+          <div className="w-full text-[#3c4043]">
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="설명 추가 (메모, 링크, 장소 등)"
               rows={2}
-              className="w-full px-2.5 py-1.5 bg-[#f1f3f4] rounded text-xs text-[#3c4043] outline-none border border-transparent focus:border-[#1a73e8] resize-none"
+              className="w-full px-2.5 py-1.5 bg-[#f1f3f4] rounded text-xs text-[#3c4043] outline-none border border-transparent focus:border-[#1a73e8] resize-none block box-border"
             />
           </div>
 

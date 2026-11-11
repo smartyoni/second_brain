@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Clock, AlignLeft } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
 import { TimePicker24h } from '../shared/TimePicker24h';
 import { getGoogleCategoryColor } from '../../utils/googleCalendarUtils';
@@ -82,7 +82,7 @@ export const GoogleCalendarEventInlineEdit: React.FC<GoogleCalendarEventInlineEd
     <form
       id="calendar-event-inline-edit-form"
       onSubmit={handleSubmit}
-      className={`p-5 sm:p-6 space-y-4 overflow-y-auto text-xs ${className}`}
+      className={`px-3 py-4 sm:px-4 sm:py-5 space-y-4 overflow-y-auto text-xs ${className}`}
     >
       {/* 1. 색상 사각형 + 제목 인풋 (읽기 뷰와 1:1 일치하는 폰트 크기 및 높이) */}
       <div className="flex items-start gap-4">
@@ -141,22 +141,19 @@ export const GoogleCalendarEventInlineEdit: React.FC<GoogleCalendarEventInlineEd
         )}
       </div>
 
-      {/* 3. 메모 아이콘 + 상세 설명 텍스트영역 (기존 메모 박스와 동일한 높이 및 스타일 유지) */}
-      <div className="flex items-start gap-4 text-xs text-[#3c4043]">
-        <AlignLeft className="w-4 h-4 text-[#5f6368] shrink-0 mt-0.5" />
-        <div className="flex-1">
-          <textarea
-            ref={textareaRef}
-            value={editDescription}
-            onChange={(e) => {
-              setEditDescription(e.target.value);
-              adjustTextareaHeight();
-            }}
-            placeholder="설명(메모) 추가..."
-            className="w-full whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-200 focus:border-[#1a73e8] focus:bg-white outline-none resize-none transition-colors font-sans text-xs leading-relaxed"
-            style={{ overflow: 'hidden' }}
-          />
-        </div>
+      {/* 3. 상세 설명 텍스트영역 (좌측 삼선 제거 및 너비 극대화) */}
+      <div className="w-full text-xs text-[#3c4043]">
+        <textarea
+          ref={textareaRef}
+          value={editDescription}
+          onChange={(e) => {
+            setEditDescription(e.target.value);
+            adjustTextareaHeight();
+          }}
+          placeholder="설명(메모) 추가..."
+          className="w-full whitespace-pre-wrap text-slate-600 bg-slate-50 p-2.5 rounded-md border border-slate-200 focus:border-[#1a73e8] focus:bg-white outline-none resize-none transition-colors font-sans text-xs leading-relaxed block box-border"
+          style={{ overflow: 'hidden' }}
+        />
       </div>
     </form>
   );
