@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { ActivePanel } from '../../types';
 import { DetailHeader } from '../detail/DetailHeader';
@@ -25,6 +25,8 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
     setSelectedDetailItem,
   } = useWorkspace();
 
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+
   const currentState = panelId === 'panel-3' ? panel3State : panel4State;
   const currentSubItem = subItems.find((s) => s.id === currentState.subItemId);
 
@@ -48,7 +50,10 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
 
   const handleAddGroup = () => {
     if (!currentState.subItemId) return;
-    addChecklistGroup(currentState.subItemId);
+    const newGroupId = addChecklistGroup(currentState.subItemId);
+    if (newGroupId) {
+      setEditingGroupId(newGroupId);
+    }
   };
 
   const handleAddItemToGroup = (groupId: string): string => {
@@ -58,7 +63,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
         if (g.id !== groupId) return g;
         const newItem = {
           id: newId,
-          text: '새 할 일',
+          text: '',
           isCompleted: false,
           order: 0,
         };
@@ -155,6 +160,13 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
                 prev.map((g) => (g.id === id ? { ...g, name } : g))
               )
             }
+            isEditingGroupName={editingGroupId === group.id}
+            onStartEditGroupName={() => setEditingGroupId(group.id)}
+            onEndEditGroupName={() => {
+              if (editingGroupId === group.id) {
+                setEditingGroupId(null);
+              }
+            }}
             onDeleteGroup={(id) =>
               setChecklistGroups((prev) => prev.filter((g) => g.id !== id))
             }

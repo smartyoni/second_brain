@@ -75,16 +75,18 @@ export const useWorkspaceData = (
     setTextGroups((prev) => [...prev, newGroup]);
   };
 
-  const addChecklistGroup = (subItemId: string) => {
+  const addChecklistGroup = (subItemId: string): string => {
+    const groupId = `cg-${Date.now()}`;
     const newGroup: ChecklistGroupData = {
-      id: `cg-${Date.now()}`,
+      id: groupId,
       subItemId,
-      name: '새 체크그룹',
+      name: '',
       isExpanded: true,
       order: checklistGroups.length,
-      items: [{ id: `ci-${Date.now()}`, text: '새 할 일', isCompleted: false, order: 0 }],
+      items: [],
     };
     setChecklistGroups((prev) => [...prev, newGroup]);
+    return groupId;
   };
 
   return {

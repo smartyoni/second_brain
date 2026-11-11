@@ -23,6 +23,9 @@ interface ChecklistGroupSectionProps {
   onToggleItemComplete: (groupId: string, itemId: string) => void;
   onUpdateItemText: (groupId: string, itemId: string, text: string) => void;
   onDeleteItem: (groupId: string, itemId: string) => void;
+  isEditingGroupName?: boolean;
+  onStartEditGroupName?: () => void;
+  onEndEditGroupName?: () => void;
 }
 
 export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
@@ -38,9 +41,24 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
   onToggleItemComplete,
   onUpdateItemText,
   onDeleteItem,
+  isEditingGroupName: propIsEditingGroupName,
+  onStartEditGroupName,
+  onEndEditGroupName,
 }) => {
   const { updateCheckItemDueDate, setSelectedCalendarDate } = useWorkspace();
-  const [isEditingGroupName, setIsEditingGroupName] = useState(false);
+  const [internalEditingGroupName, setInternalEditingGroupName] = useState(false);
+  const isEditingGroup = propIsEditingGroupName !== undefined ? propIsEditingGroupName : internalEditingGroupName;
+
+  const handleStartEditGroup = () => {
+    if (onStartEditGroupName) onStartEditGroupName();
+    else setInternalEditingGroupName(true);
+  };
+
+  const handleEndEditGroup = () => {
+    if (onEndEditGroupName) onEndEditGroupName();
+    else setInternalEditingGroupName(false);
+  };
+
   const [schedulingItemId, setSchedulingItemId] = useState<string | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
@@ -68,7 +86,7 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
         onClick={() => onToggleExpand(group.id)}
         onDoubleClick={(e) => {
           e.stopPropagation();
-          setIsEditingGroupName(true);
+          handleStartEditGroup();
         }}
         className="h-10 lg:h-8 px-2.5 lg:px-2 bg-[#5287be] hover:bg-[#4378af] text-white flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs font-bold cursor-pointer select-none transition-colors pr-0 border-b border-[#3b6f9f]"
       >
@@ -80,15 +98,22 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
 
         <Folder className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white/95 shrink-0" />
 
-        <div className="flex-1 min-w-0" onClick={(e) => isEditingGroupName && e.stopPropagation()}>
+        <div className="flex-1 min-w-0" onClick={(e) => isEditingGroup && e.stopPropagation()}>
           <InlineEditableText
             value={group.name}
-            isEditing={isEditingGroupName}
+            isEditing={isEditingGroup}
+            placeholder="그룹 이름 입력..."
             onSave={(newName) => {
-              onUpdateGroupName(group.id, newName);
-              setIsEditingGroupName(false);
+              const finalName = newName.trim() || '새 체크그룹';
+              onUpdateGroupName(group.id, finalName);
+              handleEndEditGroup();
             }}
-            onCancel={() => setIsEditingGroupName(false)}
+            onCancel={() => {
+              if (!group.name.trim()) {
+                onUpdateGroupName(group.id, '새 체크그룹');
+              }
+              handleEndEditGroup();
+            }}
             className="text-sm lg:text-xs truncate block text-white font-bold"
             inputClassName="text-sm lg:text-xs h-7 lg:h-6 py-0 px-1 text-slate-900 font-semibold"
           />
@@ -114,7 +139,7 @@ export const ChecklistGroupSection: React.FC<ChecklistGroupSectionProps> = ({
           onMove={onMoveGroup ? (dir) => onMoveGroup(group.id, dir) : undefined}
           canMoveUp={canMoveUp}
           canMoveDown={canMoveDown}
-          onEdit={() => setIsEditingGroupName(true)}
+          onEdit={() => handleStartEditGroup()}
           onDelete={() => onDeleteGroup(group.id)}
           deleteTitle="이 체크리스트 그룹을 삭제하시겠습니까?"
           buttonClassName="p-2 lg:p-0.5 text-white/90 hover:text-white hover:bg-white/20"

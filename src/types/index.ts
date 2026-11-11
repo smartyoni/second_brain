@@ -236,5 +236,5 @@ export interface WorkspaceContextType {
   addCategoryItem: (topCategoryId: string, groupId?: string) => void;
   addSubItem: (categoryId: string) => void;
   addTextGroup: (subItemId: string) => void;
-  addChecklistGroup: (subItemId: string) => void;
+  addChecklistGroup: (subItemId: string) => string;
 }

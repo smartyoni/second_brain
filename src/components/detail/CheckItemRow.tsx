@@ -59,11 +59,19 @@ export const CheckItemRow: React.FC<CheckItemRowProps> = ({
   };
 
   const handleSave = (newText: string) => {
+    if (!newText.trim() && !item.text.trim()) {
+      onDeleteItem(groupId, item.id);
+      handleEndEdit();
+      return;
+    }
     onUpdateText(groupId, item.id, newText);
     handleEndEdit();
   };
 
   const handleCancel = () => {
+    if (!item.text.trim()) {
+      onDeleteItem(groupId, item.id);
+    }
     handleEndEdit();
   };
 

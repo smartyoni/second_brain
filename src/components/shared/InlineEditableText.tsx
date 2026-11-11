@@ -6,6 +6,7 @@ interface InlineEditableTextProps {
   isEditing: boolean;
   onSave: (newValue: string) => void;
   onCancel: () => void;
+  placeholder?: string;
   className?: string;
   inputClassName?: string;
 }
@@ -15,6 +16,7 @@ export const InlineEditableText: React.FC<InlineEditableTextProps> = ({
   isEditing,
   onSave,
   onCancel,
+  placeholder = '',
   className = '',
   inputClassName = '',
 }) => {
@@ -35,7 +37,7 @@ export const InlineEditableText: React.FC<InlineEditableTextProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      onSave(draft.trim() || value);
+      onSave(draft.trim() || value || placeholder);
     } else if (e.key === 'Escape') {
       e.preventDefault();
       setDraft(value);
@@ -44,7 +46,7 @@ export const InlineEditableText: React.FC<InlineEditableTextProps> = ({
   };
 
   const handleBlur = () => {
-    onSave(draft.trim() || value);
+    onSave(draft.trim() || value || placeholder);
   };
 
   if (isEditing) {
@@ -53,6 +55,7 @@ export const InlineEditableText: React.FC<InlineEditableTextProps> = ({
         ref={inputRef}
         type="text"
         value={draft}
+        placeholder={placeholder}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
@@ -64,7 +67,11 @@ export const InlineEditableText: React.FC<InlineEditableTextProps> = ({
 
   return (
     <span className={`truncate ${className}`}>
-      <SmartText text={value} />
+      {value ? (
+        <SmartText text={value} />
+      ) : (
+        <span className="opacity-60 italic">{placeholder || '(제목 없음)'}</span>
+      )}
     </span>
   );
 };
