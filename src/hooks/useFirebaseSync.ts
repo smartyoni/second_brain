@@ -116,8 +116,18 @@ export const migrateTextGroupsToChecklist = (
     return { textGroups: [], checklistGroups: checklistGroups || [] };
   }
 
+  // 캘린더 쇼핑 탭 전용 텍스트 그룹은 체크리스트 마이그레이션에서 제외하여 그대로 유지
+  const isShoppingGroup = (tg: TextGroupData) =>
+    tg.id === 'tg-calendar-shopping' || tg.subItemId === '__calendar_shopping__';
+  const shoppingGroups = textGroups.filter(isShoppingGroup);
+  const legacyGroups = textGroups.filter((tg) => !isShoppingGroup(tg));
+
+  if (legacyGroups.length === 0) {
+    return { textGroups: shoppingGroups, checklistGroups: checklistGroups || [] };
+  }
+
   const existingCgIds = new Set((checklistGroups || []).map((cg) => cg.id));
-  const convertedGroups: ChecklistGroupData[] = textGroups.map((tg, tgIdx) => {
+  const convertedGroups: ChecklistGroupData[] = legacyGroups.map((tg, tgIdx) => {
     const newId = existingCgIds.has(tg.id) ? `cg-migrated-${tg.id}` : tg.id;
     const items: CheckItem[] = (tg.blocks || []).map((b, bIdx) => ({
       id: b.id || `ci-${Date.now()}-${tgIdx}-${bIdx}`,
@@ -143,7 +153,7 @@ export const migrateTextGroupsToChecklist = (
   });
 
   return {
-    textGroups: [],
+    textGroups: shoppingGroups,
     checklistGroups: [...(checklistGroups || []), ...convertedGroups],
   };
 };

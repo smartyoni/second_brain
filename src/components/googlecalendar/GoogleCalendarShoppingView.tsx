@@ -107,6 +107,7 @@ export const GoogleCalendarShoppingView: React.FC = () => {
         </span>
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={handleAddBlock}
           className="flex items-center gap-1 px-2.5 py-1 bg-[#1a73e8] hover:bg-[#1557b0] text-white text-xs font-semibold rounded-md shadow-2xs transition-colors cursor-pointer"
           title="새 텍스트 박스 추가"
