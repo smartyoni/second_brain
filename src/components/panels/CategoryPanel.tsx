@@ -134,115 +134,116 @@ export const CategoryPanel: React.FC<CategoryPanelProps> = ({ showMiniCalendar }
         memoCount={quickMemos.length}
       />
 
-      {/* 데스크탑(lg 이상): 1번 패널 상단 배치 유지 */}
-      <div className="hidden lg:block shrink-0">
-        <TopCategoryGrid />
-      </div>
-
-      {isQuickMemoTab ? (
-        <QuickMemoMonthList
-          selectedCategoryId={selectedCategoryId}
-          onSelectMonth={selectCategory}
-        />
-      ) : (
-        <>
-          <CategoryToolbar
-            totalCount={currentItems.length}
-            onExpandAll={handleExpandAll}
-            onCollapseAll={handleCollapseAll}
-            onAddGroup={handleAddGroup}
-            onAddCategory={handleAddCategory}
-          />
-
-          <CategoryGroupList
-            currentTopId={currentTopId}
-            currentGroups={currentGroups}
-            currentItems={currentItems}
-            unclassifiedItems={unclassifiedItems}
-            selectedCategoryId={selectedCategoryId}
-            draggedCategoryId={draggedCategoryId}
-            groupTargets={groupTargets}
-            onMoveGroup={(id, dir) =>
-              setCategoryGroups((prev) =>
-                moveScopedItem(prev, (g) => g.topCategoryId === currentTopId, id, dir)
-              )
-            }
-            onMoveCategory={(catId, dir, gId) =>
-              setCategoryItems((prev) =>
-                moveScopedItem(
-                  prev,
-                  (c) => c.topCategoryId === currentTopId && (gId ? c.groupId === gId : !c.groupId),
-                  catId,
-                  dir
-                )
-              )
-            }
-            onMoveCategoryToGroup={handleMoveCategoryToGroup}
-            onDropSubItem={handleDropSubItem}
-            onToggleExpand={(id) =>
-              setCategoryGroups((prev) =>
-                prev.map((g) => (g.id === id ? { ...g, isExpanded: !g.isExpanded } : g))
-              )
-            }
-            onUpdateGroupName={(id, name) =>
-              setCategoryGroups((prev) =>
-                prev.map((g) => (g.id === id ? { ...g, name } : g))
-              )
-            }
-            onDeleteGroup={(id) => {
-              if (FIXED_TODO_GROUP_IDS.has(id) || FIXED_PROJECT_GROUP_IDS.has(id)) return;
-              setCategoryGroups((prev) => prev.filter((g) => g.id !== id));
-              setCategoryItems((prev) =>
-                prev.map((c) => (c.groupId === id ? { ...c, groupId: undefined } : c))
-              );
-            }}
-            onAddCategoryToGroup={(id) => {
-              if (currentTopId) {
-                const newCatId = addCategoryItem(currentTopId, id || undefined);
-                if (newCatId) {
-                  setEditingCategoryId(newCatId);
-                }
-              }
-            }}
-            onSelectCategory={selectCategory}
-            onUpdateCategoryName={(id, name) =>
-              setCategoryItems((prev) =>
-                prev.map((c) => (c.id === id ? { ...c, name } : c))
-              )
-            }
-            onDeleteCategory={(id) => {
-              if (FIXED_TODO_CATEGORY_IDS.has(id)) return;
-              setCategoryItems((prev) => prev.filter((c) => c.id !== id));
-            }}
-            onCategoryDragStart={onCategoryDragStart}
-            onCategoryDragOver={onCategoryDragOver}
-            onCategoryDrop={onCategoryDrop}
-            onCategoryDragEnd={onCategoryDragEnd}
-            editingGroupId={editingGroupId}
-            onStartEditGroup={(id) => setEditingGroupId(id)}
-            onEndEditGroup={() => setEditingGroupId(null)}
-            editingCategoryId={editingCategoryId}
-            onStartEditCategory={(id) => setEditingCategoryId(id)}
-            onEndEditCategory={() => setEditingCategoryId(null)}
-          />
-        </>
-      )}
-
-      {/* 1번 패널 가장 하단 구글 미니달력 (캘린더 모드 등 활성화 시) */}
-      {isMiniCalendarVisible && (
-        <div className="shrink-0 border-t border-slate-200 bg-white py-2 px-1">
+      {isMiniCalendarVisible ? (
+        <div className="shrink-0 border-b border-slate-200 bg-white py-2 px-1">
           <GoogleMiniCalendar
             currentDateObj={currentDateObj}
             selectedDate={selectedCalendarDate}
             onSelectDate={setSelectedCalendarDate}
           />
         </div>
-      )}
+      ) : (
+        <>
+          {/* 데스크탑(lg 이상): 1번 패널 상단 배치 유지 */}
+          <div className="hidden lg:block shrink-0">
+            <TopCategoryGrid />
+          </div>
 
-      {/* 모바일(lg 미만): 하단 네비게이터바 바로 위로 5*3열 기능탭 배치 */}
-      <div className="block lg:hidden shrink-0 border-t border-slate-300 bg-white z-10">
-        <TopCategoryGrid />
-      </div>
+          {isQuickMemoTab ? (
+            <QuickMemoMonthList
+              selectedCategoryId={selectedCategoryId}
+              onSelectMonth={selectCategory}
+            />
+          ) : (
+            <>
+              <CategoryToolbar
+                totalCount={currentItems.length}
+                onExpandAll={handleExpandAll}
+                onCollapseAll={handleCollapseAll}
+                onAddGroup={handleAddGroup}
+                onAddCategory={handleAddCategory}
+              />
+
+              <CategoryGroupList
+                currentTopId={currentTopId}
+                currentGroups={currentGroups}
+                currentItems={currentItems}
+                unclassifiedItems={unclassifiedItems}
+                selectedCategoryId={selectedCategoryId}
+                draggedCategoryId={draggedCategoryId}
+                groupTargets={groupTargets}
+                onMoveGroup={(id, dir) =>
+                  setCategoryGroups((prev) =>
+                    moveScopedItem(prev, (g) => g.topCategoryId === currentTopId, id, dir)
+                  )
+                }
+                onMoveCategory={(catId, dir, gId) =>
+                  setCategoryItems((prev) =>
+                    moveScopedItem(
+                      prev,
+                      (c) => c.topCategoryId === currentTopId && (gId ? c.groupId === gId : !c.groupId),
+                      catId,
+                      dir
+                    )
+                  )
+                }
+                onMoveCategoryToGroup={handleMoveCategoryToGroup}
+                onDropSubItem={handleDropSubItem}
+                onToggleExpand={(id) =>
+                  setCategoryGroups((prev) =>
+                    prev.map((g) => (g.id === id ? { ...g, isExpanded: !g.isExpanded } : g))
+                  )
+                }
+                onUpdateGroupName={(id, name) =>
+                  setCategoryGroups((prev) =>
+                    prev.map((g) => (g.id === id ? { ...g, name } : g))
+                  )
+                }
+                onDeleteGroup={(id) => {
+                  if (FIXED_TODO_GROUP_IDS.has(id) || FIXED_PROJECT_GROUP_IDS.has(id)) return;
+                  setCategoryGroups((prev) => prev.filter((g) => g.id !== id));
+                  setCategoryItems((prev) =>
+                    prev.map((c) => (c.groupId === id ? { ...c, groupId: undefined } : c))
+                  );
+                }}
+                onAddCategoryToGroup={(id) => {
+                  if (currentTopId) {
+                    const newCatId = addCategoryItem(currentTopId, id || undefined);
+                    if (newCatId) {
+                      setEditingCategoryId(newCatId);
+                    }
+                  }
+                }}
+                onSelectCategory={selectCategory}
+                onUpdateCategoryName={(id, name) =>
+                  setCategoryItems((prev) =>
+                    prev.map((c) => (c.id === id ? { ...c, name } : c))
+                  )
+                }
+                onDeleteCategory={(id) => {
+                  if (FIXED_TODO_CATEGORY_IDS.has(id)) return;
+                  setCategoryItems((prev) => prev.filter((c) => c.id !== id));
+                }}
+                onCategoryDragStart={onCategoryDragStart}
+                onCategoryDragOver={onCategoryDragOver}
+                onCategoryDrop={onCategoryDrop}
+                onCategoryDragEnd={onCategoryDragEnd}
+                editingGroupId={editingGroupId}
+                onStartEditGroup={(id) => setEditingGroupId(id)}
+                onEndEditGroup={() => setEditingGroupId(null)}
+                editingCategoryId={editingCategoryId}
+                onStartEditCategory={(id) => setEditingCategoryId(id)}
+                onEndEditCategory={() => setEditingCategoryId(null)}
+              />
+            </>
+          )}
+
+          {/* 모바일(lg 미만): 하단 네비게이터바 바로 위로 5*3열 기능탭 배치 */}
+          <div className="block lg:hidden shrink-0 border-t border-slate-300 bg-white z-10">
+            <TopCategoryGrid />
+          </div>
+        </>
+      )}
 
       {/* 퀵메모 작성 모달 */}
       <QuickMemoModal
