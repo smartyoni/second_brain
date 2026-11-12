@@ -186,8 +186,8 @@ export interface WorkspaceContextType {
 
   // 선택 핸들러 (현재 활성 패널에 반영)
   selectTopCategory: (topId: string) => void;
-  selectCategory: (catId: string) => void;
-  selectSubItem: (subId: string) => void;
+  selectCategory: (catId: string, navigateOnMobile?: boolean) => void;
+  selectSubItem: (subId: string, navigateOnMobile?: boolean) => void;
 
   // 데이터
   topCategories: TopCategory[];

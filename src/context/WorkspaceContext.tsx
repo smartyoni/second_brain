@@ -61,22 +61,26 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }));
   };
 
-  const selectCategory = (catId: string) => {
+  const selectCategory = (catId: string, navigateOnMobile = true) => {
     const firstSub = subItems.find((s) => s.categoryId === catId);
     updateActivePanelState((prev) => ({
       ...prev,
       categoryId: catId,
       subItemId: firstSub ? firstSub.id : null,
     }));
-    setMobileStep('subitem');
+    if (navigateOnMobile) {
+      setMobileStep('subitem');
+    }
   };
 
-  const selectSubItem = (subId: string) => {
+  const selectSubItem = (subId: string, navigateOnMobile = true) => {
     updateActivePanelState((prev) => ({
       ...prev,
       subItemId: subId,
     }));
-    setMobileStep('detail');
+    if (navigateOnMobile) {
+      setMobileStep('detail');
+    }
   };
 
   const setPanelDetailTab = (panel: ActivePanel, tab: DetailTab) => {

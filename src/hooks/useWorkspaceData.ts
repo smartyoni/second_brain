@@ -17,8 +17,8 @@ import {
 } from '../context/initialData';
 
 export const useWorkspaceData = (
-  selectCategory: (catId: string) => void,
-  selectSubItem: (subId: string) => void
+  selectCategory: (catId: string, navigateOnMobile?: boolean) => void,
+  selectSubItem: (subId: string, navigateOnMobile?: boolean) => void
 ) => {
   const [topCategories, setTopCategories] = useState<TopCategory[]>(initialTopCategories);
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>(initialGroups);
@@ -48,7 +48,7 @@ export const useWorkspaceData = (
       order: categoryItems.length,
     };
     setCategoryItems((prev) => [...prev, newItem]);
-    selectCategory(newItem.id);
+    selectCategory(newItem.id, false);
     return newItem.id;
   };
 
@@ -61,7 +61,7 @@ export const useWorkspaceData = (
       isCompleted: false,
     };
     setSubItems((prev) => [...prev, newSub]);
-    selectSubItem(newSub.id);
+    selectSubItem(newSub.id, false);
     return newSub.id;
   };
 
