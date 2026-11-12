@@ -4,7 +4,6 @@ import {
   CategoryItem,
   SubItem,
   ChecklistGroupData,
-  PanelDetailState,
 } from '../types';
 import { initialQuickMemos } from '../context/initialData';
 
@@ -12,8 +11,7 @@ export const useQuickMemoData = (
   categoryItems: CategoryItem[],
   setCategoryItems: React.Dispatch<React.SetStateAction<CategoryItem[]>>,
   setSubItems: React.Dispatch<React.SetStateAction<SubItem[]>>,
-  setChecklistGroups: React.Dispatch<React.SetStateAction<ChecklistGroupData[]>>,
-  updateActivePanelState: (updater: (prev: PanelDetailState) => PanelDetailState) => void
+  setChecklistGroups: React.Dispatch<React.SetStateAction<ChecklistGroupData[]>>
 ) => {
   const [quickMemos, setQuickMemos] = useState<QuickMemo[]>(initialQuickMemos);
 
@@ -68,15 +66,6 @@ export const useQuickMemoData = (
       },
       ...prev,
     ]);
-
-    // 방금 작성한 메모로 즉시 선택 활성화
-    updateActivePanelState((prev) => ({
-      ...prev,
-      topCategoryId: 'top-1',
-      categoryId: targetCatId,
-      subItemId: newSubId,
-      activeTab: 'check',
-    }));
   };
 
   const deleteQuickMemo = (id: string) => {

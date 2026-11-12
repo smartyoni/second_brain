@@ -114,8 +114,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     categoryItems,
     setCategoryItems,
     setSubItems,
-    setChecklistGroups,
-    updateActivePanelState
+    setChecklistGroups
   );
 
   // 3. 캘린더 및 일정 연동
