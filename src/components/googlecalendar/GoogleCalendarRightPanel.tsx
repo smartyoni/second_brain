@@ -3,7 +3,7 @@ import {
   Calendar as CalendarIcon,
   Plus,
   X,
-  CalendarDays,
+  ShoppingBag,
   ListTodo,
   Clock,
   List,
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
 import { GoogleCalendarDayView } from './GoogleCalendarDayView';
-import { GoogleCalendarThreeDayView } from './GoogleCalendarThreeDayView';
+import { GoogleCalendarShoppingView } from './GoogleCalendarShoppingView';
 import { GoogleCalendarScheduleView } from './GoogleCalendarScheduleView';
 import { GoogleCalendarTodoView } from './GoogleCalendarTodoView';
 import {
@@ -21,7 +21,7 @@ import {
   getTodayDateStr,
 } from '../../utils/googleCalendarUtils';
 
-export type CalendarSideViewType = 'day' | 'threeDay' | 'todo' | 'schedule';
+export type CalendarSideViewType = 'day' | 'shopping' | 'todo' | 'schedule';
 
 interface GoogleCalendarRightPanelProps {
   sideViewType: CalendarSideViewType;
@@ -76,7 +76,7 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (sideViewType === 'todo') return;
+    if (sideViewType === 'todo' || sideViewType === 'shopping') return;
     if (e.touches.length !== 1) return;
     touchStartRef.current = {
       x: e.touches[0].clientX,
@@ -85,7 +85,7 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (sideViewType === 'todo') return;
+    if (sideViewType === 'todo' || sideViewType === 'shopping') return;
     if (!touchStartRef.current || e.changedTouches.length !== 1) return;
     const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
     const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
@@ -105,15 +105,22 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
       {/* 1. 상단 컨트롤 바 */}
       <div className="p-3 border-b border-[#dadce0] bg-[#fafafa] flex flex-col gap-2 shrink-0">
         {/* 상단 날짜 네비게이션 및 닫기 */}
-        {sideViewType === 'todo' ? (
+        {sideViewType === 'todo' || sideViewType === 'shopping' ? (
           <div className="flex items-center justify-between gap-1 py-0.5">
-            <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs text-[#3c4043] font-bold">
-              <ListTodo className="w-4 h-4 text-[#1a73e8]" />
-              <span>진행중</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-100 text-red-700 font-bold">
-                {items.filter((i) => !!i.isInProgress && !i.isCompleted).length}
-              </span>
-            </div>
+            {sideViewType === 'todo' ? (
+              <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs text-[#3c4043] font-bold">
+                <ListTodo className="w-4 h-4 text-[#1a73e8]" />
+                <span>진행중</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-red-100 text-red-700 font-bold">
+                  {items.filter((i) => !!i.isInProgress && !i.isCompleted).length}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs text-[#3c4043] font-bold">
+                <ShoppingBag className="w-4 h-4 text-[#1a73e8]" />
+                <span>쇼핑</span>
+              </div>
+            )}
             <button
               type="button"
               onClick={onClose}
@@ -198,12 +205,12 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
           </div>
         )}
 
-        {/* 서브 뷰 전환 세그먼트 탭 [ 일 | 3일 | 일정 | 진행중 ] (모바일에서는 하단 바로 이동하여 데스크탑에서만 표시) */}
+        {/* 서브 뷰 전환 세그먼트 탭 [ 일 | 쇼핑 | 일정 | 진행중 ] (모바일에서는 하단 바로 이동하여 데스크탑에서만 표시) */}
         <div className="hidden lg:grid grid-cols-4 bg-[#f1f3f4] border border-[#dadce0] p-0.5 rounded-lg text-xs font-medium text-center">
           {(
             [
               { id: 'day', label: '일', Icon: Clock },
-              { id: 'threeDay', label: '3일', Icon: CalendarDays },
+              { id: 'shopping', label: '쇼핑', Icon: ShoppingBag },
               { id: 'schedule', label: '일정', Icon: List },
               { id: 'todo', label: '진행중', Icon: ListTodo },
             ] as const
@@ -247,23 +254,7 @@ export const GoogleCalendarRightPanel: React.FC<GoogleCalendarRightPanelProps> =
           />
         )}
 
-        {sideViewType === 'threeDay' && (
-          <GoogleCalendarThreeDayView
-            currentDateObj={currentDateObj}
-            selectedDate={selectedDate}
-            items={items}
-            onSelectDate={onSelectDate}
-            onSelectItem={onSelectItem}
-            onCellClick={onCellClick}
-            draggedItem={draggedItem}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDropOnTime={onDropOnTime}
-            onDropAllDay={onDropAllDay}
-            onDragEnd={onDragEnd}
-            onContextMenu={onContextMenu}
-          />
-        )}
+        {sideViewType === 'shopping' && <GoogleCalendarShoppingView />}
 
         {sideViewType === 'todo' && (
           <GoogleCalendarTodoView

@@ -3,7 +3,7 @@ import { useWorkspace } from '../context/WorkspaceContext';
 import { CalendarScheduleItem } from '../types';
 import { getTodayDateStr, formatLocalDateStr, parseLocalDate } from '../utils/calendarUtils';
 
-export type FullCalendarViewType = 'month' | 'threeDay' | 'day' | 'schedule' | 'todo';
+export type FullCalendarViewType = 'month' | 'shopping' | 'day' | 'schedule' | 'todo';
 
 export const useFullCalendar = () => {
   const {
@@ -86,8 +86,6 @@ export const useFullCalendar = () => {
     const d = new Date(currentDateObj);
     if (viewType === 'month' || viewType === 'schedule') {
       d.setMonth(d.getMonth() - 1);
-    } else if (viewType === 'threeDay') {
-      d.setDate(d.getDate() - 3);
     } else {
       d.setDate(d.getDate() - 1);
     }
@@ -98,8 +96,6 @@ export const useFullCalendar = () => {
     const d = new Date(currentDateObj);
     if (viewType === 'month' || viewType === 'schedule') {
       d.setMonth(d.getMonth() + 1);
-    } else if (viewType === 'threeDay') {
-      d.setDate(d.getDate() + 3);
     } else {
       d.setDate(d.getDate() + 1);
     }

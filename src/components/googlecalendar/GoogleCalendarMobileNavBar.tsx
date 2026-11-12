@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Calendar, CalendarDays, Clock, List, ListTodo } from 'lucide-react';
+import { ShoppingBag, CalendarDays, Clock, List, ListTodo } from 'lucide-react';
 import { CalendarSideViewType } from './GoogleCalendarRightPanel';
 
 export type CalendarMobilePanel = 'month' | 'detail' | 'sidebar';
@@ -49,11 +49,11 @@ export const GoogleCalendarMobileNavBar: React.FC<GoogleCalendarMobileNavBarProp
       onClick: () => handleSelectSideView('day'),
     },
     {
-      id: 'threeDay' as const,
-      label: '3일',
-      Icon: Calendar,
-      isActive: !isMonthActive && sideViewType === 'threeDay',
-      onClick: () => handleSelectSideView('threeDay'),
+      id: 'shopping' as const,
+      label: '쇼핑',
+      Icon: ShoppingBag,
+      isActive: !isMonthActive && sideViewType === 'shopping',
+      onClick: () => handleSelectSideView('shopping'),
     },
     {
       id: 'schedule' as const,
@@ -71,11 +71,11 @@ export const GoogleCalendarMobileNavBar: React.FC<GoogleCalendarMobileNavBarProp
     },
   ];
 
-  // 현재 활성 뷰 인덱스 구하기 (0: 월간, 1: 일, 2: 3일, 3: 일정, 4: 진행중)
+  // 현재 활성 뷰 인덱스 구하기 (0: 월간, 1: 일, 2: 쇼핑, 3: 일정, 4: 진행중)
   const getActiveIndex = (): number => {
     if (isMonthActive) return 0;
     if (sideViewType === 'day') return 1;
-    if (sideViewType === 'threeDay') return 2;
+    if (sideViewType === 'shopping') return 2;
     if (sideViewType === 'schedule') return 3;
     if (sideViewType === 'todo') return 4;
     return 0;

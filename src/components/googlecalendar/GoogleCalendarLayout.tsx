@@ -21,7 +21,7 @@ export const GoogleCalendarLayout: React.FC = () => {
   const [sideViewType, setSideViewType] = useState<CalendarSideViewType>(() => {
     try {
       const s = localStorage.getItem('sb_cal_side_view_type') as CalendarSideViewType;
-      if (['day', 'threeDay', 'todo', 'schedule'].includes(s)) return s;
+      if (['day', 'shopping', 'todo', 'schedule'].includes(s)) return s;
     } catch {}
     return 'day';
   });

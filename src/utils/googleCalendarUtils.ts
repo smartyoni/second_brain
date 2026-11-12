@@ -230,17 +230,13 @@ export function getGoogleCalendarHeaderTitle(
 
 export function shiftDateBySideView(
   selectedDate: string,
-  sideViewType: string,
+  _sideViewType: string,
   direction: 'prev' | 'next'
 ): string {
   const base = parseLocalDate(selectedDate);
   const delta = direction === 'prev' ? -1 : 1;
 
-  if (sideViewType === 'threeDay') {
-    base.setDate(base.getDate() + delta * 3);
-  } else {
-    base.setDate(base.getDate() + delta * 1);
-  }
+  base.setDate(base.getDate() + delta * 1);
   return formatLocalDateStr(base);
 }
 
@@ -256,10 +252,8 @@ export function getSidePanelDateLabel(
     return '진행중';
   }
 
-  if (sideViewType === 'threeDay') {
-    const endObj = new Date(currentDateObj);
-    endObj.setDate(endObj.getDate() + 2);
-    return `${currentDateObj.getMonth() + 1}월 ${currentDateObj.getDate()}일 ~ ${endObj.getMonth() + 1}월 ${endObj.getDate()}일`;
+  if (sideViewType === 'shopping') {
+    return '쇼핑';
   }
 
   return currentDateObj.toLocaleDateString('ko-KR', {
