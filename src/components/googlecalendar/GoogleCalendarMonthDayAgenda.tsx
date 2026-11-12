@@ -20,6 +20,9 @@ interface GoogleCalendarMonthDayAgendaProps {
   onSelectItem: (item: CalendarScheduleItem) => void;
   onAddEvent: (dateStr: string) => void;
   onClose?: () => void;
+  onPrevDay?: () => void;
+  onNextDay?: () => void;
+  onSwipeUp?: () => void;
   className?: string;
 }
 
@@ -29,10 +32,14 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
   onSelectItem,
   onAddEvent,
   onClose,
+  onPrevDay,
+  onNextDay,
+  onSwipeUp,
   className,
 }) => {
   const { toggleCheckItemCompleted, toggleCalendarEventCompleted } = useWorkspace();
   const listRef = useRef<HTMLDivElement>(null);
+  const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const {
     translateY,
@@ -44,6 +51,50 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
     threshold: 50,
     scrollContainerRef: listRef,
   });
+
+  const handleAgendaTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    swipeStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+  };
+
+  const handleAgendaTouchEnd = (e: React.TouchEvent) => {
+    if (!swipeStartRef.current || e.changedTouches.length !== 1) return;
+    const diffX = e.changedTouches[0].clientX - swipeStartRef.current.x;
+    const diffY = e.changedTouches[0].clientY - swipeStartRef.current.y;
+    swipeStartRef.current = null;
+
+    const absX = Math.abs(diffX);
+    const absY = Math.abs(diffY);
+
+    if (absX > 45 && absX > absY * 1.2) {
+      if (diffX < 0) {
+        onNextDay?.();
+      } else {
+        onPrevDay?.();
+      }
+    }
+  };
+
+  const headerSwipeUpStartY = useRef<number | null>(null);
+  const handleHeaderSwipeUpStart = (e: React.TouchEvent) => {
+    headerTouchHandlers.onTouchStart(e);
+    if (e.touches.length === 1) {
+      headerSwipeUpStartY.current = e.touches[0].clientY;
+    }
+  };
+  const handleHeaderSwipeUpEnd = (e: React.TouchEvent) => {
+    headerTouchHandlers.onTouchEnd(e);
+    if (headerSwipeUpStartY.current !== null && e.changedTouches.length === 1) {
+      const diffY = e.changedTouches[0].clientY - headerSwipeUpStartY.current;
+      if (diffY < -40) {
+        onSwipeUp?.();
+      }
+    }
+    headerSwipeUpStartY.current = null;
+  };
 
   const dateObj = parseLocalDate(selectedDate);
   const isValid = !isNaN(dateObj.getTime());
@@ -71,6 +122,8 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
 
   return (
     <aside
+      onTouchStart={handleAgendaTouchStart}
+      onTouchEnd={handleAgendaTouchEnd}
       className={
         className
           ? className
@@ -85,7 +138,9 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
       {/* 1. 상단 헤더 */}
       <div
         className="p-3 sm:p-4 border-b border-[#dadce0] bg-[#fafafa] touch-none select-none"
-        {...headerTouchHandlers}
+        onTouchStart={handleHeaderSwipeUpStart}
+        onTouchMove={headerTouchHandlers.onTouchMove}
+        onTouchEnd={handleHeaderSwipeUpEnd}
       >
         {/* 모바일 시트 핸들 바 */}
         <div

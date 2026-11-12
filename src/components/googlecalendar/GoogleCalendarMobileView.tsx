@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronUp } from 'lucide-react';
 import { CalendarScheduleItem, TopCategory } from '../../types';
 import { isItemOnDate } from '../../utils/calendarUtils';
+import { shiftDateBySideView } from '../../utils/googleCalendarUtils';
 import { CalendarMobilePanel, GoogleCalendarMobileNavBar } from './GoogleCalendarMobileNavBar';
 import { GoogleCalendarMonthGrid } from './GoogleCalendarMonthGrid';
 import { GoogleCalendarMonthDayAgenda } from './GoogleCalendarMonthDayAgenda';
@@ -71,7 +72,26 @@ export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> =
   onPrevMonth,
   onNextMonth,
 }) => {
-  const [isAgendaOpen, setIsAgendaOpen] = useState(false);
+  const [agendaStage, setAgendaStage] = useState<'closed' | 'half' | 'week'>('closed');
+
+  const isAgendaOpen = agendaStage !== 'closed';
+  const isWeekOnly = agendaStage === 'week';
+
+  const handleSwipeUp = () => {
+    setAgendaStage((prev) => (prev === 'closed' ? 'half' : 'week'));
+  };
+
+  const handleSwipeDown = () => {
+    setAgendaStage((prev) => (prev === 'week' ? 'half' : 'closed'));
+  };
+
+  const handlePrevDay = () => {
+    onSelectDate(shiftDateBySideView(selectedDate, 'day', 'prev'));
+  };
+
+  const handleNextDay = () => {
+    onSelectDate(shiftDateBySideView(selectedDate, 'day', 'next'));
+  };
 
   const handleDateClickMobile = (dateStr: string) => {
     onSelectDate(dateStr);
@@ -82,13 +102,17 @@ export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> =
     <div className="flex-1 flex flex-col h-full w-full overflow-hidden bg-white">
       {/* 1. 패널 본문 영역 */}
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
-        {/* 패널 A: 월간 달력 (접이식 아젠다 분할 뷰 지원) */}
+        {/* 패널 A: 월간 달력 (3단계 접이식 아젠다 분할 뷰: closed -> half -> week) */}
         {mobilePanel === 'month' && (
           <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
-            {/* 상단 월간 달력 (아젠다 열림 시 기존 대비 30% 더 위로 접혀 32% 높이, 닫힘 시 100% 전체화면) */}
+            {/* 상단 월간 달력 (closed: 100%, half: 32%, week: 선택 주 1줄만 표시) */}
             <div
               className={`w-full overflow-hidden transition-all duration-200 flex flex-col ${
-                isAgendaOpen ? 'h-[32%] border-b border-[#dadce0]' : 'h-full'
+                agendaStage === 'week'
+                  ? 'h-auto shrink-0 border-b border-[#dadce0]'
+                  : agendaStage === 'half'
+                  ? 'h-[32%] border-b border-[#dadce0]'
+                  : 'h-full'
               }`}
             >
               <GoogleCalendarMonthGrid
@@ -105,18 +129,19 @@ export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> =
                 onDragEnd={onDragEnd}
                 onContextMenu={onContextMenu}
                 onDateClickMobile={handleDateClickMobile}
-                onPrevMonth={onPrevMonth}
-                onNextMonth={onNextMonth}
-                onSwipeUp={() => setIsAgendaOpen(true)}
-                onSwipeDown={() => setIsAgendaOpen(false)}
+                onPrevMonth={isAgendaOpen ? handlePrevDay : onPrevMonth}
+                onNextMonth={isAgendaOpen ? handleNextDay : onNextMonth}
+                onSwipeUp={handleSwipeUp}
+                onSwipeDown={handleSwipeDown}
                 compact={isAgendaOpen}
+                weekOnly={isWeekOnly}
               />
 
               {/* 월간 전체화면일 때 하단 스와이프/탭 힌트 바 */}
               {!isAgendaOpen && (
                 <button
                   type="button"
-                  onClick={() => setIsAgendaOpen(true)}
+                  onClick={() => setAgendaStage('half')}
                   className="w-full py-1 bg-[#f8f9fa] border-t border-[#dadce0] flex items-center justify-center gap-1 text-[11px] text-[#5f6368] hover:bg-[#e8eaed] active:bg-[#dadce0] transition-colors shrink-0 cursor-pointer"
                   title="위로 스와이프하거나 탭하여 당일 일정 보기"
                 >
@@ -126,15 +151,22 @@ export const GoogleCalendarMobileView: React.FC<GoogleCalendarMobileViewProps> =
               )}
             </div>
 
-            {/* 하단 당일 일정 아젠다 시트 (isAgendaOpen일 때 기존 54% -> 68% 높이로 대폭 확장되어 일정 노출 증가) */}
+            {/* 하단 당일 일정 아젠다 시트 (half: 68%, week: 주간 1줄 제외한 나머지 전체) */}
             {isAgendaOpen && (
-              <div className="flex-1 h-[68%] w-full overflow-hidden bg-white animate-in slide-in-from-bottom-4 duration-200">
+              <div
+                className={`flex-1 w-full overflow-hidden bg-white animate-in slide-in-from-bottom-4 duration-200 ${
+                  agendaStage === 'week' ? 'min-h-0' : 'h-[68%]'
+                }`}
+              >
                 <GoogleCalendarMonthDayAgenda
                   selectedDate={selectedDate}
                   items={items.filter((i) => isItemOnDate(i, selectedDate))}
                   onSelectItem={onSelectItem}
                   onAddEvent={(dateStr) => onCellClick(dateStr)}
-                  onClose={() => setIsAgendaOpen(false)}
+                  onPrevDay={handlePrevDay}
+                  onNextDay={handleNextDay}
+                  onSwipeUp={handleSwipeUp}
+                  onClose={handleSwipeDown}
                   className="w-full h-full flex flex-col select-none"
                 />
               </div>

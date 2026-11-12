@@ -22,6 +22,7 @@ export interface GoogleCalendarMonthGridProps {
   onSwipeUp?: () => void;
   onSwipeDown?: () => void;
   compact?: boolean;
+  weekOnly?: boolean;
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -45,6 +46,7 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
   onSwipeUp,
   onSwipeDown,
   compact = false,
+  weekOnly = false,
 }) => {
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -150,6 +152,15 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
 
   const totalWeeks = Math.ceil(days.length / 7);
 
+  // 주간 접힘 모드(weekOnly): 선택된 날짜가 속한 주 7일만 표시
+  const visibleDays = React.useMemo(() => {
+    if (!weekOnly) return days;
+    const selectedIdx = days.findIndex((d) => d.dateStr === selectedDate);
+    if (selectedIdx === -1) return days.slice(0, 7);
+    const weekIdx = Math.floor(selectedIdx / 7);
+    return days.slice(weekIdx * 7, weekIdx * 7 + 7);
+  }, [weekOnly, days, selectedDate]);
+
   const handleCellSelect = (dateStr: string) => {
     if (isSwipingRef.current) return;
     onSelectDate(dateStr);
@@ -185,12 +196,14 @@ export const GoogleCalendarMonthGrid: React.FC<GoogleCalendarMonthGridProps> = (
       <div
         className="flex-1 grid grid-cols-7 border-l border-[#dadce0] overflow-y-auto"
         style={{
-          gridTemplateRows: compact
+          gridTemplateRows: weekOnly
+            ? 'minmax(48px, auto)'
+            : compact
             ? `repeat(${totalWeeks}, minmax(0, 1fr))`
             : `repeat(${totalWeeks}, minmax(90px, 1fr))`,
         }}
       >
-        {days.map((item, idx) => {
+        {visibleDays.map((item, idx) => {
           const isSelected = item.dateStr === selectedDate;
           const isToday = item.dateStr === todayStr;
           const dayItems = itemsByDate.get(item.dateStr) || [];
