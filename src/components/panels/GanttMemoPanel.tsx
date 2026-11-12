@@ -4,6 +4,7 @@ import { DetailItemChecklistSection } from '../memo/DetailItemChecklistSection';
 import { DetailItemMemoSection } from '../memo/DetailItemMemoSection';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { SmartText } from '../shared/SmartText';
+import { getDetailItemSummary } from '../../utils/detailItemSummary';
 
 export const GanttMemoPanel: React.FC = () => {
   // 기본 화면: 체크리스트, [체크] [텍스트] 순서로 탭 전환
@@ -50,38 +51,10 @@ export const GanttMemoPanel: React.FC = () => {
   };
 
   // 현재 선택된 항목의 제목 및 하위 항목 숫자(체크/텍스트) 계산
-  const { targetTitle, checkCount, textCount } = useMemo(() => {
-    if (!selectedDetailItem) {
-      return { targetTitle: '', checkCount: 0, textCount: 0 };
-    }
-    const { type, groupId, itemId } = selectedDetailItem;
-
-    let title = '';
-    let checklistLen = 0;
-    let memoText = '';
-
-    if (type === 'checklist') {
-      const grp = checklistGroups.find((g) => g.id === groupId);
-      const itm = grp?.items.find((i) => i.id === itemId);
-      title = itm?.text || '';
-      checklistLen = itm?.checklist?.length || 0;
-      memoText = itm?.memo || '';
-    } else {
-      const grp = textGroups.find((g) => g.id === groupId);
-      const blk = grp?.blocks.find((b) => b.id === itemId);
-      title = blk?.text.split('\n')[0] || grp?.name || '';
-      checklistLen = blk?.checklist?.length || 0;
-      memoText = blk?.memo || '';
-    }
-
-    const hasMemo = memoText.trim().length > 0;
-
-    return {
-      targetTitle: title,
-      checkCount: checklistLen,
-      textCount: hasMemo ? 1 : 0,
-    };
-  }, [selectedDetailItem, checklistGroups, textGroups]);
+  const { targetTitle, checkCount, textCount } = useMemo(
+    () => getDetailItemSummary(selectedDetailItem, checklistGroups, textGroups),
+    [selectedDetailItem, checklistGroups, textGroups]
+  );
 
   return (
     <div
