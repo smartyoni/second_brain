@@ -194,6 +194,11 @@ export const useCalendarSchedule = (
       setTextGroups((prev) => prev.map((g) => g.id === item.groupId ? {
         ...g, blocks: g.blocks.map((b) => b.id === item.id ? { ...b, checklist: updater(b.checklist || []) } : b)
       } : g));
+    } else if (item.sourceType === 'subcheck') {
+      updateSubCheckItem(item.id, (sub) => ({
+        ...sub,
+        checklist: updater(sub.checklist || []),
+      }));
     }
   };
 

@@ -43,6 +43,7 @@ export interface SubCheckItem {
   dueDate?: string; // YYYY-MM-DD
   dueTime?: string; // HH:mm
   endDate?: string; // YYYY-MM-DD
+  checklist?: SubCheckItem[];
 }
 
 // 3번 패널: 텍스트 블록

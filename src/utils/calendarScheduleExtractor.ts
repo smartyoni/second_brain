@@ -70,6 +70,7 @@ export const extractAllScheduleItems = ({
               topCategoryId: category?.topCategoryId || '',
               parentItemId: item.id,
               parentItemTitle: item.text,
+              checklist: sub.checklist || [],
             });
           }
         });
@@ -123,6 +124,7 @@ export const extractAllScheduleItems = ({
               topCategoryId: category?.topCategoryId || '',
               parentItemId: block.id,
               parentItemTitle: firstLine || group.name,
+              checklist: sub.checklist || [],
             });
           }
         });
@@ -171,6 +173,7 @@ export const extractAllScheduleItems = ({
             topCategoryId: category?.topCategoryId || '',
             parentItemId: evt.id,
             parentItemTitle: evt.title,
+            checklist: sub.checklist || [],
           });
         }
       });
