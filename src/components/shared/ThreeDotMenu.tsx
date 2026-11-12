@@ -88,7 +88,11 @@ export const ThreeDotMenu: React.FC<ThreeDotMenuProps> = ({
   };
 
   return (
-    <div ref={containerRef} className="relative inline-flex items-center ml-auto mr-0 pr-0">
+    <div
+      ref={containerRef}
+      onClick={(e) => e.stopPropagation()}
+      className="relative inline-flex items-center ml-auto mr-0 pr-0"
+    >
       <button
         ref={buttonRef}
         type="button"

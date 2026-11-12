@@ -55,6 +55,7 @@ export const ConfirmPopover: React.FC<ConfirmPopoverProps> = ({
   return createPortal(
     <div
       ref={popoverRef}
+      onClick={(e) => e.stopPropagation()}
       style={{ top: `${top}px`, left: `${left}px` }}
       className="fixed z-50 w-40 bg-white border border-slate-300 rounded shadow-lg p-2 text-xs animate-in fade-in zoom-in-95 duration-100"
     >
