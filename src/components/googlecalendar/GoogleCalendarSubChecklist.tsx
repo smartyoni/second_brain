@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ListChecks, Plus, CheckSquare } from 'lucide-react';
 import { CalendarScheduleItem, SubCheckItem } from '../../types';
 import { useWorkspace } from '../../context/WorkspaceContext';
@@ -30,7 +30,7 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
   const totalCount = checklistItems.length;
 
   // 체크리스트 항목 추가 (미완료 목록 하단, 완료된 항목들 상단에 배치)
-  const handleAddChecklistItem = () => {
+  const handleAddChecklistItem = useCallback(() => {
     const newId = `subcheck-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
     onUpdateChecklist((prev) => {
@@ -46,7 +46,31 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
     });
 
     setEditingItemId(newId);
-  };
+  }, [onUpdateChecklist]);
+
+  // 단축키: 모달 내 비편집 상태에서 Shift+Enter 시 새 체크리스트 항목 추가
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || !e.shiftKey) return;
+      if (schedulingItem) return;
+
+      const activeEl = document.activeElement;
+      const isInputField =
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          (activeEl as HTMLElement).isContentEditable);
+
+      if (isInputField) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      handleAddChecklistItem();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleAddChecklistItem, schedulingItem]);
 
   // 완료 토글 (완료된 항목은 하단으로 이동)
   const handleToggleComplete = (subId: string) => {
@@ -133,6 +157,7 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
 
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => handleAddChecklistItem()}
           className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-white bg-pink-600 hover:bg-pink-700 transition-colors shadow-2xs cursor-pointer shrink-0"
         >
@@ -167,6 +192,7 @@ export const GoogleCalendarSubChecklist: React.FC<GoogleCalendarSubChecklistProp
                   onToggleComplete={handleToggleComplete}
                   onUpdateText={handleUpdateText}
                   onDelete={handleDeleteItem}
+                  onSaveAndAddNew={() => handleAddChecklistItem()}
                   onOpenSchedule={setSchedulingItem}
                   onSelectCalendarDate={setSelectedCalendarDate}
                   onDragStart={handleDragStart}

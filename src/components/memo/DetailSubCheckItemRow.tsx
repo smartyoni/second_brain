@@ -16,6 +16,7 @@ interface DetailSubCheckItemRowProps {
   onToggleComplete: (id: string) => void;
   onUpdateText: (id: string, text: string) => void;
   onDelete: (id: string) => void;
+  onSaveAndAddNew?: (newText: string) => void;
   onOpenSchedule?: (item: SubCheckItem) => void;
   onSelectCalendarDate?: (date: string) => void;
   onDragStart: (id: string, e: React.DragEvent) => void;
@@ -35,6 +36,7 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
   onToggleComplete,
   onUpdateText,
   onDelete,
+  onSaveAndAddNew,
   onOpenSchedule,
   onSelectCalendarDate,
   onDragStart,
@@ -64,6 +66,16 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
     onClearForceEdit?.();
   };
 
+  const handleSaveAndAddNew = (newText: string) => {
+    const trimmed = newText.trim();
+    if (trimmed) {
+      onUpdateText(item.id, trimmed);
+    }
+    setIsEditing(false);
+    onClearForceEdit?.();
+    onSaveAndAddNew?.(newText);
+  };
+
   return (
     <div
       draggable={!isEditing}
@@ -89,6 +101,7 @@ export const DetailSubCheckItemRow: React.FC<DetailSubCheckItemRowProps> = ({
             isEditing={isEditing}
             onSave={handleSave}
             onCancel={handleCancel}
+            onSaveAndAddNew={onSaveAndAddNew ? handleSaveAndAddNew : undefined}
             rows={3}
             saveOnEnter={false}
             placeholder="(체크 항목을 입력하세요)"
