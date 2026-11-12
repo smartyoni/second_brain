@@ -21,7 +21,7 @@ const AppContent: React.FC = () => {
     mobileStep,
     setMobileStep,
     addQuickMemo,
-    selectTopCategory,
+    goToCurrentQuickMemoCategory,
     selectedCalendarDate,
     setSelectedCalendarDate,
     getCurrentActiveState,
@@ -47,9 +47,7 @@ const AppContent: React.FC = () => {
   };
 
   const handleQuickMove = () => {
-    setAppMode('workspace');
-    selectTopCategory('top-1');
-    setMobileStep('category');
+    goToCurrentQuickMemoCategory();
   };
 
   const handleHomeNavigation = () => {

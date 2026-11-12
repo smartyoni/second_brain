@@ -18,20 +18,15 @@ export const QuickMemoBar: React.FC<QuickMemoBarProps> = ({
   onOpenModal,
   isQuickMemoTab = true,
 }) => {
-  const { appMode, setAppMode, selectTopCategory, selectedCalendarDate } = useWorkspace();
+  const { appMode, setAppMode, goToCurrentQuickMemoCategory, selectedCalendarDate } = useWorkspace();
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
   const handleSelectMove = () => {
-    setAppMode('workspace');
-    selectTopCategory('top-1');
+    goToCurrentQuickMemoCategory();
     onSelectSegment('move');
   };
 
   const handleSelectMemo = () => {
-    // 캘린더 모드에서는 지식보관소로 튕기지 않고 현재 캘린더 모드를 유지한 채 퀵메모 모달 열기
-    if (appMode === 'workspace') {
-      selectTopCategory('top-1');
-    }
     onSelectSegment('memo');
     onOpenModal();
   };

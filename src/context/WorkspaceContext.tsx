@@ -83,6 +83,25 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const goToCurrentQuickMemoCategory = () => {
+    setAppMode('workspace');
+    const now = new Date();
+    const currentYearMonth = `${now.getFullYear()}년 ${String(now.getMonth() + 1).padStart(2, '0')}월`;
+    const targetCat =
+      categoryItems.find((c) => c.topCategoryId === 'top-1' && c.name === currentYearMonth) ||
+      categoryItems.find((c) => c.topCategoryId === 'top-1') ||
+      null;
+    const firstSub = targetCat ? subItems.find((s) => s.categoryId === targetCat.id) : null;
+
+    updateActivePanelState((prev) => ({
+      ...prev,
+      topCategoryId: 'top-1',
+      categoryId: targetCat ? targetCat.id : null,
+      subItemId: firstSub ? firstSub.id : null,
+    }));
+    setMobileStep(targetCat ? 'subitem' : 'category');
+  };
+
   const setPanelDetailTab = (panel: ActivePanel, tab: DetailTab) => {
     if (panel === 'panel-3') {
       setPanel3State((prev) => ({ ...prev, activeTab: tab }));
@@ -205,6 +224,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         selectTopCategory,
         selectCategory,
         selectSubItem,
+        goToCurrentQuickMemoCategory,
         topCategories,
         setTopCategories,
         categoryGroups,

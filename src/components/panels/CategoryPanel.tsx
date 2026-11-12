@@ -35,7 +35,6 @@ export const CategoryPanel: React.FC<CategoryPanelProps> = ({ showMiniCalendar }
     addCategoryItem,
     quickMemos,
     addQuickMemo,
-    selectTopCategory,
     selectedCalendarDate,
     setSelectedCalendarDate,
   } = useWorkspace();
@@ -130,9 +129,6 @@ export const CategoryPanel: React.FC<CategoryPanelProps> = ({ showMiniCalendar }
         isQuickMemoTab={isQuickMemoTab}
         onSelectSegment={(segment) => {
           setActiveSegment(segment);
-          if (segment === 'move' && !isQuickMemoTab) {
-            selectTopCategory('top-1');
-          }
         }}
         onOpenModal={() => setIsModalOpen(true)}
         memoCount={quickMemos.length}

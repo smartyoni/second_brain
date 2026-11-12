@@ -188,6 +188,7 @@ export interface WorkspaceContextType {
   selectTopCategory: (topId: string) => void;
   selectCategory: (catId: string, navigateOnMobile?: boolean) => void;
   selectSubItem: (subId: string, navigateOnMobile?: boolean) => void;
+  goToCurrentQuickMemoCategory: () => void;
 
   // 데이터
   topCategories: TopCategory[];
