@@ -49,6 +49,11 @@ export const GoogleCalendarScheduleItemRow: React.FC<GoogleCalendarScheduleItemR
           item.isCompleted ? 'line-through text-slate-400' : ''
         }`}
       >
+        {(item.groupId === 'tg-calendar-shopping' || item.subItemId === '__calendar_shopping__') && (
+          <span className="text-[10px] text-amber-800 font-semibold mr-1.5 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 shrink-0">
+            쇼핑
+          </span>
+        )}
         {item.sourceType === 'subcheck' && (
           <span className="text-[10px] text-emerald-800 font-semibold mr-1.5 px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 shrink-0">
             하위할일
