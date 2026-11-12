@@ -188,6 +188,12 @@ export const GoogleCalendarMonthCell: React.FC<GoogleCalendarMonthCellProps> = (
                       진행
                     </span>
                   )}
+                  {(schedule.groupId === 'tg-calendar-shopping' ||
+                    schedule.subItemId === '__calendar_shopping__') && (
+                    <span className="px-1 py-0.2 rounded-xs bg-amber-100 text-amber-800 text-[9px] font-bold shrink-0">
+                      쇼핑
+                    </span>
+                  )}
                   {schedule.sourceType === 'subcheck' && (
                     <span className="text-[9px] font-bold text-emerald-800 shrink-0">
                       ↳

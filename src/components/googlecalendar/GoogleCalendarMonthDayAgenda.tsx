@@ -226,7 +226,12 @@ export const GoogleCalendarMonthDayAgenda: React.FC<GoogleCalendarMonthDayAgenda
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 rounded-full ${color.bg}`} />
-                    {schedule.sourceType === 'calendar' ? (
+                    {schedule.groupId === 'tg-calendar-shopping' ||
+                    schedule.subItemId === '__calendar_shopping__' ? (
+                      <span className="text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded font-medium">
+                        쇼핑
+                      </span>
+                    ) : schedule.sourceType === 'calendar' ? (
                       <span className="text-[10px] px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded font-medium">
                         캘린더
                       </span>
