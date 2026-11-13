@@ -31,7 +31,7 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
   const [focusedPanel, setFocusedPanel] = useState<WorkspacePanelId>(loadSavedFocusedPanel);
 
   const isProjectTab = getCurrentActiveState().topCategoryId === 'top-3';
-  const activeRingColor = isProjectTab ? 'ring-indigo-600' : 'ring-blue-600';
+  const activeBorderColor = isProjectTab ? 'border-indigo-600' : 'border-blue-600';
 
   const handlePanelFocus = (panel: WorkspacePanelId) => {
     setFocusedPanel(panel);
@@ -62,52 +62,64 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
         {/* 1번 패널: 카테고리 패널 (276px의 120% 확장: 331px 고정) */}
         <div
           onMouseDownCapture={() => handlePanelFocus('panel-1')}
+          onClickCapture={() => handlePanelFocus('panel-1')}
+          onTouchStartCapture={() => handlePanelFocus('panel-1')}
           onFocusCapture={() => handlePanelFocus('panel-1')}
-          className={`w-[331px] shrink-0 h-full bg-white flex flex-col overflow-hidden transition-[box-shadow] duration-150 relative ${
-            focusedPanel === 'panel-1'
-              ? `ring-2 ring-inset ${activeRingColor} z-10`
-              : 'z-0'
-          }`}
+          className="w-[331px] shrink-0 h-full bg-white flex flex-col overflow-hidden relative"
         >
+          {focusedPanel === 'panel-1' && (
+            <div
+              className={`pointer-events-none absolute inset-0 border-2 border-t-4 ${activeBorderColor} z-30 shadow-xs`}
+            />
+          )}
           {panel1}
         </div>
 
         {/* 2번 패널: 하위 항목 리스트 패널 (2·3·4번 패널 동일 너비: flex-1 1:1:1 분할) */}
         <div
           onMouseDownCapture={() => handlePanelFocus('panel-2')}
+          onClickCapture={() => handlePanelFocus('panel-2')}
+          onTouchStartCapture={() => handlePanelFocus('panel-2')}
           onFocusCapture={() => handlePanelFocus('panel-2')}
-          className={`flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden transition-[box-shadow] duration-150 relative ${
-            focusedPanel === 'panel-2'
-              ? `ring-2 ring-inset ${activeRingColor} z-10`
-              : 'z-0'
-          }`}
+          className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden relative"
         >
+          {focusedPanel === 'panel-2' && (
+            <div
+              className={`pointer-events-none absolute inset-0 border-2 border-t-4 ${activeBorderColor} z-30 shadow-xs`}
+            />
+          )}
           {panel2}
         </div>
 
         {/* 3번 패널: 메인 상세 내용 (2·3·4번 패널 동일 너비: flex-1 1:1:1 분할) */}
         <div
           onMouseDownCapture={() => handlePanelFocus('panel-3')}
+          onClickCapture={() => handlePanelFocus('panel-3')}
+          onTouchStartCapture={() => handlePanelFocus('panel-3')}
           onFocusCapture={() => handlePanelFocus('panel-3')}
-          className={`flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden relative transition-[box-shadow] duration-150 ${
-            focusedPanel === 'panel-3'
-              ? `ring-2 ring-inset ${activeRingColor} z-10`
-              : 'z-0'
-          }`}
+          className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden relative"
         >
+          {focusedPanel === 'panel-3' && (
+            <div
+              className={`pointer-events-none absolute inset-0 border-2 border-t-4 ${activeBorderColor} z-30 shadow-xs`}
+            />
+          )}
           {panel3}
         </div>
 
         {/* 4번 패널: 항목 연동 세부 메모 및 체크리스트 (2·3·4번 패널 동일 너비: flex-1 1:1:1 분할) */}
         <div
           onMouseDownCapture={() => handlePanelFocus('panel-4')}
+          onClickCapture={() => handlePanelFocus('panel-4')}
+          onTouchStartCapture={() => handlePanelFocus('panel-4')}
           onFocusCapture={() => handlePanelFocus('panel-4')}
-          className={`flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden transition-[box-shadow] duration-150 relative ${
-            focusedPanel === 'panel-4'
-              ? `ring-2 ring-inset ${activeRingColor} z-10`
-              : 'z-0'
-          }`}
+          className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden relative"
         >
+          {focusedPanel === 'panel-4' && (
+            <div
+              className={`pointer-events-none absolute inset-0 border-2 border-t-4 ${activeBorderColor} z-30 shadow-xs`}
+            />
+          )}
           {panel4}
         </div>
       </div>
@@ -115,13 +127,19 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
       {/* 2. 모바일 / 태블릿 세로모드 뷰: 1개 패널 순차 드릴다운 네비게이션 */}
       <div className="flex lg:hidden h-full w-full bg-white flex-col overflow-hidden">
         {mobileStep === 'category' && (
-          <div className="h-full w-full flex flex-col overflow-hidden">
+          <div className="h-full w-full flex flex-col overflow-hidden relative">
+            <div
+              className={`pointer-events-none absolute inset-0 border-2 border-t-4 ${activeBorderColor} z-30 shadow-xs`}
+            />
             {panel1}
           </div>
         )}
 
         {mobileStep === 'subitem' && (
-          <div className="h-full w-full flex flex-col overflow-hidden">
+          <div className="h-full w-full flex flex-col overflow-hidden relative">
+            <div
+              className={`pointer-events-none absolute inset-0 border-2 border-t-4 ${activeBorderColor} z-30 shadow-xs`}
+            />
             {/* 뒤로가기 네비게이션 바 */}
             <div className="h-11 px-3.5 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
               <button
@@ -138,7 +156,10 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
         )}
 
         {mobileStep === 'detail' && (
-          <div className="h-full w-full flex flex-col overflow-hidden">
+          <div className="h-full w-full flex flex-col overflow-hidden relative">
+            <div
+              className={`pointer-events-none absolute inset-0 border-2 border-t-4 ${activeBorderColor} z-30 shadow-xs`}
+            />
             {/* 뒤로가기 네비게이션 바 */}
             <div className="h-11 px-3.5 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
               <button
@@ -156,7 +177,10 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
         )}
 
         {mobileStep === 'memo' && (
-          <div className="h-full w-full flex flex-col overflow-hidden">
+          <div className="h-full w-full flex flex-col overflow-hidden relative">
+            <div
+              className={`pointer-events-none absolute inset-0 border-2 border-t-4 ${activeBorderColor} z-30 shadow-xs`}
+            />
             {/* 뒤로가기 네비게이션 바 */}
             <div className="h-11 px-3.5 bg-slate-100 border-b border-slate-300 flex items-center gap-2 shrink-0 select-none">
               <button
