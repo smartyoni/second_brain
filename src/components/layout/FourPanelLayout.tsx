@@ -26,17 +26,17 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
           {panel1}
         </div>
 
-        {/* 2번 패널: 하위 항목 리스트 패널 (1번 패널과 동일 너비: 331px 고정) */}
-        <div className="w-[331px] shrink-0 h-full bg-white flex flex-col overflow-hidden">
+        {/* 2번 패널: 하위 항목 리스트 패널 (2·3·4번 패널 동일 너비: flex-1 1:1:1 분할) */}
+        <div className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden">
           {panel2}
         </div>
 
-        {/* 3번 패널: 메인 상세 내용 (3·4번 패널 동일 너비: flex-1 1:1 분할) */}
+        {/* 3번 패널: 메인 상세 내용 (2·3·4번 패널 동일 너비: flex-1 1:1:1 분할) */}
         <div className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden relative">
           {panel3}
         </div>
 
-        {/* 4번 패널: 항목 연동 세부 메모 및 체크리스트 (3·4번 패널 동일 너비: flex-1 1:1 분할) */}
+        {/* 4번 패널: 항목 연동 세부 메모 및 체크리스트 (2·3·4번 패널 동일 너비: flex-1 1:1:1 분할) */}
         <div className="flex-1 min-w-0 h-full bg-white flex flex-col overflow-hidden">
           {panel4}
         </div>
