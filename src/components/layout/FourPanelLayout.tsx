@@ -38,22 +38,14 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
     try {
       localStorage.setItem('sb_focused_panel', panel);
     } catch {}
-
-    if (panel === 'panel-3' && activePanel !== 'panel-3') {
-      setActivePanel('panel-3');
-    } else if (panel === 'panel-4' && activePanel !== 'panel-4') {
-      setActivePanel('panel-4');
-    }
   };
 
-  // activePanel이 외부에서 변경되면 3·4번 포커스 상태 동기화
+  // 4번 패널 포커스로 인해 발생할 수 있는 activePanel 오염 방지 (항상 panel-3 유지)
   useEffect(() => {
-    if (activePanel === 'panel-3' && focusedPanel === 'panel-4') {
-      setFocusedPanel('panel-3');
-    } else if (activePanel === 'panel-4' && focusedPanel === 'panel-3') {
-      setFocusedPanel('panel-4');
+    if (activePanel === 'panel-4') {
+      setActivePanel('panel-3');
     }
-  }, [activePanel]);
+  }, [activePanel, setActivePanel]);
 
   // 전역 Shift+Enter 단축키: 현재 선택된(강조된) 패널에 항목 추가 이벤트 발송
   useEffect(() => {
