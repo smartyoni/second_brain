@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ListChecks, Plus, Info, CheckSquare } from 'lucide-react';
 import { useDetailItemChecklist } from '../../hooks/useDetailItemChecklist';
 import { useDragSort } from '../../hooks/useDragSort';
@@ -36,6 +36,18 @@ export const DetailItemChecklistSection: React.FC = () => {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
   const hasMultipleLines = validLines.length > 1;
+
+  // 4번 패널 선택 시 Shift+Enter 단축키로 새 세부 체크 항목 추가
+  useEffect(() => {
+    const handlePanelAdd = (e: Event) => {
+      const customEvent = e as CustomEvent<{ panelId: string }>;
+      if (customEvent.detail?.panelId === 'panel-4') {
+        handleAddChecklistItem();
+      }
+    };
+    window.addEventListener('secondbrain-panel-add-item', handlePanelAdd);
+    return () => window.removeEventListener('secondbrain-panel-add-item', handlePanelAdd);
+  }, [handleAddChecklistItem]);
 
   if (!targetItem) {
     return (

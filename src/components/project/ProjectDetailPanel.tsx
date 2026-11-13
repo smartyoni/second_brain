@@ -79,42 +79,42 @@ export const ProjectDetailPanel: React.FC = () => {
     return newId;
   };
 
-  // 단축키: Shift + Enter로 현재 탭의 활성 그룹에 새 항목/블록 추가
+  // 3번 패널 선택 시 Shift + Enter로 현재 탭의 활성 그룹에 새 항목/블록 추가
   useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && e.shiftKey) {
-        const activeEl = document.activeElement;
-        const isInputField =
-          activeEl &&
-          (activeEl.tagName === 'INPUT' ||
-            activeEl.tagName === 'TEXTAREA' ||
-            (activeEl as HTMLElement).isContentEditable);
-        if (isInputField) return;
+    const handlePanelAdd = (e: Event) => {
+      const customEvent = e as CustomEvent<{ panelId: string }>;
+      if (customEvent.detail?.panelId !== 'panel-3') return;
 
-        const hasOpenModal = document.querySelector('[role="dialog"], .fixed.inset-0');
-        if (hasOpenModal) return;
-
-        if (activeTab === 'text') {
-          if (currentTextGroups.length === 0) return;
-          const target = currentTextGroups.find((g) => g.id === selectedDetailItem?.groupId) || currentTextGroups[0];
-          if (target) {
-            e.preventDefault();
-            handleAddBlockToGroup(target.id);
+      if (activeTab === 'text') {
+        if (currentTextGroups.length === 0) {
+          if (panel3State.subItemId) {
+            const newGroupId = addTextGroup(panel3State.subItemId);
+            if (newGroupId) handleAddBlockToGroup(newGroupId);
           }
-        } else {
-          if (currentChecklistGroups.length === 0) return;
-          const target = currentChecklistGroups.find((g) => g.id === selectedDetailItem?.groupId) || currentChecklistGroups[0];
-          if (target) {
-            e.preventDefault();
-            handleAddItemToGroup(target.id);
+          return;
+        }
+        const target = currentTextGroups.find((g) => g.id === selectedDetailItem?.groupId) || currentTextGroups[0];
+        if (target) {
+          handleAddBlockToGroup(target.id);
+        }
+      } else {
+        if (currentChecklistGroups.length === 0) {
+          if (panel3State.subItemId) {
+            const newGroupId = addChecklistGroup(panel3State.subItemId);
+            if (newGroupId) handleAddItemToGroup(newGroupId);
           }
+          return;
+        }
+        const target = currentChecklistGroups.find((g) => g.id === selectedDetailItem?.groupId) || currentChecklistGroups[0];
+        if (target) {
+          handleAddItemToGroup(target.id);
         }
       }
     };
 
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [activeTab, currentTextGroups, currentChecklistGroups, selectedDetailItem]);
+    window.addEventListener('secondbrain-panel-add-item', handlePanelAdd);
+    return () => window.removeEventListener('secondbrain-panel-add-item', handlePanelAdd);
+  }, [activeTab, currentTextGroups, currentChecklistGroups, selectedDetailItem, panel3State.subItemId]);
 
   // 현재 체크리스트 전체 항목수와 완료수
   const checkStats = useMemo(() => {

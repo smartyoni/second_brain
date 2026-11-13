@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { useDragSort } from '../../hooks/useDragSort';
 import { AccountBar } from '../category/AccountBar';
@@ -103,6 +103,18 @@ export const CategoryPanel: React.FC<CategoryPanelProps> = ({ showMiniCalendar }
       setEditingCategoryId(newId);
     }
   };
+
+  // 1번 패널 선택 시 Shift+Enter 단축키로 새 카테고리 추가
+  useEffect(() => {
+    const handlePanelAdd = (e: Event) => {
+      const customEvent = e as CustomEvent<{ panelId: string }>;
+      if (customEvent.detail?.panelId === 'panel-1') {
+        handleAddCategory();
+      }
+    };
+    window.addEventListener('secondbrain-panel-add-item', handlePanelAdd);
+    return () => window.removeEventListener('secondbrain-panel-add-item', handlePanelAdd);
+  }, [currentTopId]);
 
   const groupTargets = currentGroups.map((g) => ({ id: g.id, name: g.name }));
   const handleMoveCategoryToGroup = (catId: string, groupId: string) =>

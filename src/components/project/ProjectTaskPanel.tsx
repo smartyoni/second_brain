@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { useDragSort } from '../../hooks/useDragSort';
 import { SubItem } from '../../types';
@@ -67,6 +67,18 @@ export const ProjectTaskPanel: React.FC = () => {
       }
     }
   };
+
+  // 2번 패널 선택 시 Shift+Enter 단축키로 새 업무 추가
+  useEffect(() => {
+    const handlePanelAdd = (e: Event) => {
+      const customEvent = e as CustomEvent<{ panelId: string }>;
+      if (customEvent.detail?.panelId === 'panel-2') {
+        handleAdd();
+      }
+    };
+    window.addEventListener('secondbrain-panel-add-item', handlePanelAdd);
+    return () => window.removeEventListener('secondbrain-panel-add-item', handlePanelAdd);
+  }, [selectedCategoryId]);
 
   // 각 업무별 통계(체크리스트 완료수 / 전체수)
   const taskStatsMap = useMemo(() => {

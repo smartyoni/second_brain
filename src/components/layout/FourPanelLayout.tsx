@@ -55,6 +55,41 @@ export const FourPanelLayout: React.FC<FourPanelLayoutProps> = ({
     }
   }, [activePanel]);
 
+  // 전역 Shift+Enter 단축키: 현재 선택된(강조된) 패널에 항목 추가 이벤트 발송
+  useEffect(() => {
+    const handleGlobalShiftEnter = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && e.shiftKey) {
+        // 이미 텍스트 입력창(textarea, input)에서 편집 중인 경우 인라인 핸들러(onSaveAndAddNew 등)가 우선 처리하므로 중복 방지
+        const activeEl = document.activeElement;
+        const isInputField =
+          activeEl &&
+          (activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            (activeEl as HTMLElement).isContentEditable);
+
+        if (isInputField) {
+          return;
+        }
+
+        // 모달이나 팝오버 등이 열려있는 경우 제외
+        const hasOpenModal = document.querySelector('[role="dialog"], .fixed.inset-0:not(.pointer-events-none)');
+        if (hasOpenModal) {
+          return;
+        }
+
+        e.preventDefault();
+        window.dispatchEvent(
+          new CustomEvent('secondbrain-panel-add-item', {
+            detail: { panelId: focusedPanel },
+          })
+        );
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalShiftEnter);
+    return () => window.removeEventListener('keydown', handleGlobalShiftEnter);
+  }, [focusedPanel]);
+
   return (
     <div className="h-full w-full overflow-hidden bg-slate-300">
       {/* 1. PC / 태블릿 가로모드 뷰 (1200px 이상 & landscape): 상시 4패널 고정 분할 */}

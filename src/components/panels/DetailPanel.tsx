@@ -81,46 +81,34 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ panelId }) => {
     return newId;
   };
 
-  // 단축키: Shift + Enter 누를 시 그룹헤더의 항목 추가 발동
+  // 3번 패널 선택 시 Shift + Enter 누를 시 그룹 내 새 항목 추가 발동
   useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && e.shiftKey) {
-        // 이미 텍스트 입력창(textarea, input)에서 편집 중인 경우 인라인 핸들러가 우선 처리하므로 중복 방지
-        const activeEl = document.activeElement;
-        const isInputField =
-          activeEl &&
-          (activeEl.tagName === 'INPUT' ||
-            activeEl.tagName === 'TEXTAREA' ||
-            (activeEl as HTMLElement).isContentEditable);
+    const handlePanelAdd = (e: Event) => {
+      const customEvent = e as CustomEvent<{ panelId: string }>;
+      if (customEvent.detail?.panelId !== 'panel-3') return;
 
-        if (isInputField) {
-          return;
+      if (currentChecklistGroups.length === 0) {
+        if (currentState.subItemId) {
+          const newGroupId = addChecklistGroup(currentState.subItemId);
+          if (newGroupId) {
+            handleAddItemToGroup(newGroupId);
+          }
         }
+        return;
+      }
 
-        // 모달이나 팝오버 등이 열려있는 경우 제외
-        const hasOpenModal = document.querySelector('[role="dialog"], .fixed.inset-0');
-        if (hasOpenModal) {
-          return;
-        }
+      const targetGroup =
+        currentChecklistGroups.find((g) => g.id === selectedDetailItem?.groupId) ||
+        currentChecklistGroups[0];
 
-        if (currentChecklistGroups.length === 0) {
-          return;
-        }
-
-        const targetGroup =
-          currentChecklistGroups.find((g) => g.id === selectedDetailItem?.groupId) ||
-          currentChecklistGroups[0];
-
-        if (targetGroup) {
-          e.preventDefault();
-          handleAddItemToGroup(targetGroup.id);
-        }
+      if (targetGroup) {
+        handleAddItemToGroup(targetGroup.id);
       }
     };
 
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [currentChecklistGroups, selectedDetailItem]);
+    window.addEventListener('secondbrain-panel-add-item', handlePanelAdd);
+    return () => window.removeEventListener('secondbrain-panel-add-item', handlePanelAdd);
+  }, [currentChecklistGroups, selectedDetailItem, currentState.subItemId]);
 
   return (
     <div className="flex flex-col h-full bg-slate-100 select-none">

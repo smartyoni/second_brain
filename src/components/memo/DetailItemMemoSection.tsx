@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FileText, Calendar, CheckSquare, AlignLeft, Info, Pencil, Check, X } from 'lucide-react';
 import { useDetailItemMemo } from '../../hooks/useDetailItemMemo';
 import { SmartText } from '../shared/SmartText';
@@ -32,6 +32,18 @@ export const DetailItemMemoSection: React.FC = () => {
 
   const isChecklist = targetItem.type === 'checklist';
   const currentText = isEditing ? localMemo : targetItem.memo;
+
+  // 4번 패널 선택 시 Shift+Enter 단축키로 세부 메모 편집 모드 진입
+  useEffect(() => {
+    const handlePanelAdd = (e: Event) => {
+      const customEvent = e as CustomEvent<{ panelId: string }>;
+      if (customEvent.detail?.panelId === 'panel-4' && !isEditing) {
+        handleStartEdit();
+      }
+    };
+    window.addEventListener('secondbrain-panel-add-item', handlePanelAdd);
+    return () => window.removeEventListener('secondbrain-panel-add-item', handlePanelAdd);
+  }, [isEditing, handleStartEdit]);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
