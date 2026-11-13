@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { useDragSort } from '../../hooks/useDragSort';
 import { SubItem } from '../../types';
@@ -19,6 +19,8 @@ export const ProjectTaskPanel: React.FC = () => {
     selectSubItem,
     addSubItem,
   } = useWorkspace();
+
+  const [editingSubItemId, setEditingSubItemId] = useState<string | null>(null);
 
   const currentTopId = getCurrentActiveState().topCategoryId;
   const selectedCategoryId = getCurrentActiveState().categoryId;
@@ -59,7 +61,10 @@ export const ProjectTaskPanel: React.FC = () => {
 
   const handleAdd = () => {
     if (selectedCategoryId) {
-      addSubItem(selectedCategoryId);
+      const newId = addSubItem(selectedCategoryId);
+      if (newId) {
+        setEditingSubItemId(newId);
+      }
     }
   };
 
@@ -182,6 +187,14 @@ export const ProjectTaskPanel: React.FC = () => {
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(item.id, e)}
               onDragEnd={handleDragEnd}
+              isEditing={editingSubItemId === item.id}
+              onStartEdit={() => setEditingSubItemId(item.id)}
+              onEndEdit={() => {
+                if (editingSubItemId === item.id) {
+                  setEditingSubItemId(null);
+                }
+              }}
+              onSaveAndAddNew={handleAdd}
             />
           ))
         )}

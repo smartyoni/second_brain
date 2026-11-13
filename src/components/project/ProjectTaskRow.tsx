@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SubItem } from '../../types';
-import { InlineEditableText } from '../shared/InlineEditableText';
+import { InlineEditableTextarea } from '../shared/InlineEditableTextarea';
+import { SmartText } from '../shared/SmartText';
 import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
 
@@ -22,6 +23,10 @@ interface ProjectTaskRowProps {
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onDragEnd: () => void;
+  isEditing?: boolean;
+  onStartEdit?: () => void;
+  onEndEdit?: () => void;
+  onSaveAndAddNew?: () => void;
 }
 
 export const ProjectTaskRow: React.FC<ProjectTaskRowProps> = ({
@@ -42,8 +47,24 @@ export const ProjectTaskRow: React.FC<ProjectTaskRowProps> = ({
   onDragOver,
   onDrop,
   onDragEnd,
+  isEditing: propIsEditing,
+  onStartEdit,
+  onEndEdit,
+  onSaveAndAddNew,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [internalEditing, setInternalEditing] = useState(false);
+  const isEditing = propIsEditing !== undefined ? propIsEditing : internalEditing;
+
+  const handleStartEdit = () => {
+    if (onStartEdit) onStartEdit();
+    else setInternalEditing(true);
+  };
+
+  const handleEndEdit = () => {
+    if (onEndEdit) onEndEdit();
+    else setInternalEditing(false);
+  };
+
   const isAllDone = taskStats.total > 0 && taskStats.completed === taskStats.total;
 
   return (
@@ -56,17 +77,17 @@ export const ProjectTaskRow: React.FC<ProjectTaskRowProps> = ({
       onClick={onSelect}
       onDoubleClick={(e) => {
         e.stopPropagation();
-        setIsEditing(true);
+        handleStartEdit();
       }}
-      className={`group px-2.5 py-2 flex items-center justify-between text-xs cursor-pointer border-b transition-colors select-none ${
+      className={`group px-2.5 py-2 flex items-start justify-between min-h-[40px] text-xs cursor-pointer border-b transition-colors select-none ${
         isSelected
           ? 'bg-indigo-50/90 text-indigo-950 font-medium border-indigo-200'
           : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200'
       } ${isDragged ? 'opacity-40 bg-indigo-100' : ''}`}
     >
-      <div className="flex items-center gap-2 min-w-0 flex-1 mr-1">
+      <div className="flex items-start gap-2 min-w-0 flex-1 mr-1">
         {/* 완료 상태 아이콘 */}
-        <div className="shrink-0">
+        <div className="shrink-0 mt-0.5">
           {isAllDone ? (
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           ) : (
@@ -75,22 +96,61 @@ export const ProjectTaskRow: React.FC<ProjectTaskRowProps> = ({
         </div>
 
         {/* 업무/마일스톤 타이틀 */}
-        <div className="truncate flex-1">
-          <InlineEditableText
-            value={item.title}
-            isEditing={isEditing}
-            onSave={(newTitle) => {
-              onUpdateTitle(item.id, newTitle);
-              setIsEditing(false);
-            }}
-            onCancel={() => setIsEditing(false)}
-            className={`text-xs ${isAllDone ? 'line-through text-slate-400' : ''}`}
-            inputClassName="text-xs h-6 py-0 px-1"
-          />
+        <div className="flex-1 min-w-0">
+          {isEditing ? (
+            <InlineEditableTextarea
+              value={item.title}
+              isEditing={isEditing}
+              placeholder="업무/마일스톤 입력..."
+              minRows={1}
+              maxRows={10}
+              rows={1}
+              saveOnEnter={false}
+              onSave={(newTitle) => {
+                if (!newTitle.trim() && !item.title.trim()) {
+                  onDelete(item.id);
+                } else {
+                  onUpdateTitle(item.id, newTitle.trim() || '새 업무');
+                }
+                handleEndEdit();
+              }}
+              onCancel={() => {
+                if (!item.title.trim()) {
+                  onDelete(item.id);
+                }
+                handleEndEdit();
+              }}
+              onSaveAndAddNew={
+                onSaveAndAddNew
+                  ? (newTitle) => {
+                      if (!newTitle.trim() && !item.title.trim()) {
+                        onDelete(item.id);
+                      } else {
+                        onUpdateTitle(item.id, newTitle.trim() || '새 업무');
+                      }
+                      handleEndEdit();
+                      onSaveAndAddNew();
+                    }
+                  : undefined
+              }
+            />
+          ) : (
+            <div
+              className={`text-xs whitespace-pre-wrap break-words leading-relaxed select-text ${
+                isAllDone ? 'line-through text-slate-400' : ''
+              }`}
+            >
+              {item.title ? (
+                <SmartText text={item.title} />
+              ) : (
+                <span className="text-slate-400 italic">제목 없음</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
         {/* D-Day 뱃지 */}
         {dDayText && (
           <span
@@ -123,7 +183,7 @@ export const ProjectTaskRow: React.FC<ProjectTaskRowProps> = ({
           canMoveUp={canMoveUp}
           canMoveDown={canMoveDown}
           onMove={onMove}
-          onEdit={() => setIsEditing(true)}
+          onEdit={() => handleStartEdit()}
           onDelete={() => onDelete(item.id)}
           targetItems={categoryTargets}
           targetActionLabel="프로젝트 이동"
