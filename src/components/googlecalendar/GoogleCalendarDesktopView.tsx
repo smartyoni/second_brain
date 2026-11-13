@@ -1,6 +1,5 @@
 import React from 'react';
 import { CategoryPanel } from '../panels/CategoryPanel';
-import { GoogleCalendarHeader } from './GoogleCalendarHeader';
 import { GoogleCalendarMonthView } from './GoogleCalendarMonthView';
 import { CalendarSideViewType } from './GoogleCalendarRightPanel';
 import { CalendarScheduleItem } from '../../types';
@@ -71,40 +70,35 @@ export const GoogleCalendarDesktopView: React.FC<GoogleCalendarDesktopViewProps>
       )}
 
       <main className="flex-1 min-w-0 flex flex-col h-full overflow-hidden bg-white">
-        <GoogleCalendarHeader
+        <GoogleCalendarMonthView
+          headerTitle={headerTitle}
           onToggleSidebar={onToggleSidebar}
-          title={headerTitle}
           onPrev={onPrev}
           onNext={onNext}
           onToday={onToday}
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}
+          currentDateObj={currentDateObj}
+          selectedDate={selectedCalendarDate}
+          items={filteredItems}
+          sideViewType={sideViewType}
+          onSideViewTypeChange={onSideViewTypeChange}
+          isRightPanelOpen={isRightPanelOpen}
+          onToggleRightPanel={onToggleRightPanel}
+          onSelectDate={setDateByString}
+          onSelectItem={onSelectItem}
+          onCellClick={onCellClick}
+          draggedItem={draggedItem}
+          onDragStart={onDragStart}
+          onDragOver={onDragOver}
+          onDropOnDate={onDropOnDate}
+          onDropOnTime={onDropOnTime}
+          onDropAllDay={onDropAllDay}
+          onDragEnd={onDragEnd}
+          onContextMenu={onContextMenu}
+          onPrevMonth={onPrev}
+          onNextMonth={onNext}
         />
-
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <GoogleCalendarMonthView
-            currentDateObj={currentDateObj}
-            selectedDate={selectedCalendarDate}
-            items={filteredItems}
-            sideViewType={sideViewType}
-            onSideViewTypeChange={onSideViewTypeChange}
-            isRightPanelOpen={isRightPanelOpen}
-            onToggleRightPanel={onToggleRightPanel}
-            onSelectDate={setDateByString}
-            onSelectItem={onSelectItem}
-            onCellClick={onCellClick}
-            draggedItem={draggedItem}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDropOnDate={onDropOnDate}
-            onDropOnTime={onDropOnTime}
-            onDropAllDay={onDropAllDay}
-            onDragEnd={onDragEnd}
-            onContextMenu={onContextMenu}
-            onPrevMonth={onPrev}
-            onNextMonth={onNext}
-          />
-        </div>
       </main>
     </div>
   );

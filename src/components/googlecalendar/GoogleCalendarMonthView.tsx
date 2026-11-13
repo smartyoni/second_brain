@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronUp, ChevronDown, X, Calendar as CalendarIcon } from 'lucide-react';
 import { CalendarScheduleItem } from '../../types';
+import { GoogleCalendarHeader } from './GoogleCalendarHeader';
 import { GoogleCalendarRightPanel, CalendarSideViewType } from './GoogleCalendarRightPanel';
 import { GoogleCalendarMonthGrid } from './GoogleCalendarMonthGrid';
 import { GoogleCalendarMonthDayAgenda } from './GoogleCalendarMonthDayAgenda';
@@ -28,6 +29,13 @@ interface GoogleCalendarMonthViewProps {
   onContextMenu?: (item: CalendarScheduleItem, e: React.MouseEvent) => void;
   onPrevMonth?: () => void;
   onNextMonth?: () => void;
+  headerTitle?: string;
+  onToggleSidebar?: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  onToday?: () => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = ({
@@ -51,6 +59,13 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
   onContextMenu,
   onPrevMonth,
   onNextMonth,
+  headerTitle,
+  onToggleSidebar,
+  onPrev,
+  onNext,
+  onToday,
+  searchQuery,
+  onSearchChange,
 }) => {
   // 3번 패널(우측 패널) 열림 및 뷰 타입 상태
   const [internalIsOpen, setInternalIsOpen] = useState<boolean>(true);
@@ -110,14 +125,27 @@ export const GoogleCalendarMonthView: React.FC<GoogleCalendarMonthViewProps> = (
     <div className="flex-1 flex flex-row h-full bg-white overflow-hidden select-none">
       {/* 2번 패널 영역: 월간 캘린더 (3번 패널과 별개로 2번 패널 안에서 상하 접이식 아젠다 동작) */}
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden border-r border-[#dadce0]">
-        {/* 상단 월간 달력 (closed: 100%, half: 42%, week: 선택 주 1줄만 표시) */}
+        {/* 2번 패널 독립 헤더 (월간 캘린더 전용 헤더) */}
+        {headerTitle && (
+          <GoogleCalendarHeader
+            onToggleSidebar={onToggleSidebar || (() => {})}
+            title={headerTitle}
+            onPrev={onPrev || onPrevMonth || (() => {})}
+            onNext={onNext || onNextMonth || (() => {})}
+            onToday={onToday || (() => {})}
+            searchQuery={searchQuery}
+            onSearchChange={onSearchChange}
+          />
+        )}
+
+        {/* 상단 월간 달력 (closed: 나머지 100%, half: 42%, week: 선택 주 1줄만 표시) */}
         <div
           className={`w-full overflow-hidden transition-all duration-200 flex flex-col ${
             agendaStage === 'week'
               ? 'h-auto shrink-0 border-b border-[#dadce0]'
               : agendaStage === 'half'
               ? 'h-[42%] border-b border-[#dadce0]'
-              : 'h-full'
+              : 'flex-1 min-h-0'
           }`}
         >
           <GoogleCalendarMonthGrid
