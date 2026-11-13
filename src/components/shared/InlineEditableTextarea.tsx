@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { Check } from 'lucide-react';
 
 interface InlineEditableTextareaProps {
@@ -8,6 +8,8 @@ interface InlineEditableTextareaProps {
   onCancel: () => void;
   onSaveAndAddNew?: (newValue: string) => void; // Shift+Enter 시 저장 후 다음 항목 추가
   rows?: number;
+  minRows?: number;
+  maxRows?: number; // 최대 확장 줄 수 (기본 10줄)
   placeholder?: string;
   saveOnEnter?: boolean; // true면 Enter 즉시 저장(Shift+Enter 줄바꿈), false면 Ctrl+Enter 저장(Enter 줄바꿈)
   className?: string;
@@ -21,6 +23,8 @@ export const InlineEditableTextarea: React.FC<InlineEditableTextareaProps> = ({
   onCancel,
   onSaveAndAddNew,
   rows = 3,
+  minRows: propMinRows,
+  maxRows = 10,
   placeholder = '',
   saveOnEnter = false,
   className = '',
@@ -29,6 +33,44 @@ export const InlineEditableTextarea: React.FC<InlineEditableTextareaProps> = ({
   const [draft, setDraft] = useState(value);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isActionRef = useRef(false);
+
+  const minRows = propMinRows ?? rows ?? 2;
+
+  // 내용의 길이에 따라 10줄(maxRows)까지 높이 자동 확장 및 스크롤 제어
+  const adjustHeight = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+
+    el.style.height = 'auto';
+
+    const computed = window.getComputedStyle(el);
+    const paddingTop = parseFloat(computed.paddingTop) || 0;
+    const paddingBottom = parseFloat(computed.paddingBottom) || 0;
+    const borderTop = parseFloat(computed.borderTopWidth) || 0;
+    const borderBottom = parseFloat(computed.borderBottomWidth) || 0;
+    const verticalOffset = paddingTop + paddingBottom + borderTop + borderBottom;
+
+    let lineHeight = parseFloat(computed.lineHeight);
+    if (!lineHeight || isNaN(lineHeight)) {
+      const fontSize = parseFloat(computed.fontSize) || 12;
+      lineHeight = fontSize * 1.5;
+    }
+
+    const minHeight = lineHeight * minRows + verticalOffset;
+    const maxHeight = lineHeight * maxRows + verticalOffset;
+    const targetHeight = el.scrollHeight + borderTop + borderBottom;
+
+    if (targetHeight > maxHeight) {
+      el.style.height = `${maxHeight}px`;
+      el.style.overflowY = 'auto';
+    } else if (targetHeight < minHeight) {
+      el.style.height = `${minHeight}px`;
+      el.style.overflowY = 'hidden';
+    } else {
+      el.style.height = `${targetHeight}px`;
+      el.style.overflowY = 'hidden';
+    }
+  };
 
   useEffect(() => {
     setDraft(value);
@@ -40,6 +82,21 @@ export const InlineEditableTextarea: React.FC<InlineEditableTextareaProps> = ({
       textareaRef.current.select();
     }
   }, [isEditing]);
+
+  // draft 변경이나 편집 모드 진입 시 높이 자동 조절
+  useLayoutEffect(() => {
+    if (isEditing) {
+      adjustHeight();
+    }
+  }, [draft, isEditing, minRows, maxRows]);
+
+  // 창 너비 변경 시 줄바꿈 변화에 맞춰 높이 재계산
+  useEffect(() => {
+    if (!isEditing) return;
+    const handleResize = () => adjustHeight();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isEditing, minRows, maxRows]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Escape') {
@@ -88,12 +145,14 @@ export const InlineEditableTextarea: React.FC<InlineEditableTextareaProps> = ({
       <textarea
         ref={textareaRef}
         value={draft}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={(e) => {
+          setDraft(e.target.value);
+        }}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
-        rows={rows}
+        rows={minRows}
         placeholder={placeholder}
-        className={`w-full text-xs text-slate-800 bg-white border border-blue-500 rounded p-1.5 outline-none focus:ring-1 focus:ring-blue-500 font-sans shadow-inner resize-y leading-relaxed ${textareaClassName}`}
+        className={`w-full text-xs text-slate-800 bg-white border border-blue-500 rounded p-1.5 outline-none focus:ring-1 focus:ring-blue-500 font-sans shadow-inner resize-none leading-relaxed ${textareaClassName}`}
       />
       <div className="flex items-center justify-between gap-1 text-[11px] text-slate-600 px-0.5">
         <span className="text-[10px] text-slate-600">
