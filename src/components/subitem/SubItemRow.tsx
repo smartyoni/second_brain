@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CheckSquare, Square } from 'lucide-react';
 import { SubItem } from '../../types';
-import { InlineEditableText } from '../shared/InlineEditableText';
+import { InlineEditableTextarea } from '../shared/InlineEditableTextarea';
+import { SmartText } from '../shared/SmartText';
 import { ThreeDotMenu, MoveDirection } from '../shared/ThreeDotMenu';
 
 interface SubItemRowProps {
@@ -25,6 +26,7 @@ interface SubItemRowProps {
   isEditing?: boolean;
   onStartEdit?: () => void;
   onEndEdit?: () => void;
+  onSaveAndAddNew?: () => void;
 }
 
 export const SubItemRow: React.FC<SubItemRowProps> = ({
@@ -48,6 +50,7 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
   isEditing: propIsEditing,
   onStartEdit,
   onEndEdit,
+  onSaveAndAddNew,
 }) => {
   const [internalEditing, setInternalEditing] = useState(false);
   const isEditing = propIsEditing !== undefined ? propIsEditing : internalEditing;
@@ -80,7 +83,7 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
         e.stopPropagation();
         handleStartEdit();
       }}
-      className={`group relative h-11 lg:h-8 px-3 lg:px-2.5 flex items-center gap-2 lg:gap-1.5 text-sm lg:text-xs cursor-pointer select-none border-b border-slate-200 transition-colors pr-0 ${
+      className={`group relative min-h-[44px] lg:min-h-[32px] py-2 lg:py-1.5 px-3 lg:px-2.5 flex items-start gap-2 lg:gap-1.5 text-sm lg:text-xs cursor-pointer select-none border-b border-slate-200 transition-colors pr-0 ${
         isSelected
           ? item.isCompleted
             ? 'bg-blue-50/80 text-blue-900 font-medium shadow-xs'
@@ -103,7 +106,7 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
             e.stopPropagation();
             onToggleComplete?.(item.id);
           }}
-          className="p-1 -m-1 lg:p-0.5 lg:-m-0.5 text-slate-400 hover:text-blue-600 transition-colors shrink-0 cursor-pointer"
+          className="p-1 -m-1 lg:p-0.5 lg:-m-0.5 mt-0.5 text-slate-400 hover:text-blue-600 transition-colors shrink-0 cursor-pointer"
           title={item.isCompleted ? '미완료로 변경' : '완료로 처리'}
         >
           {item.isCompleted ? (
@@ -115,31 +118,58 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
       )}
 
       <div className="flex-1 min-w-0">
-        <InlineEditableText
-          value={item.title}
-          isEditing={isEditing}
-          placeholder="항목 제목 입력..."
-          onSave={(newTitle) => {
-            if (!newTitle.trim() && !item.title.trim()) {
-              onDelete(item.id);
-            } else {
-              onUpdateTitle(item.id, newTitle.trim() || '새 항목');
+        {isEditing ? (
+          <InlineEditableTextarea
+            value={item.title}
+            isEditing={isEditing}
+            placeholder="항목 제목 입력..."
+            minRows={1}
+            maxRows={10}
+            rows={1}
+            saveOnEnter={false}
+            onSave={(newTitle) => {
+              if (!newTitle.trim() && !item.title.trim()) {
+                onDelete(item.id);
+              } else {
+                onUpdateTitle(item.id, newTitle.trim() || '새 항목');
+              }
+              handleEndEdit();
+            }}
+            onCancel={() => {
+              if (!item.title.trim()) {
+                onDelete(item.id);
+              }
+              handleEndEdit();
+            }}
+            onSaveAndAddNew={
+              onSaveAndAddNew
+                ? (newTitle) => {
+                    if (!newTitle.trim() && !item.title.trim()) {
+                      onDelete(item.id);
+                    } else {
+                      onUpdateTitle(item.id, newTitle.trim() || '새 항목');
+                    }
+                    handleEndEdit();
+                    onSaveAndAddNew();
+                  }
+                : undefined
             }
-            handleEndEdit();
-          }}
-          onCancel={() => {
-            if (!item.title.trim()) {
-              onDelete(item.id);
-            }
-            handleEndEdit();
-          }}
-          className={`text-sm lg:text-xs truncate block ${
-            item.isCompleted
-              ? 'line-through text-slate-400 opacity-80 font-normal'
-              : ''
-          }`}
-          inputClassName="text-sm lg:text-xs h-8 lg:h-6 py-0 px-1.5"
-        />
+          />
+        ) : (
+          <div
+            className={`text-sm lg:text-xs whitespace-pre-wrap break-words leading-relaxed select-text ${
+              item.isCompleted
+                ? 'line-through text-slate-400 opacity-80 font-normal'
+                : ''
+            }`}
+          >
+            {item.title ? (
+              <SmartText text={item.title} />
+            ) : (
+              <span className="text-slate-400 italic">제목 없음</span>
+            )}
+          </div>
+        )}
       </div>
 
       <ThreeDotMenu
@@ -152,7 +182,7 @@ export const SubItemRow: React.FC<SubItemRowProps> = ({
         onEdit={() => handleStartEdit()}
         onDelete={() => onDelete(item.id)}
         deleteTitle={`'${item.title}' 문서를 삭제하시겠습니까?`}
-        buttonClassName="p-2 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
+        buttonClassName="p-2 lg:p-0.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 mt-0.5"
       />
     </div>
   );

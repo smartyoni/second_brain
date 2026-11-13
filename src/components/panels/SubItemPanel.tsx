@@ -145,6 +145,7 @@ export const SubItemPanel: React.FC = () => {
                 setEditingSubItemId(null);
               }
             }}
+            onSaveAndAddNew={handleAdd}
           />
         ))}
 
